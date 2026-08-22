@@ -14,3 +14,11 @@
 
 ### 補足
 - ビルド実行時（`npm run build`）に上記のコピー作業まで完了させること。
+
+## AIエージェント直接ファイル操作規約 (Vault Direct Markdown Edit)
+
+AIエージェントがプラグインを介さずにVault内のTODOデータを直接編集・追加・完了するための仕様・ルールは、以下にまとめられています。
+
+- [AGENTS_TODO_CALENDAR.md](file:///Users/s-ikari/work/obsidian-todo-calendar/AGENTS_TODO_CALENDAR.md)
+- Vault側配置場所: `<Vault Root>/_todo-calendar/AGENTS.md`
+
