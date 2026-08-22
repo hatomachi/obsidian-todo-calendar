@@ -194,6 +194,7 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
               onQuickToggleTodoStatus={handleQuickToggleTodoStatus}
               onDeleteItem={handleDeleteItem}
               onOpenCreateItemModal={() => setIsCreateItemModalOpen(true)}
+              onUpdateItem={handleUpdateItem}
             />
           )}
         </div>

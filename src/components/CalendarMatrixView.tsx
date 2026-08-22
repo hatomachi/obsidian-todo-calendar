@@ -13,6 +13,7 @@ interface CalendarMatrixViewProps {
   onQuickToggleTodoStatus: (item: ItemData, todoId: string) => void;
   onDeleteItem: (item: ItemData) => void;
   onOpenCreateItemModal: () => void;
+  onUpdateItem: (item: ItemData) => void;
 }
 
 const formatDateStr = (date: Date): string => {
@@ -43,8 +44,18 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
   onQuickToggleTodoStatus,
   onDeleteItem,
   onOpenCreateItemModal,
+  onUpdateItem,
 }) => {
   const todayStr = formatDateStr(new Date());
+
+  // D&D State
+  const [draggedTodo, setDraggedTodo] = React.useState<{ itemId: string; todoId: string } | null>(null);
+  const [dragOverCell, setDragOverCell] = React.useState<{ itemId: string; dateStr: string } | null>(null);
+  const isDraggingRef = React.useRef(false);
+
+  // Cell Inline Creation State
+  const [addingTodoCell, setAddingTodoCell] = React.useState<{ itemId: string; dateStr: string } | null>(null);
+  const [inlineTodoTitle, setInlineTodoTitle] = React.useState('');
 
   const handleContainerClick = () => {
     if (isDrawerOpen && onCloseDrawer) {
@@ -69,6 +80,133 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
 
   const minDateStr = days[0].dateStr;
   const maxDateStr = days[6].dateStr;
+
+  // Global cleanup to guarantee isDraggingRef never gets stuck true on component updates
+  React.useEffect(() => {
+    const resetDrag = () => {
+      setTimeout(() => {
+        isDraggingRef.current = false;
+      }, 50);
+      setDraggedTodo(null);
+      setDragOverCell(null);
+    };
+    window.addEventListener('dragend', resetDrag);
+    window.addEventListener('mouseup', resetDrag);
+    return () => {
+      window.removeEventListener('dragend', resetDrag);
+      window.removeEventListener('mouseup', resetDrag);
+    };
+  }, []);
+
+  // D&D Handlers
+  const handleDragStart = (e: React.DragEvent, itemId: string, todoId: string) => {
+    isDraggingRef.current = true;
+    setDraggedTodo({ itemId, todoId });
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', JSON.stringify({ itemId, todoId }));
+  };
+
+  const handleDragEnd = () => {
+    setDraggedTodo(null);
+    setDragOverCell(null);
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 100);
+  };
+
+  const handleDragOver = (e: React.DragEvent, itemId: string, dateStr: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (!dragOverCell || dragOverCell.itemId !== itemId || dragOverCell.dateStr !== dateStr) {
+      setDragOverCell({ itemId, dateStr });
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent, itemId: string, dateStr: string) => {
+    e.preventDefault();
+    if (dragOverCell?.itemId === itemId && dragOverCell?.dateStr === dateStr) {
+      setDragOverCell(null);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetItem: ItemData, dateStr: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverCell(null);
+
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 100);
+
+    let dragData = draggedTodo;
+    if (!dragData) {
+      try {
+        const raw = e.dataTransfer.getData('text/plain');
+        if (raw) dragData = JSON.parse(raw);
+      } catch (err) {
+        // ignore
+      }
+    }
+
+    if (!dragData) return;
+
+    const sourceItem = items.find((it) => it.id === dragData!.itemId);
+    if (!sourceItem) return;
+
+    const targetTodo = sourceItem.todos.find((t) => t.id === dragData!.todoId);
+    if (!targetTodo || targetTodo.due === dateStr) return;
+
+    if (sourceItem.id === targetItem.id) {
+      const updatedTodos = targetItem.todos.map((t) =>
+        t.id === targetTodo.id ? { ...t, due: dateStr } : t
+      );
+      onUpdateItem({ ...targetItem, todos: updatedTodos });
+    } else {
+      const sourceUpdatedTodos = sourceItem.todos.filter((t) => t.id !== targetTodo.id);
+      const updatedTargetTodo = { ...targetTodo, due: dateStr };
+      const targetUpdatedTodos = [...targetItem.todos, updatedTargetTodo];
+
+      onUpdateItem({ ...sourceItem, todos: sourceUpdatedTodos });
+      onUpdateItem({ ...targetItem, todos: targetUpdatedTodos });
+    }
+  };
+
+  // Cell Inline Add Handlers
+  const handleStartInlineAdd = (itemId: string, dateStr: string) => {
+    setAddingTodoCell({ itemId, dateStr });
+    setInlineTodoTitle('');
+  };
+
+  const handleSaveInlineTodo = (item: ItemData, dateStr: string) => {
+    const title = inlineTodoTitle.trim();
+    if (title) {
+      const newTodo: TodoItem = {
+        id: `todo-${Date.now()}`,
+        title,
+        due: dateStr,
+        status: 'todo',
+        description: '',
+      };
+      onUpdateItem({ ...item, todos: [...item.todos, newTodo] });
+    }
+    setAddingTodoCell(null);
+    setInlineTodoTitle('');
+  };
+
+  const handleInlineKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    item: ItemData,
+    dateStr: string
+  ) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSaveInlineTodo(item, dateStr);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setAddingTodoCell(null);
+      setInlineTodoTitle('');
+    }
+  };
 
   return (
     <div className="calendar-matrix-container" onClick={handleContainerClick}>
@@ -160,10 +298,14 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                         {pastTodos.map((todo) => (
                           <div
                             key={todo.id}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, item.id, todo.id)}
+                            onDragEnd={handleDragEnd}
                             className="compact-todo-pill todo-pill-past-todo"
                             title={`${todo.title}\n期日: ${todo.due}\nステータス: 未完了\n${todo.description || ''}`}
                             onClick={(e) => {
                               e.stopPropagation();
+                              if (isDraggingRef.current) return;
                               onSelectItem(item, todo.id);
                             }}
                           >
@@ -195,20 +337,36 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                         ? 'holiday-cell'
                         : 'weekday-cell';
 
+                      const isDragOverThisCell =
+                        dragOverCell?.itemId === item.id && dragOverCell?.dateStr === day.dateStr;
+
+                      const isAddingHere =
+                        addingTodoCell?.itemId === item.id && addingTodoCell?.dateStr === day.dateStr;
+
                       return (
                         <td
                           key={day.dateStr}
-                          className={`matrix-cell ${cellBgClass}`}
-                          onClick={() => onSelectItem(item)}
+                          className={`matrix-cell ${cellBgClass} ${isDragOverThisCell ? 'drag-over-cell' : ''}`}
+                          onDragOver={(e) => handleDragOver(e, item.id, day.dateStr)}
+                          onDragLeave={(e) => handleDragLeave(e, item.id, day.dateStr)}
+                          onDrop={(e) => handleDrop(e, item, day.dateStr)}
+                          onClick={() => {
+                            if (isDraggingRef.current) return;
+                            onSelectItem(item);
+                          }}
                         >
                           <div className="cell-todo-stack">
                             {cellTodos.map((todo) => (
                               <div
                                 key={todo.id}
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, item.id, todo.id)}
+                                onDragEnd={handleDragEnd}
                                 className={`compact-todo-pill status-${todo.status}`}
                                 title={`${todo.title}\nステータス: ${todo.status === 'done' ? '完了' : '未完了'}\n${todo.description || ''}`}
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  if (isDraggingRef.current) return;
                                   onSelectItem(item, todo.id);
                                 }}
                               >
@@ -228,6 +386,33 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                                 </span>
                               </div>
                             ))}
+
+                            {isAddingHere ? (
+                              <div className="inline-todo-input-wrapper" onClick={(e) => e.stopPropagation()}>
+                                <input
+                                  type="text"
+                                  className="inline-todo-input"
+                                  placeholder="TODOを入力..."
+                                  value={inlineTodoTitle}
+                                  onChange={(e) => setInlineTodoTitle(e.target.value)}
+                                  onKeyDown={(e) => handleInlineKeyDown(e, item, day.dateStr)}
+                                  onBlur={() => handleSaveInlineTodo(item, day.dateStr)}
+                                  autoFocus
+                                />
+                              </div>
+                            ) : (
+                              <div
+                                className="cell-add-prompt"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleStartInlineAdd(item.id, day.dateStr);
+                                }}
+                                title="TODOを追加"
+                              >
+                                <Plus size={11} />
+                                <span>TODOを追加</span>
+                              </div>
+                            )}
                           </div>
                         </td>
                       );
@@ -239,10 +424,14 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                         {futureTodos.map((todo) => (
                           <div
                             key={todo.id}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, item.id, todo.id)}
+                            onDragEnd={handleDragEnd}
                             className={`compact-todo-pill status-${todo.status}`}
                             title={`${todo.title}\n期日: ${todo.due}\nステータス: ${todo.status === 'done' ? '完了' : '未完了'}\n${todo.description || ''}`}
                             onClick={(e) => {
                               e.stopPropagation();
+                              if (isDraggingRef.current) return;
                               onSelectItem(item, todo.id);
                             }}
                           >
@@ -275,4 +464,5 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
     </div>
   );
 };
+
 

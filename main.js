@@ -2393,9 +2393,9 @@ var require_react_dom_development = __commonJS({
         if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
           __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
         }
-        var React5 = require_react();
+        var React6 = require_react();
         var Scheduler = require_scheduler();
-        var ReactSharedInternals = React5.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+        var ReactSharedInternals = React6.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
         var suppressWarning = false;
         function setSuppressWarning(newSuppressWarning) {
           {
@@ -4002,7 +4002,7 @@ var require_react_dom_development = __commonJS({
           {
             if (props.value == null) {
               if (typeof props.children === "object" && props.children !== null) {
-                React5.Children.forEach(props.children, function(child) {
+                React6.Children.forEach(props.children, function(child) {
                   if (child == null) {
                     return;
                   }
@@ -23598,7 +23598,7 @@ var require_react_jsx_runtime_development = __commonJS({
     if (true) {
       (function() {
         "use strict";
-        var React5 = require_react();
+        var React6 = require_react();
         var REACT_ELEMENT_TYPE = Symbol.for("react.element");
         var REACT_PORTAL_TYPE = Symbol.for("react.portal");
         var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
@@ -23624,7 +23624,7 @@ var require_react_jsx_runtime_development = __commonJS({
           }
           return null;
         }
-        var ReactSharedInternals = React5.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+        var ReactSharedInternals = React6.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
         function error(format) {
           {
             {
@@ -24504,7 +24504,7 @@ __export(main_exports, {
 });
 module.exports = __toCommonJS(main_exports);
 var import_obsidian2 = require("obsidian");
-var import_react6 = __toESM(require_react());
+var import_react7 = __toESM(require_react());
 var import_client = __toESM(require_client());
 
 // src/constants.ts
@@ -24514,7 +24514,7 @@ var COLLECTIONS_DIR = `${ROOT_DATA_DIR}/collections`;
 var ITEMS_DIR = `${ROOT_DATA_DIR}/items`;
 
 // src/components/AppView.tsx
-var import_react5 = __toESM(require_react());
+var import_react6 = __toESM(require_react());
 
 // src/storage.ts
 var import_obsidian = require("obsidian");
@@ -25182,6 +25182,9 @@ var CollectionsGrid = ({
   ] });
 };
 
+// src/components/CalendarMatrixView.tsx
+var import_react4 = __toESM(require_react());
+
 // src/utils/holidays.ts
 function getNthMonday(year, month, n) {
   let count = 0;
@@ -25280,9 +25283,15 @@ var CalendarMatrixView = ({
   onSelectItem,
   onQuickToggleTodoStatus,
   onDeleteItem,
-  onOpenCreateItemModal
+  onOpenCreateItemModal,
+  onUpdateItem
 }) => {
   const todayStr = formatDateStr(/* @__PURE__ */ new Date());
+  const [draggedTodo, setDraggedTodo] = import_react4.default.useState(null);
+  const [dragOverCell, setDragOverCell] = import_react4.default.useState(null);
+  const isDraggingRef = import_react4.default.useRef(false);
+  const [addingTodoCell, setAddingTodoCell] = import_react4.default.useState(null);
+  const [inlineTodoTitle, setInlineTodoTitle] = import_react4.default.useState("");
   const handleContainerClick = () => {
     if (isDrawerOpen && onCloseDrawer) {
       onCloseDrawer();
@@ -25303,6 +25312,109 @@ var CalendarMatrixView = ({
   });
   const minDateStr = days[0].dateStr;
   const maxDateStr = days[6].dateStr;
+  import_react4.default.useEffect(() => {
+    const resetDrag = () => {
+      setTimeout(() => {
+        isDraggingRef.current = false;
+      }, 50);
+      setDraggedTodo(null);
+      setDragOverCell(null);
+    };
+    window.addEventListener("dragend", resetDrag);
+    window.addEventListener("mouseup", resetDrag);
+    return () => {
+      window.removeEventListener("dragend", resetDrag);
+      window.removeEventListener("mouseup", resetDrag);
+    };
+  }, []);
+  const handleDragStart = (e, itemId, todoId) => {
+    isDraggingRef.current = true;
+    setDraggedTodo({ itemId, todoId });
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", JSON.stringify({ itemId, todoId }));
+  };
+  const handleDragEnd = () => {
+    setDraggedTodo(null);
+    setDragOverCell(null);
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 100);
+  };
+  const handleDragOver = (e, itemId, dateStr) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (!dragOverCell || dragOverCell.itemId !== itemId || dragOverCell.dateStr !== dateStr) {
+      setDragOverCell({ itemId, dateStr });
+    }
+  };
+  const handleDragLeave = (e, itemId, dateStr) => {
+    e.preventDefault();
+    if (dragOverCell?.itemId === itemId && dragOverCell?.dateStr === dateStr) {
+      setDragOverCell(null);
+    }
+  };
+  const handleDrop = (e, targetItem, dateStr) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverCell(null);
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 100);
+    let dragData = draggedTodo;
+    if (!dragData) {
+      try {
+        const raw = e.dataTransfer.getData("text/plain");
+        if (raw) dragData = JSON.parse(raw);
+      } catch (err) {
+      }
+    }
+    if (!dragData) return;
+    const sourceItem = items.find((it) => it.id === dragData.itemId);
+    if (!sourceItem) return;
+    const targetTodo = sourceItem.todos.find((t) => t.id === dragData.todoId);
+    if (!targetTodo || targetTodo.due === dateStr) return;
+    if (sourceItem.id === targetItem.id) {
+      const updatedTodos = targetItem.todos.map(
+        (t) => t.id === targetTodo.id ? { ...t, due: dateStr } : t
+      );
+      onUpdateItem({ ...targetItem, todos: updatedTodos });
+    } else {
+      const sourceUpdatedTodos = sourceItem.todos.filter((t) => t.id !== targetTodo.id);
+      const updatedTargetTodo = { ...targetTodo, due: dateStr };
+      const targetUpdatedTodos = [...targetItem.todos, updatedTargetTodo];
+      onUpdateItem({ ...sourceItem, todos: sourceUpdatedTodos });
+      onUpdateItem({ ...targetItem, todos: targetUpdatedTodos });
+    }
+  };
+  const handleStartInlineAdd = (itemId, dateStr) => {
+    setAddingTodoCell({ itemId, dateStr });
+    setInlineTodoTitle("");
+  };
+  const handleSaveInlineTodo = (item, dateStr) => {
+    const title = inlineTodoTitle.trim();
+    if (title) {
+      const newTodo = {
+        id: `todo-${Date.now()}`,
+        title,
+        due: dateStr,
+        status: "todo",
+        description: ""
+      };
+      onUpdateItem({ ...item, todos: [...item.todos, newTodo] });
+    }
+    setAddingTodoCell(null);
+    setInlineTodoTitle("");
+  };
+  const handleInlineKeyDown = (e, item, dateStr) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSaveInlineTodo(item, dateStr);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setAddingTodoCell(null);
+      setInlineTodoTitle("");
+    }
+  };
   return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "calendar-matrix-container", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "table-scroll-wrapper", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("table", { className: "matrix-table", onClick: (e) => e.stopPropagation(), children: [
     /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "row-header-th", children: "\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item)" }),
@@ -25363,6 +25475,9 @@ var CalendarMatrixView = ({
         /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "matrix-cell past-col-cell", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "cell-todo-stack", children: pastTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
           "div",
           {
+            draggable: true,
+            onDragStart: (e) => handleDragStart(e, item.id, todo.id),
+            onDragEnd: handleDragEnd,
             className: "compact-todo-pill todo-pill-past-todo",
             title: `${todo.title}
 \u671F\u65E5: ${todo.due}
@@ -25370,6 +25485,7 @@ var CalendarMatrixView = ({
 ${todo.description || ""}`,
             onClick: (e) => {
               e.stopPropagation();
+              if (isDraggingRef.current) return;
               onSelectItem(item, todo.id);
             },
             children: [
@@ -25396,42 +25512,83 @@ ${todo.description || ""}`,
         days.map((day) => {
           const cellTodos = item.todos.filter((t) => t.due === day.dateStr);
           let cellBgClass = day.isToday ? "today-col-cell" : day.isNonWorkingDay ? "holiday-cell" : "weekday-cell";
+          const isDragOverThisCell = dragOverCell?.itemId === item.id && dragOverCell?.dateStr === day.dateStr;
+          const isAddingHere = addingTodoCell?.itemId === item.id && addingTodoCell?.dateStr === day.dateStr;
           return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
             "td",
             {
-              className: `matrix-cell ${cellBgClass}`,
-              onClick: () => onSelectItem(item),
-              children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "cell-todo-stack", children: cellTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
-                "div",
-                {
-                  className: `compact-todo-pill status-${todo.status}`,
-                  title: `${todo.title}
+              className: `matrix-cell ${cellBgClass} ${isDragOverThisCell ? "drag-over-cell" : ""}`,
+              onDragOver: (e) => handleDragOver(e, item.id, day.dateStr),
+              onDragLeave: (e) => handleDragLeave(e, item.id, day.dateStr),
+              onDrop: (e) => handleDrop(e, item, day.dateStr),
+              onClick: () => {
+                if (isDraggingRef.current) return;
+                onSelectItem(item);
+              },
+              children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "cell-todo-stack", children: [
+                cellTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+                  "div",
+                  {
+                    draggable: true,
+                    onDragStart: (e) => handleDragStart(e, item.id, todo.id),
+                    onDragEnd: handleDragEnd,
+                    className: `compact-todo-pill status-${todo.status}`,
+                    title: `${todo.title}
 \u30B9\u30C6\u30FC\u30BF\u30B9: ${todo.status === "done" ? "\u5B8C\u4E86" : "\u672A\u5B8C\u4E86"}
 ${todo.description || ""}`,
-                  onClick: (e) => {
-                    e.stopPropagation();
-                    onSelectItem(item, todo.id);
+                    onClick: (e) => {
+                      e.stopPropagation();
+                      if (isDraggingRef.current) return;
+                      onSelectItem(item, todo.id);
+                    },
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                        "input",
+                        {
+                          type: "checkbox",
+                          checked: todo.status === "done",
+                          onChange: (e) => {
+                            e.stopPropagation();
+                            onQuickToggleTodoStatus(item, todo.id);
+                          },
+                          onClick: (e) => e.stopPropagation(),
+                          className: "todo-pill-checkbox",
+                          title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
+                        }
+                      ),
+                      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `todo-pill-title ${todo.status === "done" ? "line-through" : ""}`, children: todo.title })
+                    ]
                   },
-                  children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-                      "input",
-                      {
-                        type: "checkbox",
-                        checked: todo.status === "done",
-                        onChange: (e) => {
-                          e.stopPropagation();
-                          onQuickToggleTodoStatus(item, todo.id);
-                        },
-                        onClick: (e) => e.stopPropagation(),
-                        className: "todo-pill-checkbox",
-                        title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
-                      }
-                    ),
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `todo-pill-title ${todo.status === "done" ? "line-through" : ""}`, children: todo.title })
-                  ]
-                },
-                todo.id
-              )) })
+                  todo.id
+                )),
+                isAddingHere ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "inline-todo-input-wrapper", onClick: (e) => e.stopPropagation(), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                  "input",
+                  {
+                    type: "text",
+                    className: "inline-todo-input",
+                    placeholder: "TODO\u3092\u5165\u529B...",
+                    value: inlineTodoTitle,
+                    onChange: (e) => setInlineTodoTitle(e.target.value),
+                    onKeyDown: (e) => handleInlineKeyDown(e, item, day.dateStr),
+                    onBlur: () => handleSaveInlineTodo(item, day.dateStr),
+                    autoFocus: true
+                  }
+                ) }) : /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+                  "div",
+                  {
+                    className: "cell-add-prompt",
+                    onClick: (e) => {
+                      e.stopPropagation();
+                      handleStartInlineAdd(item.id, day.dateStr);
+                    },
+                    title: "TODO\u3092\u8FFD\u52A0",
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Plus, { size: 11 }),
+                      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "TODO\u3092\u8FFD\u52A0" })
+                    ]
+                  }
+                )
+              ] })
             },
             day.dateStr
           );
@@ -25439,6 +25596,9 @@ ${todo.description || ""}`,
         /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "matrix-cell future-col-cell", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "cell-todo-stack", children: futureTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
           "div",
           {
+            draggable: true,
+            onDragStart: (e) => handleDragStart(e, item.id, todo.id),
+            onDragEnd: handleDragEnd,
             className: `compact-todo-pill status-${todo.status}`,
             title: `${todo.title}
 \u671F\u65E5: ${todo.due}
@@ -25446,6 +25606,7 @@ ${todo.description || ""}`,
 ${todo.description || ""}`,
             onClick: (e) => {
               e.stopPropagation();
+              if (isDraggingRef.current) return;
               onSelectItem(item, todo.id);
             },
             children: [
@@ -25475,7 +25636,7 @@ ${todo.description || ""}`,
 };
 
 // src/components/TaskDetailDrawer.tsx
-var import_react4 = __toESM(require_react());
+var import_react5 = __toESM(require_react());
 var import_jsx_runtime4 = __toESM(require_jsx_runtime());
 var TaskDetailDrawer = ({
   item,
@@ -25485,14 +25646,14 @@ var TaskDetailDrawer = ({
   onUpdateItem,
   onDeleteItem
 }) => {
-  const [localItem, setLocalItem] = (0, import_react4.useState)(item);
-  const [editingDescIds, setEditingDescIds] = (0, import_react4.useState)({});
-  const [draggedIndex, setDraggedIndex] = (0, import_react4.useState)(null);
-  const [dragOverIndex, setDragOverIndex] = (0, import_react4.useState)(null);
-  (0, import_react4.useEffect)(() => {
+  const [localItem, setLocalItem] = (0, import_react5.useState)(item);
+  const [editingDescIds, setEditingDescIds] = (0, import_react5.useState)({});
+  const [draggedIndex, setDraggedIndex] = (0, import_react5.useState)(null);
+  const [dragOverIndex, setDragOverIndex] = (0, import_react5.useState)(null);
+  (0, import_react5.useEffect)(() => {
     setLocalItem(item);
   }, [item]);
-  (0, import_react4.useEffect)(() => {
+  (0, import_react5.useEffect)(() => {
     if (selectedTodoId) {
       setEditingDescIds((prev) => ({ ...prev, [selectedTodoId]: true }));
     }
@@ -25754,26 +25915,26 @@ var TaskDetailDrawer = ({
 // src/components/AppView.tsx
 var import_jsx_runtime5 = __toESM(require_jsx_runtime());
 var AppView = ({ app }) => {
-  const [storage] = (0, import_react5.useState)(() => new StorageManager(app));
-  const [viewMode, setViewMode] = (0, import_react5.useState)("collections");
-  const [collections, setCollections] = (0, import_react5.useState)([]);
-  const [selectedCollection, setSelectedCollection] = (0, import_react5.useState)(null);
-  const [items, setItems] = (0, import_react5.useState)([]);
-  const [selectedItem, setSelectedItem] = (0, import_react5.useState)(null);
-  const [selectedTodoId, setSelectedTodoId] = (0, import_react5.useState)(null);
-  const [isDrawerOpen, setIsDrawerOpen] = (0, import_react5.useState)(false);
-  const [startDate, setStartDate] = (0, import_react5.useState)(() => /* @__PURE__ */ new Date());
-  const [isCreateItemModalOpen, setIsCreateItemModalOpen] = (0, import_react5.useState)(false);
-  const [newItemTitle, setNewItemTitle] = (0, import_react5.useState)("");
-  const loadCollections = (0, import_react5.useCallback)(async () => {
+  const [storage] = (0, import_react6.useState)(() => new StorageManager(app));
+  const [viewMode, setViewMode] = (0, import_react6.useState)("collections");
+  const [collections, setCollections] = (0, import_react6.useState)([]);
+  const [selectedCollection, setSelectedCollection] = (0, import_react6.useState)(null);
+  const [items, setItems] = (0, import_react6.useState)([]);
+  const [selectedItem, setSelectedItem] = (0, import_react6.useState)(null);
+  const [selectedTodoId, setSelectedTodoId] = (0, import_react6.useState)(null);
+  const [isDrawerOpen, setIsDrawerOpen] = (0, import_react6.useState)(false);
+  const [startDate, setStartDate] = (0, import_react6.useState)(() => /* @__PURE__ */ new Date());
+  const [isCreateItemModalOpen, setIsCreateItemModalOpen] = (0, import_react6.useState)(false);
+  const [newItemTitle, setNewItemTitle] = (0, import_react6.useState)("");
+  const loadCollections = (0, import_react6.useCallback)(async () => {
     const cols = await storage.getCollections();
     setCollections(cols);
   }, [storage]);
-  const loadItems = (0, import_react5.useCallback)(async (colId) => {
+  const loadItems = (0, import_react6.useCallback)(async (colId) => {
     const loadedItems = await storage.getItems(colId);
     setItems(loadedItems);
   }, [storage]);
-  (0, import_react5.useEffect)(() => {
+  (0, import_react6.useEffect)(() => {
     loadCollections();
   }, [loadCollections]);
   const handleSelectCollection = async (collection) => {
@@ -25897,7 +26058,8 @@ var AppView = ({ app }) => {
           onSelectItem: handleSelectItem,
           onQuickToggleTodoStatus: handleQuickToggleTodoStatus,
           onDeleteItem: handleDeleteItem,
-          onOpenCreateItemModal: () => setIsCreateItemModalOpen(true)
+          onOpenCreateItemModal: () => setIsCreateItemModalOpen(true),
+          onUpdateItem: handleUpdateItem
         }
       ) }),
       viewMode === "calendar" && isDrawerOpen && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
@@ -25968,7 +26130,7 @@ var TodoCalendarView = class extends import_obsidian2.ItemView {
     container.addClass("todo-calendar-view-container");
     this.root = (0, import_client.createRoot)(container);
     this.root.render(
-      import_react6.default.createElement(import_react6.default.StrictMode, null, import_react6.default.createElement(AppView, { app: this.app }))
+      import_react7.default.createElement(import_react7.default.StrictMode, null, import_react7.default.createElement(AppView, { app: this.app }))
     );
   }
   async onClose() {
