@@ -578,7 +578,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .todo-calendar-app .section-title {
   margin: 0;
@@ -588,109 +588,141 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+.todo-calendar-app .section-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 .todo-calendar-app .todo-form-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 .todo-calendar-app .todo-form-card {
   background-color: var(--background-primary);
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 8px;
-  padding: 12px;
+  padding: 8px 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   transition: border-color 0.15s ease;
 }
 .todo-calendar-app .todo-form-card.todo-focused {
   border-color: var(--interactive-accent);
   box-shadow: 0 0 0 1px var(--interactive-accent);
 }
-.todo-calendar-app .todo-card-header {
+.todo-calendar-app .todo-card-row {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.todo-calendar-app .todo-status-checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  user-select: none;
-  background-color: var(--background-secondary);
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
-  border-radius: 6px;
-  padding: 3px 8px;
-  transition: all 0.15s ease;
-}
-.todo-calendar-app .todo-status-checkbox-label:hover {
-  background-color: var(--background-modifier-hover);
-  border-color: var(--interactive-accent);
-}
 .todo-calendar-app .todo-status-checkbox {
   cursor: pointer;
   accent-color: var(--interactive-accent);
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   margin: 0;
+  flex-shrink: 0;
 }
-.todo-calendar-app .status-label-badge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 1px 4px;
-  border-radius: 4px;
+.todo-calendar-app .todo-title-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: var(--text-normal);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 2px 4px;
+  outline: none;
+  border-radius: 2px;
+  transition: border-color 0.15s ease;
 }
-.todo-calendar-app .status-label-badge.status-todo {
-  color: var(--text-muted);
+.todo-calendar-app .todo-title-input.done-title {
+  text-decoration: line-through;
+  opacity: 0.6;
 }
-.todo-calendar-app .status-label-badge.status-done {
-  color: #22c55e;
+.todo-calendar-app .todo-title-input:focus {
+  border-bottom-color: var(--interactive-accent);
+  background-color: var(--background-secondary-alt, rgba(0, 0, 0, 0.03));
 }
 .todo-calendar-app .due-date-input {
+  width: 110px;
+  flex-shrink: 0;
   background-color: var(--background-secondary);
   color: var(--text-normal);
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 4px;
-  padding: 3px 6px;
+  padding: 3px 4px;
   font-size: 11px;
   outline: none;
-  flex: 1;
+}
+.todo-calendar-app .toggle-desc-btn {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  padding: 4px;
+  border-radius: 4px;
+}
+.todo-calendar-app .toggle-desc-btn:hover,
+.todo-calendar-app .toggle-desc-btn.active {
+  color: var(--interactive-accent);
+  background-color: var(--background-modifier-hover);
+}
+.todo-calendar-app .toggle-desc-btn.has-desc {
+  color: var(--interactive-accent);
 }
 .todo-calendar-app .delete-todo-btn {
   color: var(--text-faint);
+  flex-shrink: 0;
+  padding: 4px;
 }
 .todo-calendar-app .delete-todo-btn:hover {
   color: #ff5555;
+  background-color: rgba(255, 85, 85, 0.1);
 }
-.todo-calendar-app .todo-card-body {
+.todo-calendar-app .todo-desc-preview {
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
   gap: 6px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  padding: 4px 6px;
+  margin-left: 24px;
+  border-left: 2px solid var(--interactive-accent);
+  border-radius: 2px;
+  background-color: var(--background-secondary-alt, rgba(0, 0, 0, 0.02));
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
-.todo-calendar-app .todo-title-input {
-  width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+.todo-calendar-app .todo-desc-preview:hover {
+  background-color: var(--background-modifier-hover);
   color: var(--text-normal);
-  font-size: 13px;
-  font-weight: 500;
-  padding: 4px 0;
-  outline: none;
 }
-.todo-calendar-app .todo-title-input:focus {
-  border-bottom-color: var(--interactive-accent);
+.todo-calendar-app .desc-preview-icon {
+  color: var(--interactive-accent);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.todo-calendar-app .desc-preview-text {
+  line-height: 1.3;
+  font-size: 11.5px;
+}
+.todo-calendar-app .todo-card-desc-editor {
+  margin-left: 24px;
 }
 .todo-calendar-app .textarea-wrapper {
   display: flex;
   gap: 6px;
   align-items: flex-start;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 .todo-calendar-app .textarea-icon {
   color: var(--text-faint);
   margin-top: 4px;
+  flex-shrink: 0;
 }
 .todo-calendar-app .todo-desc-textarea {
   flex: 1;

@@ -24863,21 +24863,10 @@ var Calendar = createLucideIcon("Calendar", [
   ["path", { d: "M3 10h18", key: "8toen8" }]
 ]);
 
-// node_modules/lucide-react/dist/esm/icons/circle-check.js
-var CircleCheck = createLucideIcon("CircleCheck", [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
-]);
-
-// node_modules/lucide-react/dist/esm/icons/circle.js
-var Circle = createLucideIcon("Circle", [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]
-]);
-
-// node_modules/lucide-react/dist/esm/icons/clock.js
-var Clock = createLucideIcon("Clock", [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["polyline", { points: "12 6 12 12 16 14", key: "68esgv" }]
+// node_modules/lucide-react/dist/esm/icons/chevrons-up-down.js
+var ChevronsUpDown = createLucideIcon("ChevronsUpDown", [
+  ["path", { d: "m7 15 5 5 5-5", key: "1hf1tw" }],
+  ["path", { d: "m7 9 5-5 5 5", key: "sgt6xg" }]
 ]);
 
 // node_modules/lucide-react/dist/esm/icons/file-text.js
@@ -24911,6 +24900,18 @@ var Layers = createLucideIcon("Layers", [
   ],
   ["path", { d: "m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65", key: "dd6zsq" }],
   ["path", { d: "m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65", key: "ep9fru" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/pencil.js
+var Pencil = createLucideIcon("Pencil", [
+  [
+    "path",
+    {
+      d: "M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z",
+      key: "1a8usu"
+    }
+  ],
+  ["path", { d: "m15 5 4 4", key: "1mk7zo" }]
 ]);
 
 // node_modules/lucide-react/dist/esm/icons/plus.js
@@ -25446,9 +25447,15 @@ var TaskDetailDrawer = ({
   onDeleteItem
 }) => {
   const [localItem, setLocalItem] = (0, import_react4.useState)(item);
+  const [editingDescIds, setEditingDescIds] = (0, import_react4.useState)({});
   (0, import_react4.useEffect)(() => {
     setLocalItem(item);
   }, [item]);
+  (0, import_react4.useEffect)(() => {
+    if (selectedTodoId) {
+      setEditingDescIds((prev) => ({ ...prev, [selectedTodoId]: true }));
+    }
+  }, [selectedTodoId]);
   if (!isOpen || !localItem) return null;
   const handleTitleChange = (newTitle) => {
     const updated = { ...localItem, title: newTitle };
@@ -25458,7 +25465,7 @@ var TaskDetailDrawer = ({
   const handleAddTodo = () => {
     const newTodo = {
       id: `todo-${Date.now()}`,
-      title: "\u65B0\u3057\u3044TODO",
+      title: "",
       due: (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
       status: "todo",
       description: ""
@@ -25487,15 +25494,19 @@ var TaskDetailDrawer = ({
     setLocalItem(updated);
     onUpdateItem(updated);
   };
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "done":
-        return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(CircleCheck, { size: 16, className: "status-icon done" });
-      case "in_progress":
-        return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Clock, { size: 16, className: "status-icon in-progress" });
-      default:
-        return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Circle, { size: 16, className: "status-icon todo" });
-    }
+  const toggleToggleEditDesc = (todoId) => {
+    setEditingDescIds((prev) => ({
+      ...prev,
+      [todoId]: !prev[todoId]
+    }));
+  };
+  const handleToggleExpandAll = () => {
+    const areAllEditing = localItem.todos.length > 0 && localItem.todos.every((t) => editingDescIds[t.id]);
+    const newMap = {};
+    localItem.todos.forEach((t) => {
+      newMap[t.id] = !areAllEditing;
+    });
+    setEditingDescIds(newMap);
   };
   return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "detail-drawer", children: [
     /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "drawer-header", children: [
@@ -25512,7 +25523,7 @@ var TaskDetailDrawer = ({
           }
         )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { className: "icon-btn close-drawer-btn", onClick: onClose, title: "\u9589\u3058\u308D", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(X, { size: 18 }) })
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { className: "icon-btn close-drawer-btn", onClick: onClose, title: "\u9589\u3058\u308B", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(X, { size: 18 }) })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "drawer-body", children: [
       /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "section-title-bar", children: [
@@ -25521,31 +25532,55 @@ var TaskDetailDrawer = ({
           localItem.todos.length,
           ")"
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("button", { className: "nav-btn primary-btn sm-btn", onClick: handleAddTodo, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Plus, { size: 14 }),
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "TODO\u3092\u8FFD\u52A0" })
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "section-actions", children: [
+          localItem.todos.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+            "button",
+            {
+              className: "nav-btn secondary-btn sm-btn",
+              onClick: handleToggleExpandAll,
+              title: "\u3059\u3079\u3066\u306E\u8A73\u7D30\u8AAC\u660E\u3092\u958B\u9589",
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ChevronsUpDown, { size: 14 }),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u5168\u958B\u9589" })
+              ]
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("button", { className: "nav-btn primary-btn sm-btn", onClick: handleAddTodo, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Plus, { size: 14 }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "TODO\u3092\u8FFD\u52A0" })
+          ] })
         ] })
       ] }),
       localItem.todos.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "empty-todos", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { children: "\u3053\u306E\u30CE\u30FC\u30C8\u306B\u306FTODO\u304C\u307E\u3060\u3042\u308A\u307E\u305B\u3093\u3002\u300CTODO\u3092\u8FFD\u52A0\u300D\u30DC\u30BF\u30F3\u3092\u62BC\u3057\u3066\u767B\u9332\u3057\u3066\u304F\u3060\u3055\u3044\u3002" }) }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "todo-form-list", children: localItem.todos.map((todo) => {
         const isFocused = todo.id === selectedTodoId;
+        const isEditingDesc = !!editingDescIds[todo.id];
+        const hasDesc = !!todo.description?.trim();
         return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
           "div",
           {
             className: `todo-form-card ${isFocused ? "todo-focused" : ""}`,
             children: [
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "todo-card-header", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { className: "todo-status-checkbox-label", title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-                    "input",
-                    {
-                      type: "checkbox",
-                      checked: todo.status === "done",
-                      onChange: (e) => handleUpdateTodo(todo.id, { status: e.target.checked ? "done" : "todo" }),
-                      className: "todo-status-checkbox"
-                    }
-                  ),
-                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: `status-label-badge status-${todo.status}`, children: todo.status === "done" ? "\u5B8C\u4E86" : "\u672A\u5B8C\u4E86" })
-                ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "todo-card-row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                  "input",
+                  {
+                    type: "checkbox",
+                    checked: todo.status === "done",
+                    onChange: (e) => handleUpdateTodo(todo.id, { status: e.target.checked ? "done" : "todo" }),
+                    className: "todo-status-checkbox",
+                    title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                  "input",
+                  {
+                    type: "text",
+                    className: `todo-title-input ${todo.status === "done" ? "done-title" : ""}`,
+                    placeholder: "TODO\u306E\u4EF6\u540D...",
+                    value: todo.title,
+                    onChange: (e) => handleUpdateTodo(todo.id, { title: e.target.value })
+                  }
+                ),
                 /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                   "input",
                   {
@@ -25558,38 +25593,47 @@ var TaskDetailDrawer = ({
                 /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                   "button",
                   {
+                    className: `icon-btn toggle-desc-btn ${isEditingDesc ? "active" : ""} ${hasDesc ? "has-desc" : ""}`,
+                    onClick: () => toggleToggleEditDesc(todo.id),
+                    title: isEditingDesc ? "\u8A73\u7D30\u7DE8\u96C6\u3092\u9589\u3058\u308B" : "\u8A73\u7D30\u30FB\u30E1\u30E2\u3092\u7DE8\u96C6",
+                    children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Pencil, { size: 13 })
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                  "button",
+                  {
                     className: "icon-btn delete-todo-btn",
                     onClick: () => handleDeleteTodo(todo.id),
                     title: "TODO\u524A\u9664",
-                    children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Trash2, { size: 14 })
+                    children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Trash2, { size: 13 })
                   }
                 )
               ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "todo-card-body", children: [
+              isEditingDesc ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "todo-card-desc-editor", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "textarea-wrapper", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(AlignLeft, { size: 13, className: "textarea-icon" }),
                 /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-                  "input",
+                  "textarea",
                   {
-                    type: "text",
-                    className: "todo-title-input",
-                    placeholder: "TODO\u306E\u4EF6\u540D...",
-                    value: todo.title,
-                    onChange: (e) => handleUpdateTodo(todo.id, { title: e.target.value })
+                    className: "todo-desc-textarea",
+                    placeholder: "\u8A73\u7D30\u30FB\u30E1\u30E2\u3092\u5165\u529B...",
+                    value: todo.description || "",
+                    onChange: (e) => handleUpdateTodo(todo.id, { description: e.target.value }),
+                    rows: 2,
+                    autoFocus: true
                   }
-                ),
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "textarea-wrapper", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(AlignLeft, { size: 14, className: "textarea-icon" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-                    "textarea",
-                    {
-                      className: "todo-desc-textarea",
-                      placeholder: "\u8A73\u7D30\u30FB\u30E1\u30E2\u3092\u5165\u529B...",
-                      value: todo.description || "",
-                      onChange: (e) => handleUpdateTodo(todo.id, { description: e.target.value }),
-                      rows: 2
-                    }
-                  )
-                ] })
-              ] })
+                )
+              ] }) }) : hasDesc ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+                "div",
+                {
+                  className: "todo-desc-preview",
+                  onClick: () => toggleToggleEditDesc(todo.id),
+                  title: "\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u8A73\u7D30\u3092\u7DE8\u96C6",
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(AlignLeft, { size: 12, className: "desc-preview-icon" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "desc-preview-text", children: todo.description })
+                  ]
+                }
+              ) : null
             ]
           },
           todo.id
@@ -26048,23 +26092,7 @@ lucide-react/dist/esm/icons/calendar.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
-lucide-react/dist/esm/icons/circle-check.js:
-  (**
-   * @license lucide-react v0.428.0 - ISC
-   *
-   * This source code is licensed under the ISC license.
-   * See the LICENSE file in the root directory of this source tree.
-   *)
-
-lucide-react/dist/esm/icons/circle.js:
-  (**
-   * @license lucide-react v0.428.0 - ISC
-   *
-   * This source code is licensed under the ISC license.
-   * See the LICENSE file in the root directory of this source tree.
-   *)
-
-lucide-react/dist/esm/icons/clock.js:
+lucide-react/dist/esm/icons/chevrons-up-down.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *
@@ -26089,6 +26117,14 @@ lucide-react/dist/esm/icons/folder.js:
    *)
 
 lucide-react/dist/esm/icons/layers.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/pencil.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *
