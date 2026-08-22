@@ -1,0 +1,34 @@
+{
+  "name": "obsidian-todo-calendar",
+  "version": "1.0.0",
+  "description": "Obsidian custom plugin for managing TODOs in a 7-day calendar matrix view with NotebookLM-style collections.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production"
+  },
+  "keywords": [
+    "obsidian",
+    "obsidian-plugin",
+    "todo",
+    "calendar",
+    "tasks"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "builtin-modules": "^3.3.0",
+    "esbuild": "^0.23.0",
+    "obsidian": "latest",
+    "tslib": "^2.6.3",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "lucide-react": "^0.428.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
