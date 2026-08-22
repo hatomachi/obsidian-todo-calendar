@@ -24880,6 +24880,12 @@ var ChevronsUpDown = createLucideIcon("ChevronsUpDown", [
   ["path", { d: "m7 9 5-5 5 5", key: "sgt6xg" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/copy.js
+var Copy = createLucideIcon("Copy", [
+  ["rect", { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2", key: "17jyea" }],
+  ["path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2", key: "zix9uf" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/file-text.js
 var FileText = createLucideIcon("FileText", [
   ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
@@ -25700,6 +25706,19 @@ var TaskDetailDrawer = ({
     setLocalItem(updated);
     onUpdateItem(updated);
   };
+  const handleDuplicateTodo = (index) => {
+    const target = localItem.todos[index];
+    if (!target) return;
+    const duplicated = {
+      ...target,
+      id: `todo-${Date.now()}`
+    };
+    const updatedTodos = [...localItem.todos];
+    updatedTodos.splice(index + 1, 0, duplicated);
+    const updated = { ...localItem, todos: updatedTodos };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
   const toggleToggleEditDesc = (todoId) => {
     setEditingDescIds((prev) => ({
       ...prev,
@@ -25928,6 +25947,15 @@ var TaskDetailDrawer = ({
                     onClick: () => toggleToggleEditDesc(todo.id),
                     title: isEditingDesc ? "\u8A73\u7D30\u7DE8\u96C6\u3092\u9589\u3058\u308B" : "\u8A73\u7D30\u30FB\u30E1\u30E2\u3092\u7DE8\u96C6",
                     children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Pencil, { size: 13 })
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                  "button",
+                  {
+                    className: "icon-btn duplicate-todo-btn",
+                    onClick: () => handleDuplicateTodo(index),
+                    title: "TODO\u3092\u8907\u88FD",
+                    children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Copy, { size: 13 })
                   }
                 ),
                 /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
@@ -26466,6 +26494,14 @@ lucide-react/dist/esm/icons/chevron-down.js:
    *)
 
 lucide-react/dist/esm/icons/chevrons-up-down.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/copy.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *

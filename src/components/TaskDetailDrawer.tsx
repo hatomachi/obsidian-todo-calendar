@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, FileText, AlignLeft, Pencil, ChevronsUpDown, GripVertical, ArrowUpDown, Check } from 'lucide-react';
+import { X, Plus, Trash2, FileText, AlignLeft, Pencil, ChevronsUpDown, GripVertical, ArrowUpDown, Check, Copy } from 'lucide-react';
 import { ItemData, TodoItem } from '../types';
 
 interface TaskDetailDrawerProps {
@@ -79,6 +79,23 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
 
   const handleDeleteTodo = (todoId: string) => {
     const updatedTodos = localItem.todos.filter((t) => t.id !== todoId);
+    const updated = { ...localItem, todos: updatedTodos };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+
+  const handleDuplicateTodo = (index: number) => {
+    const target = localItem.todos[index];
+    if (!target) return;
+
+    const duplicated: TodoItem = {
+      ...target,
+      id: `todo-${Date.now()}`,
+    };
+
+    const updatedTodos = [...localItem.todos];
+    updatedTodos.splice(index + 1, 0, duplicated);
+
     const updated = { ...localItem, todos: updatedTodos };
     setLocalItem(updated);
     onUpdateItem(updated);
@@ -323,6 +340,14 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                       title={isEditingDesc ? '詳細編集を閉じる' : '詳細・メモを編集'}
                     >
                       <Pencil size={13} />
+                    </button>
+
+                    <button
+                      className="icon-btn duplicate-todo-btn"
+                      onClick={() => handleDuplicateTodo(index)}
+                      title="TODOを複製"
+                    >
+                      <Copy size={13} />
                     </button>
 
                     <button

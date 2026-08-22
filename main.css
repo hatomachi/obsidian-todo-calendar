@@ -778,6 +778,15 @@
 .todo-calendar-app .toggle-desc-btn.has-desc {
   color: var(--interactive-accent);
 }
+.todo-calendar-app .duplicate-todo-btn {
+  color: var(--text-faint);
+  flex-shrink: 0;
+  padding: 4px;
+}
+.todo-calendar-app .duplicate-todo-btn:hover {
+  color: var(--interactive-accent);
+  background-color: var(--background-modifier-hover);
+}
 .todo-calendar-app .delete-todo-btn {
   color: var(--text-faint);
   flex-shrink: 0;
