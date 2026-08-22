@@ -273,7 +273,7 @@
 .todo-calendar-app .matrix-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 900px;
+  min-width: 1150px;
   table-layout: fixed;
   border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
 }
@@ -294,6 +294,23 @@
   position: sticky;
   left: 0;
   z-index: 10;
+}
+.todo-calendar-app .past-header-th {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  padding: 8px;
+  background-color: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  border-bottom: 2px solid #ef4444;
+}
+.todo-calendar-app .future-header-th {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  padding: 8px;
+  background-color: var(--background-secondary);
+  color: var(--text-muted);
 }
 .todo-calendar-app .day-header-th {
   font-size: 13px;
@@ -387,6 +404,12 @@
   height: 100%;
   transition: background-color 0.15s ease;
 }
+.todo-calendar-app .past-col-cell {
+  background-color: rgba(239, 68, 68, 0.02);
+}
+.todo-calendar-app .future-col-cell {
+  background-color: var(--background-secondary-alt, rgba(0, 0, 0, 0.02));
+}
 .todo-calendar-app .weekday-cell {
   background-color: var(--background-primary, #ffffff);
 }
@@ -422,6 +445,50 @@
   border-color: var(--interactive-accent);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
   transform: translateY(-1px);
+}
+.todo-calendar-app .compact-todo-pill.todo-pill-past-todo {
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+}
+.theme-dark .todo-calendar-app .compact-todo-pill.todo-pill-past-todo {
+  background-color: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+}
+.todo-calendar-app .compact-todo-pill.todo-pill-past-todo .todo-pill-title {
+  color: #dc2626;
+  font-weight: 500;
+}
+.theme-dark .todo-calendar-app .compact-todo-pill.todo-pill-past-todo .todo-pill-title {
+  color: #f87171;
+  font-weight: 500;
+}
+.todo-calendar-app .compact-todo-pill.todo-pill-past-todo:hover {
+  background-color: #fee2e2;
+  border-color: #ef4444;
+}
+.theme-dark .todo-calendar-app .compact-todo-pill.todo-pill-past-todo:hover {
+  background-color: rgba(239, 68, 68, 0.28);
+  border-color: #ef4444;
+}
+.todo-calendar-app .todo-pill-date {
+  font-size: 10px;
+  color: var(--text-muted);
+  background-color: var(--background-secondary);
+  padding: 1px 4px;
+  border-radius: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+  font-weight: 500;
+}
+.todo-calendar-app .compact-todo-pill.todo-pill-past-todo .todo-pill-date {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  font-weight: 600;
+}
+.theme-dark .todo-calendar-app .compact-todo-pill.todo-pill-past-todo .todo-pill-date {
+  background-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  font-weight: 600;
 }
 .todo-calendar-app .todo-pill-checkbox {
   cursor: pointer;

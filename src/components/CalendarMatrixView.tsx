@@ -13,6 +13,24 @@ interface CalendarMatrixViewProps {
   onOpenCreateItemModal: () => void;
 }
 
+const formatDateStr = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+const formatShortDate = (dateStr: string): string => {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    return `${month}/${day}`;
+  }
+  return dateStr;
+};
+
 export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
   items,
   startDate,
@@ -22,12 +40,14 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
   onDeleteItem,
   onOpenCreateItemModal,
 }) => {
+  const todayStr = formatDateStr(new Date());
+
   // Generate 7 days starting from startDate
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(startDate);
     d.setDate(startDate.getDate() + i);
-    const dateStr = d.toISOString().split('T')[0]; // YYYY-MM-DD
-    const isToday = dateStr === new Date().toISOString().split('T')[0];
+    const dateStr = formatDateStr(d);
+    const isToday = dateStr === todayStr;
     const dayOfWeek = d.getDay(); // 0: Sun, 6: Sat
     const isSunday = dayOfWeek === 0;
     const isSaturday = dayOfWeek === 6;
@@ -37,6 +57,9 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
     return { dateStr, dayLabel, isToday, isSunday, isSaturday, isHoliday, isNonWorkingDay };
   });
 
+  const minDateStr = days[0].dateStr;
+  const maxDateStr = days[6].dateStr;
+
   return (
     <div className="calendar-matrix-container">
       <div className="table-scroll-wrapper">
@@ -44,6 +67,7 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
           <thead>
             <tr>
               <th className="row-header-th">タスクノート (Item)</th>
+              <th className="past-header-th">過去の未完了</th>
               {days.map((day) => {
                 let colClass = 'weekday-col';
                 if (day.isToday) {
@@ -66,12 +90,13 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                   </th>
                 );
               })}
+              <th className="future-header-th">未来</th>
             </tr>
           </thead>
           <tbody>
             {items.length === 0 ? (
               <tr>
-                <td colSpan={8} className="empty-matrix-td">
+                <td colSpan={10} className="empty-matrix-td">
                   <div className="empty-matrix-state">
                     <p>このコレクションにはまだアイテムがありません。</p>
                     <button className="nav-btn primary-btn" onClick={onOpenCreateItemModal}>
@@ -84,6 +109,16 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
             ) : (
               items.map((item) => {
                 const isSelected = item.id === selectedItemId;
+
+                // Past incomplete todos (due < minDateStr and status === 'todo')
+                const pastTodos = item.todos
+                  .filter((t) => t.due && t.due < minDateStr && t.status === 'todo')
+                  .sort((a, b) => a.due.localeCompare(b.due));
+
+                // Future todos (due > maxDateStr)
+                const futureTodos = item.todos
+                  .filter((t) => t.due && t.due > maxDateStr)
+                  .sort((a, b) => a.due.localeCompare(b.due));
 
                 return (
                   <tr key={item.id} className={`matrix-row ${isSelected ? 'row-selected' : ''}`}>
@@ -109,9 +144,39 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                       </div>
                     </td>
 
+                    {/* Past Incomplete Cell */}
+                    <td className="matrix-cell past-col-cell" onClick={() => onSelectItem(item)}>
+                      <div className="cell-todo-stack">
+                        {pastTodos.map((todo) => (
+                          <div
+                            key={todo.id}
+                            className="compact-todo-pill todo-pill-past-todo"
+                            title={`${todo.title}\n期日: ${todo.due}\nステータス: 未完了\n${todo.description || ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSelectItem(item, todo.id);
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={false}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                onQuickToggleTodoStatus(item, todo.id);
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              className="todo-pill-checkbox"
+                              title="完了にする"
+                            />
+                            <span className="todo-pill-title">{todo.title}</span>
+                            <span className="todo-pill-date">{formatShortDate(todo.due)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+
                     {/* 7 Days Cells */}
                     {days.map((day) => {
-                      // Filter TODOs for this item matching the column's date
                       const cellTodos = item.todos.filter((t) => t.due === day.dateStr);
 
                       let cellBgClass = day.isToday
@@ -157,6 +222,39 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                         </td>
                       );
                     })}
+
+                    {/* Future Cell */}
+                    <td className="matrix-cell future-col-cell" onClick={() => onSelectItem(item)}>
+                      <div className="cell-todo-stack">
+                        {futureTodos.map((todo) => (
+                          <div
+                            key={todo.id}
+                            className={`compact-todo-pill status-${todo.status}`}
+                            title={`${todo.title}\n期日: ${todo.due}\nステータス: ${todo.status === 'done' ? '完了' : '未完了'}\n${todo.description || ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSelectItem(item, todo.id);
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={todo.status === 'done'}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                onQuickToggleTodoStatus(item, todo.id);
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              className="todo-pill-checkbox"
+                              title={todo.status === 'done' ? '未完了に戻す' : '完了にする'}
+                            />
+                            <span className={`todo-pill-title ${todo.status === 'done' ? 'line-through' : ''}`}>
+                              {todo.title}
+                            </span>
+                            <span className="todo-pill-date">{formatShortDate(todo.due)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </td>
                   </tr>
                 );
               })
@@ -167,3 +265,4 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
     </div>
   );
 };
+

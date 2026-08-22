@@ -25215,6 +25215,22 @@ function isJapaneseHoliday(date) {
 
 // src/components/CalendarMatrixView.tsx
 var import_jsx_runtime3 = __toESM(require_jsx_runtime());
+var formatDateStr = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+var formatShortDate = (dateStr) => {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  if (parts.length === 3) {
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    return `${month}/${day}`;
+  }
+  return dateStr;
+};
 var CalendarMatrixView = ({
   items,
   startDate,
@@ -25224,11 +25240,12 @@ var CalendarMatrixView = ({
   onDeleteItem,
   onOpenCreateItemModal
 }) => {
+  const todayStr = formatDateStr(/* @__PURE__ */ new Date());
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(startDate);
     d.setDate(startDate.getDate() + i);
-    const dateStr = d.toISOString().split("T")[0];
-    const isToday = dateStr === (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+    const dateStr = formatDateStr(d);
+    const isToday = dateStr === todayStr;
     const dayOfWeek = d.getDay();
     const isSunday = dayOfWeek === 0;
     const isSaturday = dayOfWeek === 6;
@@ -25237,9 +25254,12 @@ var CalendarMatrixView = ({
     const dayLabel = d.toLocaleDateString("ja-JP", { weekday: "short", month: "numeric", day: "numeric" });
     return { dateStr, dayLabel, isToday, isSunday, isSaturday, isHoliday, isNonWorkingDay };
   });
+  const minDateStr = days[0].dateStr;
+  const maxDateStr = days[6].dateStr;
   return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "calendar-matrix-container", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "table-scroll-wrapper", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("table", { className: "matrix-table", children: [
     /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "row-header-th", children: "\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item)" }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "past-header-th", children: "\u904E\u53BB\u306E\u672A\u5B8C\u4E86" }),
       days.map((day) => {
         let colClass = "weekday-col";
         if (day.isToday) {
@@ -25261,9 +25281,10 @@ var CalendarMatrixView = ({
           },
           day.dateStr
         );
-      })
+      }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "future-header-th", children: "\u672A\u6765" })
     ] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tbody", { children: items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { colSpan: 8, className: "empty-matrix-td", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "empty-matrix-state", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tbody", { children: items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { colSpan: 10, className: "empty-matrix-td", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "empty-matrix-state", children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { children: "\u3053\u306E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u306B\u306F\u307E\u3060\u30A2\u30A4\u30C6\u30E0\u304C\u3042\u308A\u307E\u305B\u3093\u3002" }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("button", { className: "nav-btn primary-btn", onClick: onOpenCreateItemModal, children: [
         /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Plus, { size: 16 }),
@@ -25271,6 +25292,8 @@ var CalendarMatrixView = ({
       ] })
     ] }) }) }) : items.map((item) => {
       const isSelected = item.id === selectedItemId;
+      const pastTodos = item.todos.filter((t) => t.due && t.due < minDateStr && t.status === "todo").sort((a, b) => a.due.localeCompare(b.due));
+      const futureTodos = item.todos.filter((t) => t.due && t.due > maxDateStr).sort((a, b) => a.due.localeCompare(b.due));
       return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { className: `matrix-row ${isSelected ? "row-selected" : ""}`, children: [
         /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "row-header-td", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "item-row-header-content", children: [
           /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FileText, { size: 16, className: "item-icon" }),
@@ -25290,6 +25313,39 @@ var CalendarMatrixView = ({
             }
           )
         ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "matrix-cell past-col-cell", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "cell-todo-stack", children: pastTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+          "div",
+          {
+            className: "compact-todo-pill todo-pill-past-todo",
+            title: `${todo.title}
+\u671F\u65E5: ${todo.due}
+\u30B9\u30C6\u30FC\u30BF\u30B9: \u672A\u5B8C\u4E86
+${todo.description || ""}`,
+            onClick: (e) => {
+              e.stopPropagation();
+              onSelectItem(item, todo.id);
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                "input",
+                {
+                  type: "checkbox",
+                  checked: false,
+                  onChange: (e) => {
+                    e.stopPropagation();
+                    onQuickToggleTodoStatus(item, todo.id);
+                  },
+                  onClick: (e) => e.stopPropagation(),
+                  className: "todo-pill-checkbox",
+                  title: "\u5B8C\u4E86\u306B\u3059\u308B"
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "todo-pill-title", children: todo.title }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "todo-pill-date", children: formatShortDate(todo.due) })
+            ]
+          },
+          todo.id
+        )) }) }),
         days.map((day) => {
           const cellTodos = item.todos.filter((t) => t.due === day.dateStr);
           let cellBgClass = day.isToday ? "today-col-cell" : day.isNonWorkingDay ? "holiday-cell" : "weekday-cell";
@@ -25332,7 +25388,40 @@ ${todo.description || ""}`,
             },
             day.dateStr
           );
-        })
+        }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "matrix-cell future-col-cell", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "cell-todo-stack", children: futureTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+          "div",
+          {
+            className: `compact-todo-pill status-${todo.status}`,
+            title: `${todo.title}
+\u671F\u65E5: ${todo.due}
+\u30B9\u30C6\u30FC\u30BF\u30B9: ${todo.status === "done" ? "\u5B8C\u4E86" : "\u672A\u5B8C\u4E86"}
+${todo.description || ""}`,
+            onClick: (e) => {
+              e.stopPropagation();
+              onSelectItem(item, todo.id);
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                "input",
+                {
+                  type: "checkbox",
+                  checked: todo.status === "done",
+                  onChange: (e) => {
+                    e.stopPropagation();
+                    onQuickToggleTodoStatus(item, todo.id);
+                  },
+                  onClick: (e) => e.stopPropagation(),
+                  className: "todo-pill-checkbox",
+                  title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `todo-pill-title ${todo.status === "done" ? "line-through" : ""}`, children: todo.title }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "todo-pill-date", children: formatShortDate(todo.due) })
+            ]
+          },
+          todo.id
+        )) }) })
       ] }, item.id);
     }) })
   ] }) }) });
