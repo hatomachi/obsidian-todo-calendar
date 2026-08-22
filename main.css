@@ -332,20 +332,22 @@
 }
 .todo-calendar-app .item-row-header-content {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   justify-content: space-between;
 }
 .todo-calendar-app .item-icon {
   color: var(--interactive-accent);
   flex-shrink: 0;
+  margin-top: 2px;
 }
 .todo-calendar-app .item-title-text {
   flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
   font-size: 14px;
+  line-height: 1.4;
 }
 .todo-calendar-app .delete-item-btn {
   background: transparent;
@@ -356,6 +358,7 @@
   border-radius: 4px;
   opacity: 0;
   transition: opacity 0.15s ease;
+  flex-shrink: 0;
 }
 .todo-calendar-app .matrix-row:hover .delete-item-btn {
   opacity: 1;
@@ -377,7 +380,7 @@
 }
 .todo-calendar-app .compact-todo-pill {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   padding: 4px 8px;
   border-radius: 5px;
@@ -386,9 +389,9 @@
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
   cursor: pointer;
   transition: all 0.15s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .todo-calendar-app .compact-todo-pill:hover {
   background-color: var(--background-modifier-hover);
@@ -400,7 +403,7 @@
   accent-color: var(--interactive-accent);
   width: 13px;
   height: 13px;
-  margin: 0;
+  margin: 2px 0 0 0;
   flex-shrink: 0;
 }
 .todo-calendar-app .status-icon.todo {
@@ -410,9 +413,10 @@
   color: #22c55e;
 }
 .todo-calendar-app .todo-pill-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
 }
 .todo-calendar-app .todo-pill-title.line-through {
   text-decoration: line-through;
