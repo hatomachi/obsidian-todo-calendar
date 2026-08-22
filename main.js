@@ -25142,6 +25142,77 @@ var CollectionsGrid = ({
   ] });
 };
 
+// src/utils/holidays.ts
+function getNthMonday(year, month, n) {
+  let count = 0;
+  for (let day = 1; day <= 31; day++) {
+    const d = new Date(year, month - 1, day);
+    if (d.getMonth() !== month - 1) break;
+    if (d.getDay() === 1) {
+      count++;
+      if (count === n) return day;
+    }
+  }
+  return 0;
+}
+function getShunbunDay(year) {
+  return Math.floor(20.8431 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4));
+}
+function getShubunDay(year) {
+  return Math.floor(23.2488 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4));
+}
+function isJapaneseHoliday(date) {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const isPrimaryHoliday = (y, m, d) => {
+    if (m === 1 && d === 1) return true;
+    if (m === 2 && d === 11) return true;
+    if (m === 2 && d === 23) return true;
+    if (m === 4 && d === 29) return true;
+    if (m === 5 && d === 3) return true;
+    if (m === 5 && d === 4) return true;
+    if (m === 5 && d === 5) return true;
+    if (m === 8 && d === 11) return true;
+    if (m === 11 && d === 3) return true;
+    if (m === 11 && d === 23) return true;
+    if (m === 1 && d === getNthMonday(y, 1, 2)) return true;
+    if (m === 7 && d === getNthMonday(y, 7, 3)) return true;
+    if (m === 9 && d === getNthMonday(y, 9, 3)) return true;
+    if (m === 10 && d === getNthMonday(y, 10, 2)) return true;
+    if (m === 3 && d === getShunbunDay(y)) return true;
+    if (m === 9 && d === getShubunDay(y)) return true;
+    return false;
+  };
+  if (isPrimaryHoliday(year, month, day)) {
+    return true;
+  }
+  const checkDate = new Date(year, month - 1, day);
+  const dayOfWeek = checkDate.getDay();
+  if (dayOfWeek !== 0) {
+    let p = new Date(checkDate);
+    p.setDate(p.getDate() - 1);
+    while (p.getDay() >= 0) {
+      if (isPrimaryHoliday(p.getFullYear(), p.getMonth() + 1, p.getDate())) {
+        if (p.getDay() === 0) {
+          return true;
+        }
+      } else {
+        break;
+      }
+      p.setDate(p.getDate() - 1);
+    }
+  }
+  if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+    const prevDay = new Date(year, month - 1, day - 1);
+    const nextDay = new Date(year, month - 1, day + 1);
+    if (isPrimaryHoliday(prevDay.getFullYear(), prevDay.getMonth() + 1, prevDay.getDate()) && isPrimaryHoliday(nextDay.getFullYear(), nextDay.getMonth() + 1, nextDay.getDate())) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // src/components/CalendarMatrixView.tsx
 var import_jsx_runtime3 = __toESM(require_jsx_runtime());
 var CalendarMatrixView = ({
@@ -25158,33 +25229,39 @@ var CalendarMatrixView = ({
     d.setDate(startDate.getDate() + i);
     const dateStr = d.toISOString().split("T")[0];
     const isToday = dateStr === (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+    const dayOfWeek = d.getDay();
+    const isSunday = dayOfWeek === 0;
+    const isSaturday = dayOfWeek === 6;
+    const isHoliday = isJapaneseHoliday(d);
+    const isNonWorkingDay = isSunday || isSaturday || isHoliday;
     const dayLabel = d.toLocaleDateString("ja-JP", { weekday: "short", month: "numeric", day: "numeric" });
-    return { dateStr, dayLabel, isToday };
+    return { dateStr, dayLabel, isToday, isSunday, isSaturday, isHoliday, isNonWorkingDay };
   });
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "done":
-        return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(CircleCheck, { size: 12, className: "status-icon done" });
-      case "in_progress":
-        return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Clock, { size: 12, className: "status-icon in-progress" });
-      default:
-        return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Circle, { size: 12, className: "status-icon todo" });
-    }
-  };
   return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "calendar-matrix-container", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "table-scroll-wrapper", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("table", { className: "matrix-table", children: [
     /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "row-header-th", children: "\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item)" }),
-      days.map((day) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
-        "th",
-        {
-          className: `day-header-th ${day.isToday ? "today-col" : ""}`,
-          children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "day-title", children: day.dayLabel }),
-            day.isToday && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "today-badge", children: "Today" })
-          ]
-        },
-        day.dateStr
-      ))
+      days.map((day) => {
+        let colClass = "weekday-col";
+        if (day.isToday) {
+          colClass = "today-col";
+        } else if (day.isNonWorkingDay) {
+          colClass = "holiday-col";
+        }
+        let dayTypeClass = "";
+        if (day.isSunday || day.isHoliday) dayTypeClass = "text-sun-holiday";
+        else if (day.isSaturday) dayTypeClass = "text-sat";
+        return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+          "th",
+          {
+            className: `day-header-th ${colClass}`,
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: `day-title ${dayTypeClass}`, children: day.dayLabel }),
+              day.isToday && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "today-badge", children: "Today" })
+            ]
+          },
+          day.dateStr
+        );
+      })
     ] }) }),
     /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tbody", { children: items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { colSpan: 8, className: "empty-matrix-td", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "empty-matrix-state", children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { children: "\u3053\u306E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u306B\u306F\u307E\u3060\u30A2\u30A4\u30C6\u30E0\u304C\u3042\u308A\u307E\u305B\u3093\u3002" }),
@@ -25215,10 +25292,11 @@ var CalendarMatrixView = ({
         ] }) }),
         days.map((day) => {
           const cellTodos = item.todos.filter((t) => t.due === day.dateStr);
+          let cellBgClass = day.isToday ? "today-col-cell" : day.isNonWorkingDay ? "holiday-cell" : "weekday-cell";
           return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
             "td",
             {
-              className: `matrix-cell ${day.isToday ? "today-col-cell" : ""}`,
+              className: `matrix-cell ${cellBgClass}`,
               onClick: () => onSelectItem(item),
               children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "cell-todo-stack", children: cellTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
                 "div",

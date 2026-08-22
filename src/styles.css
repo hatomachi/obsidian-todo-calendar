@@ -325,12 +325,13 @@
   border-collapse: collapse;
   min-width: 900px;
   table-layout: fixed;
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
 }
 
 .todo-calendar-app .matrix-table th,
 .todo-calendar-app .matrix-table td {
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
-  padding: 10px;
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+  padding: 8px 10px;
   vertical-align: top;
 }
 
@@ -348,16 +349,35 @@
 }
 
 .todo-calendar-app .day-header-th {
-  background-color: var(--background-secondary);
-  color: var(--text-normal);
   font-size: 13px;
   font-weight: 600;
   text-align: center;
+  padding: 8px;
+}
+
+.todo-calendar-app .day-header-th.weekday-col {
+  background-color: var(--background-primary, #ffffff);
+  color: var(--text-normal);
+}
+
+.todo-calendar-app .day-header-th.holiday-col {
+  background-color: var(--background-secondary, #f1f5f9);
+  color: var(--text-normal);
 }
 
 .todo-calendar-app .day-header-th.today-col {
   background-color: rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.12);
   border-bottom: 2px solid var(--interactive-accent);
+}
+
+.todo-calendar-app .day-title.text-sat {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.todo-calendar-app .day-title.text-sun-holiday {
+  color: #dc2626;
+  font-weight: 600;
 }
 
 .todo-calendar-app .today-badge {
@@ -435,28 +455,38 @@
 .todo-calendar-app .matrix-cell {
   min-height: 80px;
   height: 100%;
+  transition: background-color 0.15s ease;
+}
+
+.todo-calendar-app .weekday-cell {
+  background-color: var(--background-primary, #ffffff);
+}
+
+.todo-calendar-app .holiday-cell {
+  background-color: var(--background-secondary-alt, #f3f4f6);
 }
 
 .todo-calendar-app .today-col-cell {
-  background-color: rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.03);
+  background-color: rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.06);
 }
 
 .todo-calendar-app .cell-todo-stack {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
-/* Compact TODO Pill */
+/* Compact TODO Pill Card */
 .todo-calendar-app .compact-todo-pill {
   display: flex;
   align-items: flex-start;
   gap: 6px;
-  padding: 4px 8px;
-  border-radius: 5px;
+  padding: 5px 8px;
+  border-radius: 6px;
   font-size: 12px;
-  background-color: var(--background-primary-alt, rgba(255, 255, 255, 0.05));
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background-color: var(--background-primary, #ffffff);
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.22));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: normal;
@@ -467,7 +497,8 @@
 .todo-calendar-app .compact-todo-pill:hover {
   background-color: var(--background-modifier-hover);
   border-color: var(--interactive-accent);
-  transform: translateX(2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
 .todo-calendar-app .todo-pill-checkbox {

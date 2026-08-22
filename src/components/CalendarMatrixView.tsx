@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircle2, Circle, Clock, FileText, Plus, Trash2 } from 'lucide-react';
 import { ItemData, TodoItem, TodoStatus } from '../types';
+import { isJapaneseHoliday } from '../utils/holidays';
 
 interface CalendarMatrixViewProps {
   items: ItemData[];
@@ -27,20 +28,14 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
     d.setDate(startDate.getDate() + i);
     const dateStr = d.toISOString().split('T')[0]; // YYYY-MM-DD
     const isToday = dateStr === new Date().toISOString().split('T')[0];
+    const dayOfWeek = d.getDay(); // 0: Sun, 6: Sat
+    const isSunday = dayOfWeek === 0;
+    const isSaturday = dayOfWeek === 6;
+    const isHoliday = isJapaneseHoliday(d);
+    const isNonWorkingDay = isSunday || isSaturday || isHoliday;
     const dayLabel = d.toLocaleDateString('ja-JP', { weekday: 'short', month: 'numeric', day: 'numeric' });
-    return { dateStr, dayLabel, isToday };
+    return { dateStr, dayLabel, isToday, isSunday, isSaturday, isHoliday, isNonWorkingDay };
   });
-
-  const getStatusIcon = (status: TodoStatus) => {
-    switch (status) {
-      case 'done':
-        return <CheckCircle2 size={12} className="status-icon done" />;
-      case 'in_progress':
-        return <Clock size={12} className="status-icon in-progress" />;
-      default:
-        return <Circle size={12} className="status-icon todo" />;
-    }
-  };
 
   return (
     <div className="calendar-matrix-container">
@@ -49,15 +44,28 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
           <thead>
             <tr>
               <th className="row-header-th">タスクノート (Item)</th>
-              {days.map((day) => (
-                <th
-                  key={day.dateStr}
-                  className={`day-header-th ${day.isToday ? 'today-col' : ''}`}
-                >
-                  <div className="day-title">{day.dayLabel}</div>
-                  {day.isToday && <span className="today-badge">Today</span>}
-                </th>
-              ))}
+              {days.map((day) => {
+                let colClass = 'weekday-col';
+                if (day.isToday) {
+                  colClass = 'today-col';
+                } else if (day.isNonWorkingDay) {
+                  colClass = 'holiday-col';
+                }
+
+                let dayTypeClass = '';
+                if (day.isSunday || day.isHoliday) dayTypeClass = 'text-sun-holiday';
+                else if (day.isSaturday) dayTypeClass = 'text-sat';
+
+                return (
+                  <th
+                    key={day.dateStr}
+                    className={`day-header-th ${colClass}`}
+                  >
+                    <div className={`day-title ${dayTypeClass}`}>{day.dayLabel}</div>
+                    {day.isToday && <span className="today-badge">Today</span>}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
@@ -106,10 +114,16 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                       // Filter TODOs for this item matching the column's date
                       const cellTodos = item.todos.filter((t) => t.due === day.dateStr);
 
+                      let cellBgClass = day.isToday
+                        ? 'today-col-cell'
+                        : day.isNonWorkingDay
+                        ? 'holiday-cell'
+                        : 'weekday-cell';
+
                       return (
                         <td
                           key={day.dateStr}
-                          className={`matrix-cell ${day.isToday ? 'today-col-cell' : ''}`}
+                          className={`matrix-cell ${cellBgClass}`}
                           onClick={() => onSelectItem(item)}
                         >
                           <div className="cell-todo-stack">
