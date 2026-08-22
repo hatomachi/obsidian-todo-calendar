@@ -1022,3 +1022,114 @@
 .todo-calendar-app .compact-item-desc-bar.editing .save-memo-btn:hover {
   background-color: var(--background-modifier-hover);
 }
+.todo-calendar-app .stacked-more-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  margin-top: 4px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: var(--background-primary, #ffffff);
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.28));
+  color: var(--text-muted);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    2px 2px 0 0 var(--background-secondary, #f1f5f9),
+    3px 3px 0 0 var(--border-color, rgba(128, 128, 128, 0.3)),
+    5px 5px 0 0 var(--background-secondary, #f1f5f9),
+    6px 6px 0 0 var(--border-color, rgba(128, 128, 128, 0.2));
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+.theme-dark .todo-calendar-app .stacked-more-pill {
+  background-color: var(--background-secondary);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    2px 2px 0 0 var(--background-primary),
+    3px 3px 0 0 rgba(255, 255, 255, 0.15),
+    5px 5px 0 0 var(--background-primary),
+    6px 6px 0 0 rgba(255, 255, 255, 0.08);
+}
+.todo-calendar-app .stacked-more-pill:hover {
+  transform: translateY(-2px);
+  color: var(--interactive-accent);
+  border-color: var(--interactive-accent);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    3px 3px 0 0 var(--background-secondary, #f1f5f9),
+    4px 4px 0 0 var(--interactive-accent),
+    7px 7px 0 0 var(--background-secondary, #f1f5f9),
+    8px 8px 0 0 rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.4);
+}
+.theme-dark .todo-calendar-app .stacked-more-pill:hover {
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    3px 3px 0 0 var(--background-primary),
+    4px 4px 0 0 var(--interactive-accent),
+    7px 7px 0 0 var(--background-primary),
+    8px 8px 0 0 rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.4);
+}
+.todo-calendar-app .stacked-more-pill.past-stacked {
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+.theme-dark .todo-calendar-app .stacked-more-pill.past-stacked {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+.todo-calendar-app .stacked-more-pill.past-stacked:hover {
+  border-color: #ef4444;
+  color: #b91c1c;
+}
+.todo-calendar-app .stacked-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+}
+.todo-calendar-app .stacked-icon {
+  flex-shrink: 0;
+}
+.todo-calendar-app .stacked-arrow {
+  margin-left: auto;
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+.todo-calendar-app .stacked-more-pill:hover .stacked-arrow {
+  opacity: 1;
+  transform: translateY(1px);
+}
+.todo-calendar-app .collapse-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 8px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background-color: transparent;
+  border: 1px dashed var(--border-color, rgba(128, 128, 128, 0.3));
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.todo-calendar-app .collapse-pill:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+  border-color: var(--interactive-accent);
+}

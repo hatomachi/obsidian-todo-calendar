@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Circle, Clock, FileText, Plus, Trash2 } from 'lucide-react';
+import { CheckCircle2, ChevronDown, ChevronUp, Circle, Clock, FileText, Layers, Plus, Trash2 } from 'lucide-react';
 import { ItemData, TodoItem, TodoStatus } from '../types';
 import { isJapaneseHoliday } from '../utils/holidays';
 
@@ -56,6 +56,18 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
   // Cell Inline Creation State
   const [addingTodoCell, setAddingTodoCell] = React.useState<{ itemId: string; dateStr: string } | null>(null);
   const [inlineTodoTitle, setInlineTodoTitle] = React.useState('');
+
+  // Row Expand/Collapse State for Past & Future cells
+  const [expandedFutureRows, setExpandedFutureRows] = React.useState<Record<string, boolean>>({});
+  const [expandedPastRows, setExpandedPastRows] = React.useState<Record<string, boolean>>({});
+
+  const toggleFutureExpand = (itemId: string) => {
+    setExpandedFutureRows((prev) => ({ ...prev, [itemId]: !prev[itemId] }));
+  };
+
+  const togglePastExpand = (itemId: string) => {
+    setExpandedPastRows((prev) => ({ ...prev, [itemId]: !prev[itemId] }));
+  };
 
   const handleContainerClick = () => {
     if (isDrawerOpen && onCloseDrawer) {
@@ -263,10 +275,20 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                   .filter((t) => t.due && t.due < minDateStr && t.status === 'todo')
                   .sort((a, b) => a.due.localeCompare(b.due));
 
+                const isPastExpanded = !!expandedPastRows[item.id];
+                const hasPastMore = pastTodos.length > 2;
+                const visiblePastTodos = hasPastMore && !isPastExpanded ? pastTodos.slice(0, 2) : pastTodos;
+                const hiddenPastCount = pastTodos.length - 2;
+
                 // Future todos (due > maxDateStr)
                 const futureTodos = item.todos
                   .filter((t) => t.due && t.due > maxDateStr)
                   .sort((a, b) => a.due.localeCompare(b.due));
+
+                const isFutureExpanded = !!expandedFutureRows[item.id];
+                const hasFutureMore = futureTodos.length > 2;
+                const visibleFutureTodos = hasFutureMore && !isFutureExpanded ? futureTodos.slice(0, 2) : futureTodos;
+                const hiddenFutureCount = futureTodos.length - 2;
 
                 return (
                   <tr key={item.id} className={`matrix-row ${isSelected ? 'row-selected' : ''}`}>
@@ -295,7 +317,7 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                     {/* Past Incomplete Cell */}
                     <td className="matrix-cell past-col-cell" onClick={() => onSelectItem(item)}>
                       <div className="cell-todo-stack">
-                        {pastTodos.map((todo) => (
+                        {visiblePastTodos.map((todo) => (
                           <div
                             key={todo.id}
                             draggable
@@ -324,6 +346,37 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                             <span className="todo-pill-date">{formatShortDate(todo.due)}</span>
                           </div>
                         ))}
+
+                        {hasPastMore && !isPastExpanded && (
+                          <button
+                            className="stacked-more-pill past-stacked"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              togglePastExpand(item.id);
+                            }}
+                            title="クリックして全件表示"
+                          >
+                            <div className="stacked-content">
+                              <Layers size={12} className="stacked-icon" />
+                              <span>+{hiddenPastCount}件の過去タスク</span>
+                              <ChevronDown size={12} className="stacked-arrow" />
+                            </div>
+                          </button>
+                        )}
+
+                        {hasPastMore && isPastExpanded && (
+                          <button
+                            className="collapse-pill"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              togglePastExpand(item.id);
+                            }}
+                            title="折りたたむ"
+                          >
+                            <ChevronUp size={12} />
+                            <span>たたむ</span>
+                          </button>
+                        )}
                       </div>
                     </td>
 
@@ -421,7 +474,7 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                     {/* Future Cell */}
                     <td className="matrix-cell future-col-cell" onClick={() => onSelectItem(item)}>
                       <div className="cell-todo-stack">
-                        {futureTodos.map((todo) => (
+                        {visibleFutureTodos.map((todo) => (
                           <div
                             key={todo.id}
                             draggable
@@ -452,6 +505,37 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                             <span className="todo-pill-date">{formatShortDate(todo.due)}</span>
                           </div>
                         ))}
+
+                        {hasFutureMore && !isFutureExpanded && (
+                          <button
+                            className="stacked-more-pill future-stacked"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFutureExpand(item.id);
+                            }}
+                            title="クリックして全件表示"
+                          >
+                            <div className="stacked-content">
+                              <Layers size={12} className="stacked-icon" />
+                              <span>+{hiddenFutureCount}件の未来タスク</span>
+                              <ChevronDown size={12} className="stacked-arrow" />
+                            </div>
+                          </button>
+                        )}
+
+                        {hasFutureMore && isFutureExpanded && (
+                          <button
+                            className="collapse-pill"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFutureExpand(item.id);
+                            }}
+                            title="折りたたむ"
+                          >
+                            <ChevronUp size={12} />
+                            <span>たたむ</span>
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
