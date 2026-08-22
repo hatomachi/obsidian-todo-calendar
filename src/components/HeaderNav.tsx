@@ -1,12 +1,14 @@
 import React from 'react';
-import { ArrowLeft, Plus, Calendar, RefreshCw, Layers } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, RefreshCw, Layers, ChevronDown } from 'lucide-react';
 import { CollectionData } from '../types';
 
 interface HeaderNavProps {
   viewMode: 'collections' | 'calendar';
+  collections: CollectionData[];
   selectedCollection: CollectionData | null;
   startDate: Date;
   onBackToCollections: () => void;
+  onSelectCollection: (collection: CollectionData) => void;
   onNavigateDate: (days: number) => void;
   onResetToToday: () => void;
   onOpenCreateItemModal: () => void;
@@ -15,9 +17,11 @@ interface HeaderNavProps {
 
 export const HeaderNav: React.FC<HeaderNavProps> = ({
   viewMode,
+  collections,
   selectedCollection,
   startDate,
   onBackToCollections,
+  onSelectCollection,
   onNavigateDate,
   onResetToToday,
   onOpenCreateItemModal,
@@ -44,9 +48,25 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
               <span>コレクション</span>
             </button>
             <span className="breadcrumb-separator">/</span>
-            <div className="collection-title-badge">
+            <div className="collection-select-badge" title="コレクションを切り替え">
               <Layers size={16} className="badge-icon" />
-              <span className="title-text">{selectedCollection?.title}</span>
+              <select
+                className="collection-select-dropdown"
+                value={selectedCollection?.id || ''}
+                onChange={(e) => {
+                  const targetCol = collections.find((c) => c.id === e.target.value);
+                  if (targetCol) {
+                    onSelectCollection(targetCol);
+                  }
+                }}
+              >
+                {collections.map((col) => (
+                  <option key={col.id} value={col.id}>
+                    {col.title}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={14} className="dropdown-arrow-icon" />
             </div>
           </>
         ) : (
@@ -88,3 +108,4 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
     </div>
   );
 };
+

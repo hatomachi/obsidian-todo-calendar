@@ -24863,6 +24863,11 @@ var Calendar = createLucideIcon("Calendar", [
   ["path", { d: "M3 10h18", key: "8toen8" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/chevron-down.js
+var ChevronDown = createLucideIcon("ChevronDown", [
+  ["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/chevrons-up-down.js
 var ChevronsUpDown = createLucideIcon("ChevronsUpDown", [
   ["path", { d: "m7 15 5 5 5-5", key: "1hf1tw" }],
@@ -24953,9 +24958,11 @@ var X = createLucideIcon("X", [
 var import_jsx_runtime = __toESM(require_jsx_runtime());
 var HeaderNav = ({
   viewMode,
+  collections,
   selectedCollection,
   startDate,
   onBackToCollections,
+  onSelectCollection,
   onNavigateDate,
   onResetToToday,
   onOpenCreateItemModal,
@@ -24982,9 +24989,23 @@ var HeaderNav = ({
         }
       ),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "breadcrumb-separator", children: "/" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "collection-title-badge", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "collection-select-badge", title: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u3092\u5207\u308A\u66FF\u3048", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Layers, { size: 16, className: "badge-icon" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "title-text", children: selectedCollection?.title })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "select",
+          {
+            className: "collection-select-dropdown",
+            value: selectedCollection?.id || "",
+            onChange: (e) => {
+              const targetCol = collections.find((c) => c.id === e.target.value);
+              if (targetCol) {
+                onSelectCollection(targetCol);
+              }
+            },
+            children: collections.map((col) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: col.id, children: col.title }, col.id))
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { size: 14, className: "dropdown-arrow-icon" })
       ] })
     ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "app-branding", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { size: 20, className: "brand-icon" }),
@@ -25762,9 +25783,11 @@ var AppView = ({ app }) => {
       HeaderNav,
       {
         viewMode,
+        collections,
         selectedCollection,
         startDate,
         onBackToCollections: handleBackToCollections,
+        onSelectCollection: handleSelectCollection,
         onNavigateDate: handleNavigateDate,
         onResetToToday: handleResetToToday,
         onOpenCreateItemModal: () => setIsCreateItemModalOpen(true),
@@ -26085,6 +26108,14 @@ lucide-react/dist/esm/icons/arrow-left.js:
    *)
 
 lucide-react/dist/esm/icons/calendar.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/chevron-down.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *

@@ -163,9 +163,11 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
     <div className="todo-calendar-app">
       <HeaderNav
         viewMode={viewMode}
+        collections={collections}
         selectedCollection={selectedCollection}
         startDate={startDate}
         onBackToCollections={handleBackToCollections}
+        onSelectCollection={handleSelectCollection}
         onNavigateDate={handleNavigateDate}
         onResetToToday={handleResetToToday}
         onOpenCreateItemModal={() => setIsCreateItemModalOpen(true)}
