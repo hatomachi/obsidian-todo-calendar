@@ -24704,16 +24704,7 @@ ${bodyContent}`;
     const id = this.generateUniqueId();
     const filePath = `${itemFolderPath}/${id}.md`;
     const createdAt = (/* @__PURE__ */ new Date()).toISOString();
-    const todayStr = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
-    const initialTodos = [
-      {
-        id: `todo-${Date.now()}-1`,
-        title: "\u6700\u521D\u306ETODO\u30BF\u30B9\u30AF",
-        due: todayStr,
-        status: "todo",
-        description: "\u30BF\u30B9\u30AF\u306E\u8A73\u7D30\u8AAC\u660E\u3092\u3053\u3053\u306B\u5165\u529B\u3057\u307E\u3059"
-      }
-    ];
+    const initialTodos = [];
     const frontmatter = {
       id,
       collection_id: collectionId,

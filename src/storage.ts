@@ -222,17 +222,7 @@ export class StorageManager {
     const filePath = `${itemFolderPath}/${id}.md`;
     const createdAt = new Date().toISOString();
 
-    const todayStr = new Date().toISOString().split('T')[0];
-
-    const initialTodos: TodoItem[] = [
-      {
-        id: `todo-${Date.now()}-1`,
-        title: '最初のTODOタスク',
-        due: todayStr,
-        status: 'todo',
-        description: 'タスクの詳細説明をここに入力します',
-      },
-    ];
+    const initialTodos: TodoItem[] = [];
 
     const frontmatter = {
       id,
