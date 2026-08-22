@@ -646,6 +646,31 @@
   border-color: var(--interactive-accent);
   box-shadow: 0 0 0 1px var(--interactive-accent);
 }
+.todo-calendar-app .todo-form-card.dragging {
+  opacity: 0.4;
+  border: 1px dashed var(--interactive-accent);
+}
+.todo-calendar-app .todo-form-card.drag-over {
+  border-top: 2px solid var(--interactive-accent);
+  box-shadow: 0 -2px 8px rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.3);
+}
+.todo-calendar-app .drag-handle {
+  cursor: grab;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 0;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+  user-select: none;
+}
+.todo-calendar-app .drag-handle:hover {
+  color: var(--text-muted);
+}
+.todo-calendar-app .drag-handle:active {
+  cursor: grabbing;
+}
 .todo-calendar-app .todo-card-row {
   display: flex;
   align-items: center;

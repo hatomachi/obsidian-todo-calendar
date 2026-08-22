@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, FileText, AlignLeft, Pencil, ChevronsUpDown } from 'lucide-react';
+import { X, Plus, Trash2, FileText, AlignLeft, Pencil, ChevronsUpDown, GripVertical, ArrowUpDown } from 'lucide-react';
 import { ItemData, TodoItem } from '../types';
 
 interface TaskDetailDrawerProps {
@@ -21,6 +21,8 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
 }) => {
   const [localItem, setLocalItem] = useState<ItemData | null>(item);
   const [editingDescIds, setEditingDescIds] = useState<Record<string, boolean>>({});
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   useEffect(() => {
     setLocalItem(item);
@@ -94,6 +96,56 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     setEditingDescIds(newMap);
   };
 
+  const handleSortByDueDate = () => {
+    const sorted = [...localItem.todos].sort((a, b) => {
+      if (!a.due) return 1;
+      if (!b.due) return -1;
+      return a.due.localeCompare(b.due);
+    });
+    const updated = { ...localItem, todos: sorted };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+
+  // Drag and Drop handlers
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    const updatedTodos = [...localItem.todos];
+    const [moved] = updatedTodos.splice(draggedIndex, 1);
+    updatedTodos.splice(targetIndex, 0, moved);
+
+    const updated = { ...localItem, todos: updatedTodos };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
   return (
     <div className="detail-drawer">
       <div className="drawer-header">
@@ -117,14 +169,25 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           <h4 className="section-title">TODO タスク一覧 ({localItem.todos.length})</h4>
           <div className="section-actions">
             {localItem.todos.length > 0 && (
-              <button
-                className="nav-btn secondary-btn sm-btn"
-                onClick={handleToggleExpandAll}
-                title="すべての詳細説明を開閉"
-              >
-                <ChevronsUpDown size={14} />
-                <span>全開閉</span>
-              </button>
+              <>
+                <button
+                  className="nav-btn secondary-btn sm-btn"
+                  onClick={handleSortByDueDate}
+                  title="期日の昇順で並べ替え"
+                >
+                  <ArrowUpDown size={13} />
+                  <span>期日順</span>
+                </button>
+
+                <button
+                  className="nav-btn secondary-btn sm-btn"
+                  onClick={handleToggleExpandAll}
+                  title="すべての詳細説明を開閉"
+                >
+                  <ChevronsUpDown size={13} />
+                  <span>全開閉</span>
+                </button>
+              </>
             )}
             <button className="nav-btn primary-btn sm-btn" onClick={handleAddTodo}>
               <Plus size={14} />
@@ -139,17 +202,30 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           </div>
         ) : (
           <div className="todo-form-list">
-            {localItem.todos.map((todo) => {
+            {localItem.todos.map((todo, index) => {
               const isFocused = todo.id === selectedTodoId;
               const isEditingDesc = !!editingDescIds[todo.id];
               const hasDesc = !!todo.description?.trim();
+              const isDragging = draggedIndex === index;
+              const isDragOver = dragOverIndex === index;
 
               return (
                 <div
                   key={todo.id}
-                  className={`todo-form-card ${isFocused ? 'todo-focused' : ''}`}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDrop={(e) => handleDrop(e, index)}
+                  onDragEnd={handleDragEnd}
+                  className={`todo-form-card ${isFocused ? 'todo-focused' : ''} ${
+                    isDragging ? 'dragging' : ''
+                  } ${isDragOver ? 'drag-over' : ''}`}
                 >
                   <div className="todo-card-row">
+                    <div className="drag-handle" title="ドラッグして並べ替え">
+                      <GripVertical size={14} />
+                    </div>
+
                     <input
                       type="checkbox"
                       checked={todo.status === 'done'}
@@ -230,4 +306,5 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     </div>
   );
 };
+
 

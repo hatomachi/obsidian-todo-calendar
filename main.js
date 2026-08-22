@@ -2444,7 +2444,7 @@ var require_react_dom_development = __commonJS({
         var HostPortal = 4;
         var HostComponent = 5;
         var HostText = 6;
-        var Fragment2 = 7;
+        var Fragment3 = 7;
         var Mode = 8;
         var ContextConsumer = 9;
         var ContextProvider = 10;
@@ -3601,7 +3601,7 @@ var require_react_dom_development = __commonJS({
               return "DehydratedFragment";
             case ForwardRef:
               return getWrappedName$1(type, type.render, "ForwardRef");
-            case Fragment2:
+            case Fragment3:
               return "Fragment";
             case HostComponent:
               return type;
@@ -12030,7 +12030,7 @@ var require_react_dom_development = __commonJS({
             }
           }
           function updateFragment2(returnFiber, current2, fragment, lanes, key) {
-            if (current2 === null || current2.tag !== Fragment2) {
+            if (current2 === null || current2.tag !== Fragment3) {
               var created = createFiberFromFragment(fragment, returnFiber.mode, lanes, key);
               created.return = returnFiber;
               return created;
@@ -12433,7 +12433,7 @@ var require_react_dom_development = __commonJS({
               if (child.key === key) {
                 var elementType = element.type;
                 if (elementType === REACT_FRAGMENT_TYPE) {
-                  if (child.tag === Fragment2) {
+                  if (child.tag === Fragment3) {
                     deleteRemainingChildren(returnFiber, child.sibling);
                     var existing = useFiber(child, element.props.children);
                     existing.return = returnFiber;
@@ -17909,7 +17909,7 @@ var require_react_dom_development = __commonJS({
               var _resolvedProps2 = workInProgress2.elementType === type ? _unresolvedProps2 : resolveDefaultProps(type, _unresolvedProps2);
               return updateForwardRef(current2, workInProgress2, type, _resolvedProps2, renderLanes2);
             }
-            case Fragment2:
+            case Fragment3:
               return updateFragment(current2, workInProgress2, renderLanes2);
             case Mode:
               return updateMode(current2, workInProgress2, renderLanes2);
@@ -18181,7 +18181,7 @@ var require_react_dom_development = __commonJS({
             case SimpleMemoComponent:
             case FunctionComponent:
             case ForwardRef:
-            case Fragment2:
+            case Fragment3:
             case Mode:
             case Profiler:
             case ContextConsumer:
@@ -22442,7 +22442,7 @@ var require_react_dom_development = __commonJS({
           return fiber;
         }
         function createFiberFromFragment(elements, mode, lanes, key) {
-          var fiber = createFiber(Fragment2, elements, key, mode);
+          var fiber = createFiber(Fragment3, elements, key, mode);
           fiber.lanes = lanes;
           return fiber;
         }
@@ -24855,6 +24855,14 @@ var ArrowLeft = createLucideIcon("ArrowLeft", [
   ["path", { d: "M19 12H5", key: "x3x0zl" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/arrow-up-down.js
+var ArrowUpDown = createLucideIcon("ArrowUpDown", [
+  ["path", { d: "m21 16-4 4-4-4", key: "f6ql7i" }],
+  ["path", { d: "M17 20V4", key: "1ejh1v" }],
+  ["path", { d: "m3 8 4-4 4 4", key: "11wl7u" }],
+  ["path", { d: "M7 4v16", key: "1glfcx" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/calendar.js
 var Calendar = createLucideIcon("Calendar", [
   ["path", { d: "M8 2v4", key: "1cmpym" }],
@@ -24892,6 +24900,16 @@ var Folder = createLucideIcon("Folder", [
       key: "1kt360"
     }
   ]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/grip-vertical.js
+var GripVertical = createLucideIcon("GripVertical", [
+  ["circle", { cx: "9", cy: "12", r: "1", key: "1vctgf" }],
+  ["circle", { cx: "9", cy: "5", r: "1", key: "hp0tcf" }],
+  ["circle", { cx: "9", cy: "19", r: "1", key: "fkjjf6" }],
+  ["circle", { cx: "15", cy: "12", r: "1", key: "1tmaij" }],
+  ["circle", { cx: "15", cy: "5", r: "1", key: "19l28e" }],
+  ["circle", { cx: "15", cy: "19", r: "1", key: "f4zoj3" }]
 ]);
 
 // node_modules/lucide-react/dist/esm/icons/layers.js
@@ -25469,6 +25487,8 @@ var TaskDetailDrawer = ({
 }) => {
   const [localItem, setLocalItem] = (0, import_react4.useState)(item);
   const [editingDescIds, setEditingDescIds] = (0, import_react4.useState)({});
+  const [draggedIndex, setDraggedIndex] = (0, import_react4.useState)(null);
+  const [dragOverIndex, setDragOverIndex] = (0, import_react4.useState)(null);
   (0, import_react4.useEffect)(() => {
     setLocalItem(item);
   }, [item]);
@@ -25529,6 +25549,47 @@ var TaskDetailDrawer = ({
     });
     setEditingDescIds(newMap);
   };
+  const handleSortByDueDate = () => {
+    const sorted = [...localItem.todos].sort((a, b) => {
+      if (!a.due) return 1;
+      if (!b.due) return -1;
+      return a.due.localeCompare(b.due);
+    });
+    const updated = { ...localItem, todos: sorted };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+  const handleDrop = (e, targetIndex) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+    const updatedTodos = [...localItem.todos];
+    const [moved] = updatedTodos.splice(draggedIndex, 1);
+    updatedTodos.splice(targetIndex, 0, moved);
+    const updated = { ...localItem, todos: updatedTodos };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
   return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "detail-drawer", children: [
     /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "drawer-header", children: [
       /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "header-title-section", children: [
@@ -25554,34 +25615,56 @@ var TaskDetailDrawer = ({
           ")"
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "section-actions", children: [
-          localItem.todos.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
-            "button",
-            {
-              className: "nav-btn secondary-btn sm-btn",
-              onClick: handleToggleExpandAll,
-              title: "\u3059\u3079\u3066\u306E\u8A73\u7D30\u8AAC\u660E\u3092\u958B\u9589",
-              children: [
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ChevronsUpDown, { size: 14 }),
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u5168\u958B\u9589" })
-              ]
-            }
-          ),
+          localItem.todos.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(import_jsx_runtime4.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+              "button",
+              {
+                className: "nav-btn secondary-btn sm-btn",
+                onClick: handleSortByDueDate,
+                title: "\u671F\u65E5\u306E\u6607\u9806\u3067\u4E26\u3079\u66FF\u3048",
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ArrowUpDown, { size: 13 }),
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u671F\u65E5\u9806" })
+                ]
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+              "button",
+              {
+                className: "nav-btn secondary-btn sm-btn",
+                onClick: handleToggleExpandAll,
+                title: "\u3059\u3079\u3066\u306E\u8A73\u7D30\u8AAC\u660E\u3092\u958B\u9589",
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ChevronsUpDown, { size: 13 }),
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u5168\u958B\u9589" })
+                ]
+              }
+            )
+          ] }),
           /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("button", { className: "nav-btn primary-btn sm-btn", onClick: handleAddTodo, children: [
             /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Plus, { size: 14 }),
             /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "TODO\u3092\u8FFD\u52A0" })
           ] })
         ] })
       ] }),
-      localItem.todos.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "empty-todos", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { children: "\u3053\u306E\u30CE\u30FC\u30C8\u306B\u306FTODO\u304C\u307E\u3060\u3042\u308A\u307E\u305B\u3093\u3002\u300CTODO\u3092\u8FFD\u52A0\u300D\u30DC\u30BF\u30F3\u3092\u62BC\u3057\u3066\u767B\u9332\u3057\u3066\u304F\u3060\u3055\u3044\u3002" }) }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "todo-form-list", children: localItem.todos.map((todo) => {
+      localItem.todos.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "empty-todos", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { children: "\u3053\u306E\u30CE\u30FC\u30C8\u306B\u306FTODO\u304C\u307E\u3060\u3042\u308A\u307E\u305B\u3093\u3002\u300CTODO\u3092\u8FFD\u52A0\u300D\u30DC\u30BF\u30F3\u3092\u62BC\u3057\u3066\u767B\u9332\u3057\u3066\u304F\u3060\u3055\u3044\u3002" }) }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "todo-form-list", children: localItem.todos.map((todo, index) => {
         const isFocused = todo.id === selectedTodoId;
         const isEditingDesc = !!editingDescIds[todo.id];
         const hasDesc = !!todo.description?.trim();
+        const isDragging = draggedIndex === index;
+        const isDragOver = dragOverIndex === index;
         return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
           "div",
           {
-            className: `todo-form-card ${isFocused ? "todo-focused" : ""}`,
+            draggable: true,
+            onDragStart: (e) => handleDragStart(e, index),
+            onDragOver: (e) => handleDragOver(e, index),
+            onDrop: (e) => handleDrop(e, index),
+            onDragEnd: handleDragEnd,
+            className: `todo-form-card ${isFocused ? "todo-focused" : ""} ${isDragging ? "dragging" : ""} ${isDragOver ? "drag-over" : ""}`,
             children: [
               /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "todo-card-row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "drag-handle", title: "\u30C9\u30E9\u30C3\u30B0\u3057\u3066\u4E26\u3079\u66FF\u3048", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(GripVertical, { size: 14 }) }),
                 /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                   "input",
                   {
@@ -26107,6 +26190,14 @@ lucide-react/dist/esm/icons/arrow-left.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
+lucide-react/dist/esm/icons/arrow-up-down.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
 lucide-react/dist/esm/icons/calendar.js:
   (**
    * @license lucide-react v0.428.0 - ISC
@@ -26140,6 +26231,14 @@ lucide-react/dist/esm/icons/file-text.js:
    *)
 
 lucide-react/dist/esm/icons/folder.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/grip-vertical.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *
