@@ -24676,7 +24676,7 @@ ${bodyContent}`;
           id: t.id || `todo-${idx}-${Date.now()}`,
           title: t.title || "Untitled TODO",
           due: t.due || "",
-          status: t.status || "todo",
+          status: t.status === "done" ? "done" : "todo",
           description: t.description || ""
         })) : [];
         items.push({
@@ -25225,7 +25225,7 @@ var CalendarMatrixView = ({
                 {
                   className: `compact-todo-pill status-${todo.status}`,
                   title: `${todo.title}
-\u30B9\u30C6\u30FC\u30BF\u30B9: ${todo.status}
+\u30B9\u30C6\u30FC\u30BF\u30B9: ${todo.status === "done" ? "\u5B8C\u4E86" : "\u672A\u5B8C\u4E86"}
 ${todo.description || ""}`,
                   onClick: (e) => {
                     e.stopPropagation();
@@ -25233,15 +25233,17 @@ ${todo.description || ""}`,
                   },
                   children: [
                     /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-                      "span",
+                      "input",
                       {
-                        className: "toggle-status-click",
-                        onClick: (e) => {
+                        type: "checkbox",
+                        checked: todo.status === "done",
+                        onChange: (e) => {
                           e.stopPropagation();
                           onQuickToggleTodoStatus(item, todo.id);
                         },
-                        title: "\u30B9\u30C6\u30FC\u30BF\u30B9\u5207\u308A\u66FF\u3048",
-                        children: getStatusIcon(todo.status)
+                        onClick: (e) => e.stopPropagation(),
+                        className: "todo-pill-checkbox",
+                        title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
                       }
                     ),
                     /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `todo-pill-title ${todo.status === "done" ? "line-through" : ""}`, children: todo.title })
@@ -25358,19 +25360,18 @@ var TaskDetailDrawer = ({
             className: `todo-form-card ${isFocused ? "todo-focused" : ""}`,
             children: [
               /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "todo-card-header", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "status-selector", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
-                  "select",
-                  {
-                    value: todo.status,
-                    onChange: (e) => handleUpdateTodo(todo.id, { status: e.target.value }),
-                    className: `status-select status-${todo.status}`,
-                    children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("option", { value: "todo", children: "\u672A\u5B8C\u4E86 (TODO)" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("option", { value: "in_progress", children: "\u9032\u884C\u4E2D (In Progress)" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("option", { value: "done", children: "\u5B8C\u4E86 (Done)" })
-                    ]
-                  }
-                ) }),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { className: "todo-status-checkbox-label", title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                    "input",
+                    {
+                      type: "checkbox",
+                      checked: todo.status === "done",
+                      onChange: (e) => handleUpdateTodo(todo.id, { status: e.target.checked ? "done" : "todo" }),
+                      className: "todo-status-checkbox"
+                    }
+                  ),
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: `status-label-badge status-${todo.status}`, children: todo.status === "done" ? "\u5B8C\u4E86" : "\u672A\u5B8C\u4E86" })
+                ] }),
                 /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                   "input",
                   {
@@ -25517,7 +25518,7 @@ var AppView = ({ app }) => {
   const handleQuickToggleTodoStatus = async (item, todoId) => {
     const updatedTodos = item.todos.map((t) => {
       if (t.id === todoId) {
-        const nextStatus = t.status === "todo" ? "in_progress" : t.status === "in_progress" ? "done" : "todo";
+        const nextStatus = t.status === "done" ? "todo" : "done";
         return { ...t, status: nextStatus };
       }
       return t;
@@ -25715,7 +25716,7 @@ var TodoCalendarPlugin = class extends import_obsidian2.Plugin {
           id: `todo-${Date.now()}-2`,
           title: "\u53F3\u30B5\u30A4\u30C9\u8A73\u7D30\u30D5\u30A9\u30FC\u30E0\u52D5\u4F5C\u691C\u8A3C",
           due: todayStr,
-          status: "in_progress",
+          status: "todo",
           description: "Frontmatter\u30EA\u30A2\u30EB\u30BF\u30A4\u30E0\u540C\u671F"
         },
         {

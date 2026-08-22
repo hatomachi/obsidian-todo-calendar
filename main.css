@@ -395,11 +395,16 @@
   border-color: var(--interactive-accent);
   transform: translateX(2px);
 }
+.todo-calendar-app .todo-pill-checkbox {
+  cursor: pointer;
+  accent-color: var(--interactive-accent);
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  flex-shrink: 0;
+}
 .todo-calendar-app .status-icon.todo {
   color: var(--text-muted);
-}
-.todo-calendar-app .status-icon.in-progress {
-  color: #eab308;
 }
 .todo-calendar-app .status-icon.done {
   color: #22c55e;
@@ -511,15 +516,40 @@
   align-items: center;
   gap: 8px;
 }
-.todo-calendar-app .status-select {
-  background-color: var(--background-secondary);
-  color: var(--text-normal);
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
-  border-radius: 4px;
-  padding: 3px 6px;
-  font-size: 11px;
-  outline: none;
+.todo-calendar-app .todo-status-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
+  user-select: none;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: 6px;
+  padding: 3px 8px;
+  transition: all 0.15s ease;
+}
+.todo-calendar-app .todo-status-checkbox-label:hover {
+  background-color: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
+}
+.todo-calendar-app .todo-status-checkbox {
+  cursor: pointer;
+  accent-color: var(--interactive-accent);
+  width: 14px;
+  height: 14px;
+  margin: 0;
+}
+.todo-calendar-app .status-label-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+.todo-calendar-app .status-label-badge.status-todo {
+  color: var(--text-muted);
+}
+.todo-calendar-app .status-label-badge.status-done {
+  color: #22c55e;
 }
 .todo-calendar-app .due-date-input {
   background-color: var(--background-secondary);

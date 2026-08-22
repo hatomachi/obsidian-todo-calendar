@@ -117,22 +117,23 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                               <div
                                 key={todo.id}
                                 className={`compact-todo-pill status-${todo.status}`}
-                                title={`${todo.title}\nステータス: ${todo.status}\n${todo.description || ''}`}
+                                title={`${todo.title}\nステータス: ${todo.status === 'done' ? '完了' : '未完了'}\n${todo.description || ''}`}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   onSelectItem(item, todo.id);
                                 }}
                               >
-                                <span
-                                  className="toggle-status-click"
-                                  onClick={(e) => {
+                                <input
+                                  type="checkbox"
+                                  checked={todo.status === 'done'}
+                                  onChange={(e) => {
                                     e.stopPropagation();
                                     onQuickToggleTodoStatus(item, todo.id);
                                   }}
-                                  title="ステータス切り替え"
-                                >
-                                  {getStatusIcon(todo.status)}
-                                </span>
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="todo-pill-checkbox"
+                                  title={todo.status === 'done' ? '未完了に戻す' : '完了にする'}
+                                />
                                 <span className={`todo-pill-title ${todo.status === 'done' ? 'line-through' : ''}`}>
                                   {todo.title}
                                 </span>

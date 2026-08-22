@@ -131,8 +131,7 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
   const handleQuickToggleTodoStatus = async (item: ItemData, todoId: string) => {
     const updatedTodos = item.todos.map((t) => {
       if (t.id === todoId) {
-        const nextStatus: TodoStatus =
-          t.status === 'todo' ? 'in_progress' : t.status === 'in_progress' ? 'done' : 'todo';
+        const nextStatus: TodoStatus = t.status === 'done' ? 'todo' : 'done';
         return { ...t, status: nextStatus };
       }
       return t;

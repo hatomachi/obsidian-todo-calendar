@@ -187,7 +187,7 @@ export class StorageManager {
               id: t.id || `todo-${idx}-${Date.now()}`,
               title: t.title || 'Untitled TODO',
               due: t.due || '',
-              status: (t.status as any) || 'todo',
+              status: t.status === 'done' ? 'done' : 'todo',
               description: t.description || '',
             }))
           : [];

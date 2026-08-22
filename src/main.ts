@@ -131,7 +131,7 @@ export default class TodoCalendarPlugin extends Plugin {
           id: `todo-${Date.now()}-2`,
           title: '右サイド詳細フォーム動作検証',
           due: todayStr,
-          status: 'in_progress',
+          status: 'todo',
           description: 'Frontmatterリアルタイム同期',
         },
         {

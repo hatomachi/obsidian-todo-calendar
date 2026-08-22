@@ -121,19 +121,19 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   className={`todo-form-card ${isFocused ? 'todo-focused' : ''}`}
                 >
                   <div className="todo-card-header">
-                    <div className="status-selector">
-                      <select
-                        value={todo.status}
+                    <label className="todo-status-checkbox-label" title={todo.status === 'done' ? '未完了に戻す' : '完了にする'}>
+                      <input
+                        type="checkbox"
+                        checked={todo.status === 'done'}
                         onChange={(e) =>
-                          handleUpdateTodo(todo.id, { status: e.target.value as TodoStatus })
+                          handleUpdateTodo(todo.id, { status: e.target.checked ? 'done' : 'todo' })
                         }
-                        className={`status-select status-${todo.status}`}
-                      >
-                        <option value="todo">未完了 (TODO)</option>
-                        <option value="in_progress">進行中 (In Progress)</option>
-                        <option value="done">完了 (Done)</option>
-                      </select>
-                    </div>
+                        className="todo-status-checkbox"
+                      />
+                      <span className={`status-label-badge status-${todo.status}`}>
+                        {todo.status === 'done' ? '完了' : '未完了'}
+                      </span>
+                    </label>
 
                     <input
                       type="date"
