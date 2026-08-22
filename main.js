@@ -25430,8 +25430,13 @@ var CalendarMatrixView = ({
       setInlineTodoTitle("");
     }
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "calendar-matrix-container", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "table-scroll-wrapper", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("table", { className: "matrix-table", onClick: (e) => e.stopPropagation(), children: [
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { children: [
+  const handleHeaderClick = (e) => {
+    if (isDrawerOpen && onCloseDrawer) {
+      onCloseDrawer();
+    }
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "calendar-matrix-container", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "table-scroll-wrapper", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("table", { className: "matrix-table", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("thead", { onClick: handleHeaderClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "row-header-th", children: "\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item)" }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "past-header-th", children: "\u904E\u53BB\u306E\u672A\u5B8C\u4E86" }),
       days.map((day) => {

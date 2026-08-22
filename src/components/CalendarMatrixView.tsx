@@ -220,11 +220,17 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
     }
   };
 
+  const handleHeaderClick = (e: React.MouseEvent) => {
+    if (isDrawerOpen && onCloseDrawer) {
+      onCloseDrawer();
+    }
+  };
+
   return (
     <div className="calendar-matrix-container" onClick={handleContainerClick}>
       <div className="table-scroll-wrapper" onClick={handleContainerClick}>
-        <table className="matrix-table" onClick={(e) => e.stopPropagation()}>
-          <thead>
+        <table className="matrix-table">
+          <thead onClick={handleHeaderClick}>
             <tr>
               <th className="row-header-th">タスクノート (Item)</th>
               <th className="past-header-th">過去の未完了</th>
