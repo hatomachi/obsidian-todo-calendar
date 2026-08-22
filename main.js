@@ -25235,12 +25235,19 @@ var CalendarMatrixView = ({
   items,
   startDate,
   selectedItemId,
+  isDrawerOpen,
+  onCloseDrawer,
   onSelectItem,
   onQuickToggleTodoStatus,
   onDeleteItem,
   onOpenCreateItemModal
 }) => {
   const todayStr = formatDateStr(/* @__PURE__ */ new Date());
+  const handleContainerClick = () => {
+    if (isDrawerOpen && onCloseDrawer) {
+      onCloseDrawer();
+    }
+  };
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(startDate);
     d.setDate(startDate.getDate() + i);
@@ -25256,7 +25263,7 @@ var CalendarMatrixView = ({
   });
   const minDateStr = days[0].dateStr;
   const maxDateStr = days[6].dateStr;
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "calendar-matrix-container", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "table-scroll-wrapper", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("table", { className: "matrix-table", children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "calendar-matrix-container", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "table-scroll-wrapper", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("table", { className: "matrix-table", onClick: (e) => e.stopPropagation(), children: [
     /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "row-header-th", children: "\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item)" }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "past-header-th", children: "\u904E\u53BB\u306E\u672A\u5B8C\u4E86" }),
@@ -25701,6 +25708,11 @@ var AppView = ({ app }) => {
   const handleResetToToday = () => {
     setStartDate(/* @__PURE__ */ new Date());
   };
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedItem(null);
+    setSelectedTodoId(null);
+  };
   return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-calendar-app", children: [
     /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
       HeaderNav,
@@ -25730,6 +25742,8 @@ var AppView = ({ app }) => {
           items,
           startDate,
           selectedItemId: selectedItem?.id || null,
+          isDrawerOpen,
+          onCloseDrawer: handleCloseDrawer,
           onSelectItem: handleSelectItem,
           onQuickToggleTodoStatus: handleQuickToggleTodoStatus,
           onDeleteItem: handleDeleteItem,

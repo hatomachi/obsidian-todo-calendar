@@ -152,6 +152,13 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
     setStartDate(new Date());
   };
 
+  // Close detail drawer
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedItem(null);
+    setSelectedTodoId(null);
+  };
+
   return (
     <div className="todo-calendar-app">
       <HeaderNav
@@ -179,6 +186,8 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
               items={items}
               startDate={startDate}
               selectedItemId={selectedItem?.id || null}
+              isDrawerOpen={isDrawerOpen}
+              onCloseDrawer={handleCloseDrawer}
               onSelectItem={handleSelectItem}
               onQuickToggleTodoStatus={handleQuickToggleTodoStatus}
               onDeleteItem={handleDeleteItem}

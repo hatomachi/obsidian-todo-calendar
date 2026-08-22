@@ -7,6 +7,8 @@ interface CalendarMatrixViewProps {
   items: ItemData[];
   startDate: Date;
   selectedItemId: string | null;
+  isDrawerOpen?: boolean;
+  onCloseDrawer?: () => void;
   onSelectItem: (item: ItemData, todoId?: string) => void;
   onQuickToggleTodoStatus: (item: ItemData, todoId: string) => void;
   onDeleteItem: (item: ItemData) => void;
@@ -35,12 +37,20 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
   items,
   startDate,
   selectedItemId,
+  isDrawerOpen,
+  onCloseDrawer,
   onSelectItem,
   onQuickToggleTodoStatus,
   onDeleteItem,
   onOpenCreateItemModal,
 }) => {
   const todayStr = formatDateStr(new Date());
+
+  const handleContainerClick = () => {
+    if (isDrawerOpen && onCloseDrawer) {
+      onCloseDrawer();
+    }
+  };
 
   // Generate 7 days starting from startDate
   const days = Array.from({ length: 7 }, (_, i) => {
@@ -61,9 +71,9 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
   const maxDateStr = days[6].dateStr;
 
   return (
-    <div className="calendar-matrix-container">
-      <div className="table-scroll-wrapper">
-        <table className="matrix-table">
+    <div className="calendar-matrix-container" onClick={handleContainerClick}>
+      <div className="table-scroll-wrapper" onClick={handleContainerClick}>
+        <table className="matrix-table" onClick={(e) => e.stopPropagation()}>
           <thead>
             <tr>
               <th className="row-header-th">タスクノート (Item)</th>
