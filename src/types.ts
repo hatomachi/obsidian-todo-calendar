@@ -13,6 +13,7 @@ export interface ItemData {
   collectionId: string;
   filePath: string;
   title: string;
+  description?: string;
   createdAt: string;
   todos: TodoItem[];
 }

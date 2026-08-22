@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, FileText, AlignLeft, Pencil, ChevronsUpDown, GripVertical, ArrowUpDown } from 'lucide-react';
+import { X, Plus, Trash2, FileText, AlignLeft, Pencil, ChevronsUpDown, GripVertical, ArrowUpDown, Check } from 'lucide-react';
 import { ItemData, TodoItem } from '../types';
 
 interface TaskDetailDrawerProps {
@@ -21,6 +21,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
 }) => {
   const [localItem, setLocalItem] = useState<ItemData | null>(item);
   const [editingDescIds, setEditingDescIds] = useState<Record<string, boolean>>({});
+  const [isEditingItemDesc, setIsEditingItemDesc] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
@@ -38,6 +39,12 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
 
   const handleTitleChange = (newTitle: string) => {
     const updated = { ...localItem, title: newTitle };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+
+  const handleItemDescriptionChange = (newDesc: string) => {
+    const updated = { ...localItem, description: newDesc };
     setLocalItem(updated);
     onUpdateItem(updated);
   };
@@ -165,6 +172,65 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
       </div>
 
       <div className="drawer-body">
+        {/* Item Description (Memo) Section */}
+        <div className="compact-item-desc-section">
+          {isEditingItemDesc ? (
+            <div className="compact-item-desc-bar editing">
+              <AlignLeft size={13} className="desc-icon" />
+              <textarea
+                className="compact-desc-textarea"
+                placeholder="メモを入力..."
+                value={localItem.description || ''}
+                onChange={(e) => handleItemDescriptionChange(e.target.value)}
+                onBlur={(e) => {
+                  if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node)) {
+                    setIsEditingItemDesc(false);
+                  }
+                }}
+                rows={Math.max(1, Math.min(8, (localItem.description || '').split('\n').length))}
+                autoFocus
+              />
+              <button
+                className="icon-btn save-memo-btn"
+                onClick={() => setIsEditingItemDesc(false)}
+                title="完了"
+              >
+                <Check size={13} />
+              </button>
+            </div>
+          ) : localItem.description && localItem.description.trim() ? (
+            <div
+              className="compact-item-desc-bar has-content"
+              onClick={() => setIsEditingItemDesc(true)}
+              title="クリックしてメモを編集"
+            >
+              <AlignLeft size={13} className="desc-icon" />
+              <span className="desc-text">{localItem.description}</span>
+              <button
+                className="icon-btn edit-memo-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditingItemDesc(true);
+                }}
+                title="メモを編集"
+              >
+                <Pencil size={12} />
+              </button>
+            </div>
+          ) : (
+            <div className="compact-item-desc-bar empty">
+              <button
+                className="subtle-memo-btn"
+                onClick={() => setIsEditingItemDesc(true)}
+                title="メモを入力"
+              >
+                <Pencil size={12} />
+                <span>メモを追加...</span>
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="section-title-bar">
           <h4 className="section-title">TODO タスク一覧 ({localItem.todos.length})</h4>
           <div className="section-actions">

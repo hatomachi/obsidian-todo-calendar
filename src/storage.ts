@@ -197,6 +197,7 @@ export class StorageManager {
           collectionId,
           filePath: file.path,
           title: frontmatter.title || 'Untitled Item',
+          description: frontmatter.description || '',
           createdAt: frontmatter.created_at || new Date(file.stat.ctime).toISOString(),
           todos,
         });
@@ -209,7 +210,7 @@ export class StorageManager {
   /**
    * Create a new item in a collection
    */
-  async createItem(collectionId: string, title: string): Promise<ItemData> {
+  async createItem(collectionId: string, title: string, description = ''): Promise<ItemData> {
     await this.ensureDirectoriesExist();
 
     const itemFolderPath = `${ITEMS_DIR}/${collectionId}`;
@@ -237,6 +238,7 @@ export class StorageManager {
       id,
       collection_id: collectionId,
       title: title.trim() || '新規アイテム',
+      description: description.trim(),
       created_at: createdAt,
       todos: initialTodos,
     };
@@ -249,6 +251,7 @@ export class StorageManager {
       collectionId,
       filePath,
       title: frontmatter.title,
+      description: frontmatter.description,
       createdAt,
       todos: initialTodos,
     };
@@ -273,6 +276,7 @@ export class StorageManager {
       id: item.id,
       collection_id: item.collectionId,
       title: item.title,
+      description: item.description || '',
       created_at: item.createdAt,
       todos: item.todos.map((t) => ({
         id: t.id,

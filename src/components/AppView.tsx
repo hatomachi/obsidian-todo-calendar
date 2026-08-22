@@ -26,6 +26,7 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
   const [startDate, setStartDate] = useState<Date>(() => new Date());
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false);
   const [newItemTitle, setNewItemTitle] = useState('');
+  const [newItemDescription, setNewItemDescription] = useState('');
 
   // Load collections
   const loadCollections = useCallback(async () => {
@@ -87,9 +88,10 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
     e.preventDefault();
     if (!selectedCollection || !newItemTitle.trim()) return;
 
-    const newItem = await storage.createItem(selectedCollection.id, newItemTitle);
+    const newItem = await storage.createItem(selectedCollection.id, newItemTitle, newItemDescription);
     await loadItems(selectedCollection.id);
     setNewItemTitle('');
+    setNewItemDescription('');
     setIsCreateItemModalOpen(false);
 
     // Open detail drawer for newly created item
@@ -228,6 +230,16 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
                   onChange={(e) => setNewItemTitle(e.target.value)}
                   autoFocus
                   required
+                />
+              </div>
+              <div className="todo-cal-form-group">
+                <label>メモ / 詳細説明 (任意)</label>
+                <textarea
+                  className="todo-cal-form-input"
+                  placeholder="アイテムのメモを入力..."
+                  value={newItemDescription}
+                  onChange={(e) => setNewItemDescription(e.target.value)}
+                  rows={2}
                 />
               </div>
               <div className="todo-cal-modal-actions">

@@ -772,7 +772,7 @@
 .todo-calendar-app .drawer-body {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: 8px 16px 16px 16px;
 }
 
 .todo-calendar-app .section-title-bar {
@@ -1071,4 +1071,123 @@
   justify-content: flex-end;
   gap: 10px;
   margin-top: 20px;
+}
+
+/* Compact Item Description (Memo) Section */
+.todo-calendar-app .compact-item-desc-section {
+  margin-top: 2px;
+  margin-bottom: 12px;
+}
+
+.todo-calendar-app .compact-item-desc-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background-color: var(--background-primary, rgba(0, 0, 0, 0.1));
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.15));
+  font-size: 12px;
+  min-height: 30px;
+  box-sizing: border-box;
+}
+
+.todo-calendar-app .compact-item-desc-bar.empty {
+  background: transparent;
+  border: none;
+  padding: 0;
+  min-height: auto;
+}
+
+.todo-calendar-app .subtle-memo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  color: var(--text-faint, #888);
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.todo-calendar-app .subtle-memo-btn:hover {
+  color: var(--interactive-accent);
+  background-color: var(--background-modifier-hover);
+}
+
+.todo-calendar-app .compact-item-desc-bar.has-content {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.todo-calendar-app .compact-item-desc-bar.has-content:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.todo-calendar-app .compact-item-desc-bar .desc-icon {
+  color: var(--interactive-accent);
+  flex-shrink: 0;
+}
+
+.todo-calendar-app .compact-item-desc-bar .desc-text {
+  flex: 1;
+  color: var(--text-normal);
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.todo-calendar-app .compact-item-desc-bar .edit-memo-btn {
+  padding: 2px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.todo-calendar-app .compact-item-desc-bar .edit-memo-btn:hover {
+  opacity: 1;
+  color: var(--interactive-accent);
+}
+
+/* Single-Bar Edit Mode (Auto-expands for multi-line) */
+.todo-calendar-app .compact-item-desc-bar.editing {
+  align-items: flex-start;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  background-color: var(--background-primary);
+  border: 1px solid var(--interactive-accent);
+  box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.15);
+}
+
+.todo-calendar-app .compact-item-desc-bar.editing .desc-icon {
+  margin-top: 2px;
+}
+
+.todo-calendar-app .compact-item-desc-bar.editing .compact-desc-textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-normal);
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+  overflow-y: auto;
+}
+
+.todo-calendar-app .compact-item-desc-bar.editing .save-memo-btn {
+  padding: 2px;
+  color: var(--interactive-accent);
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.todo-calendar-app .compact-item-desc-bar.editing .save-memo-btn:hover {
+  background-color: var(--background-modifier-hover);
 }

@@ -24684,6 +24684,7 @@ ${bodyContent}`;
           collectionId,
           filePath: file.path,
           title: frontmatter.title || "Untitled Item",
+          description: frontmatter.description || "",
           createdAt: frontmatter.created_at || new Date(file.stat.ctime).toISOString(),
           todos
         });
@@ -24694,7 +24695,7 @@ ${bodyContent}`;
   /**
    * Create a new item in a collection
    */
-  async createItem(collectionId, title) {
+  async createItem(collectionId, title, description = "") {
     await this.ensureDirectoriesExist();
     const itemFolderPath = `${ITEMS_DIR}/${collectionId}`;
     if (!await this.app.vault.adapter.exists(itemFolderPath)) {
@@ -24717,6 +24718,7 @@ ${bodyContent}`;
       id,
       collection_id: collectionId,
       title: title.trim() || "\u65B0\u898F\u30A2\u30A4\u30C6\u30E0",
+      description: description.trim(),
       created_at: createdAt,
       todos: initialTodos
     };
@@ -24728,6 +24730,7 @@ ${bodyContent}`;
       collectionId,
       filePath,
       title: frontmatter.title,
+      description: frontmatter.description,
       createdAt,
       todos: initialTodos
     };
@@ -24748,6 +24751,7 @@ ${bodyContent}`;
       id: item.id,
       collection_id: item.collectionId,
       title: item.title,
+      description: item.description || "",
       created_at: item.createdAt,
       todos: item.todos.map((t) => ({
         id: t.id,
@@ -24870,6 +24874,9 @@ var Calendar = createLucideIcon("Calendar", [
   ["rect", { width: "18", height: "18", x: "3", y: "4", rx: "2", key: "1hopcy" }],
   ["path", { d: "M3 10h18", key: "8toen8" }]
 ]);
+
+// node_modules/lucide-react/dist/esm/icons/check.js
+var Check = createLucideIcon("Check", [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]]);
 
 // node_modules/lucide-react/dist/esm/icons/chevron-down.js
 var ChevronDown = createLucideIcon("ChevronDown", [
@@ -25648,6 +25655,7 @@ var TaskDetailDrawer = ({
 }) => {
   const [localItem, setLocalItem] = (0, import_react5.useState)(item);
   const [editingDescIds, setEditingDescIds] = (0, import_react5.useState)({});
+  const [isEditingItemDesc, setIsEditingItemDesc] = (0, import_react5.useState)(false);
   const [draggedIndex, setDraggedIndex] = (0, import_react5.useState)(null);
   const [dragOverIndex, setDragOverIndex] = (0, import_react5.useState)(null);
   (0, import_react5.useEffect)(() => {
@@ -25661,6 +25669,11 @@ var TaskDetailDrawer = ({
   if (!isOpen || !localItem) return null;
   const handleTitleChange = (newTitle) => {
     const updated = { ...localItem, title: newTitle };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+  const handleItemDescriptionChange = (newDesc) => {
+    const updated = { ...localItem, description: newDesc };
     setLocalItem(updated);
     onUpdateItem(updated);
   };
@@ -25769,6 +25782,68 @@ var TaskDetailDrawer = ({
       /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { className: "icon-btn close-drawer-btn", onClick: onClose, title: "\u9589\u3058\u308B", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(X, { size: 18 }) })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "drawer-body", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "compact-item-desc-section", children: isEditingItemDesc ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "compact-item-desc-bar editing", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(AlignLeft, { size: 13, className: "desc-icon" }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+          "textarea",
+          {
+            className: "compact-desc-textarea",
+            placeholder: "\u30E1\u30E2\u3092\u5165\u529B...",
+            value: localItem.description || "",
+            onChange: (e) => handleItemDescriptionChange(e.target.value),
+            onBlur: (e) => {
+              if (!e.currentTarget.parentElement?.contains(e.relatedTarget)) {
+                setIsEditingItemDesc(false);
+              }
+            },
+            rows: Math.max(1, Math.min(8, (localItem.description || "").split("\n").length)),
+            autoFocus: true
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+          "button",
+          {
+            className: "icon-btn save-memo-btn",
+            onClick: () => setIsEditingItemDesc(false),
+            title: "\u5B8C\u4E86",
+            children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Check, { size: 13 })
+          }
+        )
+      ] }) : localItem.description && localItem.description.trim() ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+        "div",
+        {
+          className: "compact-item-desc-bar has-content",
+          onClick: () => setIsEditingItemDesc(true),
+          title: "\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u30E1\u30E2\u3092\u7DE8\u96C6",
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(AlignLeft, { size: 13, className: "desc-icon" }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "desc-text", children: localItem.description }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+              "button",
+              {
+                className: "icon-btn edit-memo-btn",
+                onClick: (e) => {
+                  e.stopPropagation();
+                  setIsEditingItemDesc(true);
+                },
+                title: "\u30E1\u30E2\u3092\u7DE8\u96C6",
+                children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Pencil, { size: 12 })
+              }
+            )
+          ]
+        }
+      ) : /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "compact-item-desc-bar empty", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+        "button",
+        {
+          className: "subtle-memo-btn",
+          onClick: () => setIsEditingItemDesc(true),
+          title: "\u30E1\u30E2\u3092\u5165\u529B",
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Pencil, { size: 12 }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u30E1\u30E2\u3092\u8FFD\u52A0..." })
+          ]
+        }
+      ) }) }),
       /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "section-title-bar", children: [
         /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("h4", { className: "section-title", children: [
           "TODO \u30BF\u30B9\u30AF\u4E00\u89A7 (",
@@ -25926,6 +26001,7 @@ var AppView = ({ app }) => {
   const [startDate, setStartDate] = (0, import_react6.useState)(() => /* @__PURE__ */ new Date());
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = (0, import_react6.useState)(false);
   const [newItemTitle, setNewItemTitle] = (0, import_react6.useState)("");
+  const [newItemDescription, setNewItemDescription] = (0, import_react6.useState)("");
   const loadCollections = (0, import_react6.useCallback)(async () => {
     const cols = await storage.getCollections();
     setCollections(cols);
@@ -25969,9 +26045,10 @@ var AppView = ({ app }) => {
   const handleCreateItemSubmit = async (e) => {
     e.preventDefault();
     if (!selectedCollection || !newItemTitle.trim()) return;
-    const newItem = await storage.createItem(selectedCollection.id, newItemTitle);
+    const newItem = await storage.createItem(selectedCollection.id, newItemTitle, newItemDescription);
     await loadItems(selectedCollection.id);
     setNewItemTitle("");
+    setNewItemDescription("");
     setIsCreateItemModalOpen(false);
     setSelectedItem(newItem);
     setIsDrawerOpen(true);
@@ -26089,6 +26166,19 @@ var AppView = ({ app }) => {
               onChange: (e) => setNewItemTitle(e.target.value),
               autoFocus: true,
               required: true
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("label", { children: "\u30E1\u30E2 / \u8A73\u7D30\u8AAC\u660E (\u4EFB\u610F)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            "textarea",
+            {
+              className: "todo-cal-form-input",
+              placeholder: "\u30A2\u30A4\u30C6\u30E0\u306E\u30E1\u30E2\u3092\u5165\u529B...",
+              value: newItemDescription,
+              onChange: (e) => setNewItemDescription(e.target.value),
+              rows: 2
             }
           )
         ] }),
@@ -26361,6 +26451,14 @@ lucide-react/dist/esm/icons/arrow-up-down.js:
    *)
 
 lucide-react/dist/esm/icons/calendar.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/check.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *
