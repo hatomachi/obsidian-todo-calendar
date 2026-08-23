@@ -27,3 +27,10 @@ export interface CollectionData {
   createdAt: string;
   itemCount?: number;
 }
+
+export interface AgendaTodoItem {
+  todo: TodoItem;
+  item: ItemData;
+  collection: CollectionData;
+}
+

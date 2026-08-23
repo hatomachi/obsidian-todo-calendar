@@ -1,13 +1,14 @@
 import React from 'react';
-import { ArrowLeft, Plus, Calendar, RefreshCw, Layers, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, RefreshCw, Layers, ChevronDown, CheckSquare } from 'lucide-react';
 import { CollectionData } from '../types';
 
 interface HeaderNavProps {
-  viewMode: 'collections' | 'calendar';
+  viewMode: 'collections' | 'calendar' | 'agenda';
   collections: CollectionData[];
   selectedCollection: CollectionData | null;
   startDate: Date;
   onBackToCollections: () => void;
+  onSelectAgenda: () => void;
   onSelectCollection: (collection: CollectionData) => void;
   onNavigateDate: (days: number) => void;
   onResetToToday: () => void;
@@ -21,6 +22,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   selectedCollection,
   startDate,
   onBackToCollections,
+  onSelectAgenda,
   onSelectCollection,
   onNavigateDate,
   onResetToToday,
@@ -37,16 +39,26 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   return (
     <div className="todo-cal-header">
       <div className="header-left">
-        {viewMode === 'calendar' ? (
+        <button
+          className={`nav-btn ${viewMode === 'collections' ? 'active-tab' : 'secondary-btn'}`}
+          onClick={onBackToCollections}
+          title="コレクション一覧"
+        >
+          <Layers size={16} />
+          <span>コレクション</span>
+        </button>
+
+        <button
+          className={`nav-btn ${viewMode === 'agenda' ? 'active-tab' : 'secondary-btn'}`}
+          onClick={onSelectAgenda}
+          title="今日のアジェンダ"
+        >
+          <CheckSquare size={16} />
+          <span>今日のアジェンダ</span>
+        </button>
+
+        {viewMode === 'calendar' && (
           <>
-            <button
-              className="nav-btn secondary-btn"
-              onClick={onBackToCollections}
-              title="コレクション一覧へ戻る"
-            >
-              <ArrowLeft size={16} />
-              <span>コレクション</span>
-            </button>
             <span className="breadcrumb-separator">/</span>
             <div className="collection-select-badge" title="コレクションを切り替え">
               <Layers size={16} className="badge-icon" />
@@ -69,11 +81,6 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
               <ChevronDown size={14} className="dropdown-arrow-icon" />
             </div>
           </>
-        ) : (
-          <div className="app-branding">
-            <Calendar size={20} className="brand-icon" />
-            <h2 className="brand-title">TODO カレンダーマトリクス</h2>
-          </div>
         )}
       </div>
 
@@ -108,4 +115,5 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
     </div>
   );
 };
+
 

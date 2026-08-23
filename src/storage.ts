@@ -1,6 +1,6 @@
 import { App, TFile, TFolder, parseYaml, stringifyYaml } from 'obsidian';
 import { COLLECTIONS_DIR, ITEMS_DIR, ROOT_DATA_DIR } from './constants';
-import { CollectionData, ItemData, TodoItem } from './types';
+import { CollectionData, ItemData, TodoItem, AgendaTodoItem } from './types';
 
 export class StorageManager {
   private app: App;
@@ -290,4 +290,28 @@ export class StorageManager {
       await this.app.vault.delete(file);
     }
   }
+
+  /**
+   * Get all TODO items across all collections for Agenda view
+   */
+  async getAllAgendaItems(): Promise<AgendaTodoItem[]> {
+    const collections = await this.getCollections();
+    const agendaItems: AgendaTodoItem[] = [];
+
+    for (const col of collections) {
+      const items = await this.getItems(col.id);
+      for (const item of items) {
+        for (const todo of item.todos) {
+          agendaItems.push({
+            todo,
+            item,
+            collection: col,
+          });
+        }
+      }
+    }
+
+    return agendaItems;
+  }
 }
+

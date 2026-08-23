@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { App } from 'obsidian';
 import { StorageManager } from '../storage';
-import { CollectionData, ItemData, TodoStatus } from '../types';
+import { CollectionData, ItemData, TodoStatus, AgendaTodoItem } from '../types';
 import { HeaderNav } from './HeaderNav';
 import { CollectionsGrid } from './CollectionsGrid';
 import { CalendarMatrixView } from './CalendarMatrixView';
 import { TaskDetailDrawer } from './TaskDetailDrawer';
+import { AgendaView } from './AgendaView';
 
 interface AppViewProps {
   app: App;
@@ -14,11 +15,14 @@ interface AppViewProps {
 export const AppView: React.FC<AppViewProps> = ({ app }) => {
   const [storage] = useState(() => new StorageManager(app));
 
-  const [viewMode, setViewMode] = useState<'collections' | 'calendar'>('collections');
+  const [viewMode, setViewMode] = useState<'collections' | 'calendar' | 'agenda'>('collections');
   const [collections, setCollections] = useState<CollectionData[]>([]);
   const [selectedCollection, setSelectedCollection] = useState<CollectionData | null>(null);
 
   const [items, setItems] = useState<ItemData[]>([]);
+  const [agendaItems, setAgendaItems] = useState<AgendaTodoItem[]>([]);
+  const [selectedCollectionFilterId, setSelectedCollectionFilterId] = useState<string | null>(null);
+
   const [selectedItem, setSelectedItem] = useState<ItemData | null>(null);
   const [selectedTodoId, setSelectedTodoId] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -40,15 +44,30 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
     setItems(loadedItems);
   }, [storage]);
 
+  // Load all items for Agenda view
+  const loadAgendaItems = useCallback(async () => {
+    const loadedAgenda = await storage.getAllAgendaItems();
+    setAgendaItems(loadedAgenda);
+  }, [storage]);
+
   useEffect(() => {
     loadCollections();
   }, [loadCollections]);
 
-  // Handle select collection
+  // Handle select collection (to Calendar view)
   const handleSelectCollection = async (collection: CollectionData) => {
     setSelectedCollection(collection);
     await loadItems(collection.id);
     setViewMode('calendar');
+    setIsDrawerOpen(false);
+    setSelectedItem(null);
+  };
+
+  // Switch to Agenda view
+  const handleSelectAgenda = async () => {
+    await loadCollections();
+    await loadAgendaItems();
+    setViewMode('agenda');
     setIsDrawerOpen(false);
     setSelectedItem(null);
   };
@@ -64,10 +83,11 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
 
   // Refresh
   const handleRefresh = async () => {
-    if (viewMode === 'collections') {
-      await loadCollections();
-    } else if (selectedCollection) {
+    await loadCollections();
+    if (viewMode === 'calendar' && selectedCollection) {
       await loadItems(selectedCollection.id);
+    } else if (viewMode === 'agenda') {
+      await loadAgendaItems();
     }
   };
 
@@ -81,6 +101,9 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
   const handleDeleteCollection = async (collectionId: string) => {
     await storage.deleteCollection(collectionId);
     await loadCollections();
+    if (viewMode === 'agenda') {
+      await loadAgendaItems();
+    }
   };
 
   // Create Item
@@ -108,6 +131,10 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
     }
     // Save to Vault
     await storage.updateItem(updatedItem);
+
+    if (viewMode === 'agenda') {
+      await loadAgendaItems();
+    }
   };
 
   // Delete Item
@@ -120,6 +147,9 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
       setSelectedItem(null);
       setIsDrawerOpen(false);
     }
+    if (viewMode === 'agenda') {
+      await loadAgendaItems();
+    }
   };
 
   // Select Item or Todo
@@ -129,7 +159,7 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
     setIsDrawerOpen(true);
   };
 
-  // Quick toggle todo status from cell click
+  // Quick toggle todo status
   const handleQuickToggleTodoStatus = async (item: ItemData, todoId: string) => {
     const updatedTodos = item.todos.map((t) => {
       if (t.id === todoId) {
@@ -169,6 +199,7 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
         selectedCollection={selectedCollection}
         startDate={startDate}
         onBackToCollections={handleBackToCollections}
+        onSelectAgenda={handleSelectAgenda}
         onSelectCollection={handleSelectCollection}
         onNavigateDate={handleNavigateDate}
         onResetToToday={handleResetToToday}
@@ -178,14 +209,16 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
 
       <div className="app-main-layout">
         <div className="main-content-pane">
-          {viewMode === 'collections' ? (
+          {viewMode === 'collections' && (
             <CollectionsGrid
               collections={collections}
               onSelectCollection={handleSelectCollection}
               onCreateCollection={handleCreateCollection}
               onDeleteCollection={handleDeleteCollection}
             />
-          ) : (
+          )}
+
+          {viewMode === 'calendar' && (
             <CalendarMatrixView
               items={items}
               startDate={startDate}
@@ -199,15 +232,27 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
               onUpdateItem={handleUpdateItem}
             />
           )}
+
+          {viewMode === 'agenda' && (
+            <AgendaView
+              agendaItems={agendaItems}
+              collections={collections}
+              selectedCollectionId={selectedCollectionFilterId}
+              onSelectCollectionFilter={setSelectedCollectionFilterId}
+              onQuickToggleTodoStatus={handleQuickToggleTodoStatus}
+              onSelectItem={handleSelectItem}
+              onJumpToCollection={handleSelectCollection}
+            />
+          )}
         </div>
 
         {/* Right Side Drawer Inspector */}
-        {viewMode === 'calendar' && isDrawerOpen && (
+        {(viewMode === 'calendar' || viewMode === 'agenda') && isDrawerOpen && (
           <TaskDetailDrawer
             item={selectedItem}
             selectedTodoId={selectedTodoId}
             isOpen={isDrawerOpen}
-            onClose={() => setIsDrawerOpen(false)}
+            onClose={handleCloseDrawer}
             onUpdateItem={handleUpdateItem}
             onDeleteItem={handleDeleteItem}
           />
@@ -253,7 +298,7 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
                 <button type="submit" className="nav-btn primary-btn">
                   作成
                 </button>
-              </div>
+                </div>
             </form>
           </div>
         </div>
@@ -261,3 +306,4 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
     </div>
   );
 };
+

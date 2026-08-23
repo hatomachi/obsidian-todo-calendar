@@ -1094,7 +1094,7 @@ var require_react_development = __commonJS({
           }
           return dispatcher.useContext(Context);
         }
-        function useState4(initialState) {
+        function useState5(initialState) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useState(initialState);
         }
@@ -1897,7 +1897,7 @@ var require_react_development = __commonJS({
         exports.useMemo = useMemo;
         exports.useReducer = useReducer;
         exports.useRef = useRef;
-        exports.useState = useState4;
+        exports.useState = useState5;
         exports.useSyncExternalStore = useSyncExternalStore;
         exports.useTransition = useTransition;
         exports.version = ReactVersion;
@@ -2393,9 +2393,9 @@ var require_react_dom_development = __commonJS({
         if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
           __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
         }
-        var React6 = require_react();
+        var React7 = require_react();
         var Scheduler = require_scheduler();
-        var ReactSharedInternals = React6.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+        var ReactSharedInternals = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
         var suppressWarning = false;
         function setSuppressWarning(newSuppressWarning) {
           {
@@ -4002,7 +4002,7 @@ var require_react_dom_development = __commonJS({
           {
             if (props.value == null) {
               if (typeof props.children === "object" && props.children !== null) {
-                React6.Children.forEach(props.children, function(child) {
+                React7.Children.forEach(props.children, function(child) {
                   if (child == null) {
                     return;
                   }
@@ -23598,7 +23598,7 @@ var require_react_jsx_runtime_development = __commonJS({
     if (true) {
       (function() {
         "use strict";
-        var React6 = require_react();
+        var React7 = require_react();
         var REACT_ELEMENT_TYPE = Symbol.for("react.element");
         var REACT_PORTAL_TYPE = Symbol.for("react.portal");
         var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
@@ -23624,7 +23624,7 @@ var require_react_jsx_runtime_development = __commonJS({
           }
           return null;
         }
-        var ReactSharedInternals = React6.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+        var ReactSharedInternals = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
         function error(format) {
           {
             {
@@ -24474,11 +24474,11 @@ var require_react_jsx_runtime_development = __commonJS({
             return jsxWithValidation(type, props, key, false);
           }
         }
-        var jsx6 = jsxWithValidationDynamic;
-        var jsxs6 = jsxWithValidationStatic;
+        var jsx7 = jsxWithValidationDynamic;
+        var jsxs7 = jsxWithValidationStatic;
         exports.Fragment = REACT_FRAGMENT_TYPE;
-        exports.jsx = jsx6;
-        exports.jsxs = jsxs6;
+        exports.jsx = jsx7;
+        exports.jsxs = jsxs7;
       })();
     }
   }
@@ -24504,7 +24504,7 @@ __export(main_exports, {
 });
 module.exports = __toCommonJS(main_exports);
 var import_obsidian2 = require("obsidian");
-var import_react7 = __toESM(require_react());
+var import_react8 = __toESM(require_react());
 var import_client = __toESM(require_client());
 
 // src/constants.ts
@@ -24514,7 +24514,7 @@ var COLLECTIONS_DIR = `${ROOT_DATA_DIR}/collections`;
 var ITEMS_DIR = `${ROOT_DATA_DIR}/items`;
 
 // src/components/AppView.tsx
-var import_react6 = __toESM(require_react());
+var import_react7 = __toESM(require_react());
 
 // src/storage.ts
 var import_obsidian = require("obsidian");
@@ -24764,6 +24764,26 @@ ${bodyContent}`;
       await this.app.vault.delete(file);
     }
   }
+  /**
+   * Get all TODO items across all collections for Agenda view
+   */
+  async getAllAgendaItems() {
+    const collections = await this.getCollections();
+    const agendaItems = [];
+    for (const col of collections) {
+      const items = await this.getItems(col.id);
+      for (const item of items) {
+        for (const todo of item.todos) {
+          agendaItems.push({
+            todo,
+            item,
+            collection: col
+          });
+        }
+      }
+    }
+    return agendaItems;
+  }
 };
 
 // node_modules/lucide-react/dist/esm/createLucideIcon.js
@@ -24844,12 +24864,6 @@ var AlignLeft = createLucideIcon("AlignLeft", [
   ["line", { x1: "17", x2: "3", y1: "18", y2: "18", key: "1awlsn" }]
 ]);
 
-// node_modules/lucide-react/dist/esm/icons/arrow-left.js
-var ArrowLeft = createLucideIcon("ArrowLeft", [
-  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
-  ["path", { d: "M19 12H5", key: "x3x0zl" }]
-]);
-
 // node_modules/lucide-react/dist/esm/icons/arrow-up-down.js
 var ArrowUpDown = createLucideIcon("ArrowUpDown", [
   ["path", { d: "m21 16-4 4-4-4", key: "f6ql7i" }],
@@ -24874,6 +24888,11 @@ var ChevronDown = createLucideIcon("ChevronDown", [
   ["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/chevron-right.js
+var ChevronRight = createLucideIcon("ChevronRight", [
+  ["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/chevron-up.js
 var ChevronUp = createLucideIcon("ChevronUp", [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]]);
 
@@ -24883,10 +24902,41 @@ var ChevronsUpDown = createLucideIcon("ChevronsUpDown", [
   ["path", { d: "m7 9 5-5 5 5", key: "sgt6xg" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/circle-alert.js
+var CircleAlert = createLucideIcon("CircleAlert", [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["line", { x1: "12", x2: "12", y1: "8", y2: "12", key: "1pkeuh" }],
+  ["line", { x1: "12", x2: "12.01", y1: "16", y2: "16", key: "4dfq90" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/circle-check.js
+var CircleCheck = createLucideIcon("CircleCheck", [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/circle.js
+var Circle = createLucideIcon("Circle", [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/clock.js
+var Clock = createLucideIcon("Clock", [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["polyline", { points: "12 6 12 12 16 14", key: "68esgv" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/copy.js
 var Copy = createLucideIcon("Copy", [
   ["rect", { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2", key: "17jyea" }],
   ["path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2", key: "zix9uf" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/external-link.js
+var ExternalLink = createLucideIcon("ExternalLink", [
+  ["path", { d: "M15 3h6v6", key: "1q9fwt" }],
+  ["path", { d: "M10 14 21 3", key: "gplh6r" }],
+  ["path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6", key: "a6xqqp" }]
 ]);
 
 // node_modules/lucide-react/dist/esm/icons/file-text.js
@@ -24896,6 +24946,11 @@ var FileText = createLucideIcon("FileText", [
   ["path", { d: "M10 9H8", key: "b1mrlr" }],
   ["path", { d: "M16 13H8", key: "t4e002" }],
   ["path", { d: "M16 17H8", key: "z1uh3a" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/filter.js
+var Filter = createLucideIcon("Filter", [
+  ["polygon", { points: "22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3", key: "1yg77f" }]
 ]);
 
 // node_modules/lucide-react/dist/esm/icons/folder.js
@@ -24964,6 +25019,12 @@ var Search = createLucideIcon("Search", [
   ["path", { d: "m21 21-4.3-4.3", key: "1qie3q" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/square-check-big.js
+var SquareCheckBig = createLucideIcon("SquareCheckBig", [
+  ["path", { d: "M21 10.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.5", key: "1uzm8b" }],
+  ["path", { d: "m9 11 3 3L22 4", key: "1pflzl" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/trash-2.js
 var Trash2 = createLucideIcon("Trash2", [
   ["path", { d: "M3 6h18", key: "d0wm0j" }],
@@ -24987,6 +25048,7 @@ var HeaderNav = ({
   selectedCollection,
   startDate,
   onBackToCollections,
+  onSelectAgenda,
   onSelectCollection,
   onNavigateDate,
   onResetToToday,
@@ -25000,42 +25062,53 @@ var HeaderNav = ({
     return `${start.toLocaleDateString("ja-JP", options)} - ${end.toLocaleDateString("ja-JP", options)}`;
   };
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "todo-cal-header", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "header-left", children: viewMode === "calendar" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "header-left", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
         "button",
         {
-          className: "nav-btn secondary-btn",
+          className: `nav-btn ${viewMode === "collections" ? "active-tab" : "secondary-btn"}`,
           onClick: onBackToCollections,
-          title: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u4E00\u89A7\u3078\u623B\u308B",
+          title: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u4E00\u89A7",
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { size: 16 }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Layers, { size: 16 }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3" })
           ]
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "breadcrumb-separator", children: "/" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "collection-select-badge", title: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u3092\u5207\u308A\u66FF\u3048", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Layers, { size: 16, className: "badge-icon" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-          "select",
-          {
-            className: "collection-select-dropdown",
-            value: selectedCollection?.id || "",
-            onChange: (e) => {
-              const targetCol = collections.find((c) => c.id === e.target.value);
-              if (targetCol) {
-                onSelectCollection(targetCol);
-              }
-            },
-            children: collections.map((col) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: col.id, children: col.title }, col.id))
-          }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { size: 14, className: "dropdown-arrow-icon" })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+        "button",
+        {
+          className: `nav-btn ${viewMode === "agenda" ? "active-tab" : "secondary-btn"}`,
+          onClick: onSelectAgenda,
+          title: "\u4ECA\u65E5\u306E\u30A2\u30B8\u30A7\u30F3\u30C0",
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SquareCheckBig, { size: 16 }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "\u4ECA\u65E5\u306E\u30A2\u30B8\u30A7\u30F3\u30C0" })
+          ]
+        }
+      ),
+      viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "breadcrumb-separator", children: "/" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "collection-select-badge", title: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u3092\u5207\u308A\u66FF\u3048", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Layers, { size: 16, className: "badge-icon" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "select",
+            {
+              className: "collection-select-dropdown",
+              value: selectedCollection?.id || "",
+              onChange: (e) => {
+                const targetCol = collections.find((c) => c.id === e.target.value);
+                if (targetCol) {
+                  onSelectCollection(targetCol);
+                }
+              },
+              children: collections.map((col) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: col.id, children: col.title }, col.id))
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { size: 14, className: "dropdown-arrow-icon" })
+        ] })
       ] })
-    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "app-branding", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { size: 20, className: "brand-icon" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "brand-title", children: "TODO \u30AB\u30EC\u30F3\u30C0\u30FC\u30DE\u30C8\u30EA\u30AF\u30B9" })
-    ] }) }),
+    ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "header-right", children: [
       viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "date-controls", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "nav-btn secondary-btn", onClick: () => onNavigateDate(-7), title: "\u524D\u9031", children: "< \u524D\u9031" }),
@@ -26104,36 +26177,288 @@ var TaskDetailDrawer = ({
   ] });
 };
 
-// src/components/AppView.tsx
+// src/components/AgendaView.tsx
+var import_react6 = __toESM(require_react());
 var import_jsx_runtime5 = __toESM(require_jsx_runtime());
+var formatDateStr2 = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+var getRelativeDateLabel = (dateStr, todayStr) => {
+  if (!dateStr) return "\u671F\u65E5\u306A\u3057";
+  if (dateStr === todayStr) return "\u4ECA\u65E5";
+  const today = new Date(todayStr);
+  const target = new Date(dateStr);
+  const diffTime = target.getTime() - today.getTime();
+  const diffDays = Math.round(diffTime / (1e3 * 3600 * 24));
+  if (diffDays === 1) return "\u660E\u65E5";
+  if (diffDays === 2) return "\u660E\u5F8C\u65E5";
+  if (diffDays < 0) return `${Math.abs(diffDays)}\u65E5\u524D`;
+  return `${diffDays}\u65E5\u5F8C`;
+};
+var AgendaView = ({
+  agendaItems,
+  collections,
+  selectedCollectionId,
+  onSelectCollectionFilter,
+  onQuickToggleTodoStatus,
+  onSelectItem,
+  onJumpToCollection
+}) => {
+  const [showUpcoming, setShowUpcoming] = (0, import_react6.useState)(true);
+  const [showNoDue, setShowNoDue] = (0, import_react6.useState)(false);
+  const todayStr = formatDateStr2(/* @__PURE__ */ new Date());
+  const filteredItems = selectedCollectionId ? agendaItems.filter((item) => item.collection.id === selectedCollectionId) : agendaItems;
+  const overdue = [];
+  const todayList = [];
+  const upcoming = [];
+  const noDueList = [];
+  const next3Days = /* @__PURE__ */ new Date();
+  next3Days.setDate(next3Days.getDate() + 3);
+  const next3DaysStr = formatDateStr2(next3Days);
+  filteredItems.forEach((entry) => {
+    const { due, status } = entry.todo;
+    if (!due) {
+      noDueList.push(entry);
+    } else if (due < todayStr && status === "todo") {
+      overdue.push(entry);
+    } else if (due === todayStr) {
+      todayList.push(entry);
+    } else if (due > todayStr && due <= next3DaysStr && status === "todo") {
+      upcoming.push(entry);
+    }
+  });
+  overdue.sort((a, b) => a.todo.due > b.todo.due ? 1 : -1);
+  todayList.sort((a, b) => {
+    if (a.todo.status !== b.todo.status) return a.todo.status === "done" ? 1 : -1;
+    return a.collection.title.localeCompare(b.collection.title);
+  });
+  upcoming.sort((a, b) => a.todo.due > b.todo.due ? 1 : -1);
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-container", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-header", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-title-group", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h2", { children: "\u{1F4C5} \u4ECA\u65E5\u306E\u30A2\u30B8\u30A7\u30F3\u30C0 (Today's Agenda)" }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "todo-cal-agenda-date", children: todayStr })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-filter-group", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Filter, { size: 16 }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+          "select",
+          {
+            value: selectedCollectionId || "",
+            onChange: (e) => onSelectCollectionFilter(e.target.value || null),
+            className: "todo-cal-agenda-filter-select",
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("option", { value: "", children: [
+                "\u3059\u3079\u3066\u306E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3 (\u5168 ",
+                collections.length,
+                " \u4EF6)"
+              ] }),
+              collections.map((col) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("option", { value: col.id, children: col.title }, col.id))
+            ]
+          }
+        )
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-content", children: [
+      overdue.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-section overdue-section", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-section-header", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(CircleAlert, { className: "icon overdue-icon", size: 18 }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h3", { children: "\u671F\u9650\u5207\u308C (Overdue)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "count-badge overdue-badge", children: overdue.length })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-agenda-list", children: overdue.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          AgendaCard,
+          {
+            entry,
+            todayStr,
+            onQuickToggleTodoStatus,
+            onSelectItem,
+            onJumpToCollection
+          },
+          entry.todo.id
+        )) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-section today-section", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-section-header", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Calendar, { className: "icon today-icon", size: 18 }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h3", { children: "\u4ECA\u65E5 (Today)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "count-badge today-badge", children: todayList.length })
+        ] }),
+        todayList.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-agenda-empty", children: "\u{1F389} \u672C\u65E5\u306E\u30BF\u30B9\u30AF\u306F\u3042\u308A\u307E\u305B\u3093\uFF01\u7D20\u6674\u3089\u3057\u30441\u65E5\u3092\u3002" }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-agenda-list", children: todayList.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          AgendaCard,
+          {
+            entry,
+            todayStr,
+            onQuickToggleTodoStatus,
+            onSelectItem,
+            onJumpToCollection
+          },
+          entry.todo.id
+        )) })
+      ] }),
+      upcoming.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-section upcoming-section", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+          "div",
+          {
+            className: "todo-cal-agenda-section-header collapsible",
+            onClick: () => setShowUpcoming(!showUpcoming),
+            children: [
+              showUpcoming ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronDown, { size: 18 }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronRight, { size: 18 }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Clock, { className: "icon upcoming-icon", size: 18 }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h3", { children: "\u8FD1\u65E5\u4E2D (Upcoming)" }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "count-badge upcoming-badge", children: upcoming.length })
+            ]
+          }
+        ),
+        showUpcoming && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-agenda-list", children: upcoming.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          AgendaCard,
+          {
+            entry,
+            todayStr,
+            onQuickToggleTodoStatus,
+            onSelectItem,
+            onJumpToCollection
+          },
+          entry.todo.id
+        )) })
+      ] }),
+      noDueList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-section nodue-section", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+          "div",
+          {
+            className: "todo-cal-agenda-section-header collapsible",
+            onClick: () => setShowNoDue(!showNoDue),
+            children: [
+              showNoDue ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronDown, { size: 18 }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronRight, { size: 18 }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h3", { children: "\u671F\u65E5\u672A\u8A2D\u5B9A" }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "count-badge nodue-badge", children: noDueList.length })
+            ]
+          }
+        ),
+        showNoDue && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-agenda-list", children: noDueList.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          AgendaCard,
+          {
+            entry,
+            todayStr,
+            onQuickToggleTodoStatus,
+            onSelectItem,
+            onJumpToCollection
+          },
+          entry.todo.id
+        )) })
+      ] })
+    ] })
+  ] });
+};
+var AgendaCard = ({
+  entry,
+  todayStr,
+  onQuickToggleTodoStatus,
+  onSelectItem,
+  onJumpToCollection
+}) => {
+  const { todo, item, collection } = entry;
+  const isDone = todo.status === "done";
+  const relativeDate = getRelativeDateLabel(todo.due, todayStr);
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: `todo-cal-agenda-card ${isDone ? "is-done" : ""}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+      "button",
+      {
+        className: "todo-cal-agenda-checkbox",
+        onClick: (e) => {
+          e.stopPropagation();
+          onQuickToggleTodoStatus(item, todo.id);
+        },
+        title: isDone ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B",
+        children: isDone ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(CircleCheck, { className: "icon-done", size: 18 }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Circle, { className: "icon-todo", size: 18 })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+      "div",
+      {
+        className: "todo-cal-agenda-card-body",
+        onClick: () => onSelectItem(item, todo.id),
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-agenda-card-title", children: todo.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-card-sub", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "item-title", children: item.title }),
+            todo.due && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { className: "due-tag", children: [
+              todo.due,
+              " (",
+              relativeDate,
+              ")"
+            ] })
+          ] })
+        ]
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-agenda-card-actions", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+      "button",
+      {
+        className: "todo-cal-collection-badge",
+        style: {
+          borderColor: collection.color || "var(--interactive-accent)"
+        },
+        onClick: (e) => {
+          e.stopPropagation();
+          onJumpToCollection(collection);
+        },
+        title: `${collection.title} \u30AB\u30EC\u30F3\u30C0\u30FC\u3078\u79FB\u52D5`,
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { children: collection.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ExternalLink, { size: 12, className: "badge-icon" })
+        ]
+      }
+    ) })
+  ] });
+};
+
+// src/components/AppView.tsx
+var import_jsx_runtime6 = __toESM(require_jsx_runtime());
 var AppView = ({ app }) => {
-  const [storage] = (0, import_react6.useState)(() => new StorageManager(app));
-  const [viewMode, setViewMode] = (0, import_react6.useState)("collections");
-  const [collections, setCollections] = (0, import_react6.useState)([]);
-  const [selectedCollection, setSelectedCollection] = (0, import_react6.useState)(null);
-  const [items, setItems] = (0, import_react6.useState)([]);
-  const [selectedItem, setSelectedItem] = (0, import_react6.useState)(null);
-  const [selectedTodoId, setSelectedTodoId] = (0, import_react6.useState)(null);
-  const [isDrawerOpen, setIsDrawerOpen] = (0, import_react6.useState)(false);
-  const [startDate, setStartDate] = (0, import_react6.useState)(() => /* @__PURE__ */ new Date());
-  const [isCreateItemModalOpen, setIsCreateItemModalOpen] = (0, import_react6.useState)(false);
-  const [newItemTitle, setNewItemTitle] = (0, import_react6.useState)("");
-  const [newItemDescription, setNewItemDescription] = (0, import_react6.useState)("");
-  const loadCollections = (0, import_react6.useCallback)(async () => {
+  const [storage] = (0, import_react7.useState)(() => new StorageManager(app));
+  const [viewMode, setViewMode] = (0, import_react7.useState)("collections");
+  const [collections, setCollections] = (0, import_react7.useState)([]);
+  const [selectedCollection, setSelectedCollection] = (0, import_react7.useState)(null);
+  const [items, setItems] = (0, import_react7.useState)([]);
+  const [agendaItems, setAgendaItems] = (0, import_react7.useState)([]);
+  const [selectedCollectionFilterId, setSelectedCollectionFilterId] = (0, import_react7.useState)(null);
+  const [selectedItem, setSelectedItem] = (0, import_react7.useState)(null);
+  const [selectedTodoId, setSelectedTodoId] = (0, import_react7.useState)(null);
+  const [isDrawerOpen, setIsDrawerOpen] = (0, import_react7.useState)(false);
+  const [startDate, setStartDate] = (0, import_react7.useState)(() => /* @__PURE__ */ new Date());
+  const [isCreateItemModalOpen, setIsCreateItemModalOpen] = (0, import_react7.useState)(false);
+  const [newItemTitle, setNewItemTitle] = (0, import_react7.useState)("");
+  const [newItemDescription, setNewItemDescription] = (0, import_react7.useState)("");
+  const loadCollections = (0, import_react7.useCallback)(async () => {
     const cols = await storage.getCollections();
     setCollections(cols);
   }, [storage]);
-  const loadItems = (0, import_react6.useCallback)(async (colId) => {
+  const loadItems = (0, import_react7.useCallback)(async (colId) => {
     const loadedItems = await storage.getItems(colId);
     setItems(loadedItems);
   }, [storage]);
-  (0, import_react6.useEffect)(() => {
+  const loadAgendaItems = (0, import_react7.useCallback)(async () => {
+    const loadedAgenda = await storage.getAllAgendaItems();
+    setAgendaItems(loadedAgenda);
+  }, [storage]);
+  (0, import_react7.useEffect)(() => {
     loadCollections();
   }, [loadCollections]);
   const handleSelectCollection = async (collection) => {
     setSelectedCollection(collection);
     await loadItems(collection.id);
     setViewMode("calendar");
+    setIsDrawerOpen(false);
+    setSelectedItem(null);
+  };
+  const handleSelectAgenda = async () => {
+    await loadCollections();
+    await loadAgendaItems();
+    setViewMode("agenda");
     setIsDrawerOpen(false);
     setSelectedItem(null);
   };
@@ -26145,10 +26470,11 @@ var AppView = ({ app }) => {
     await loadCollections();
   };
   const handleRefresh = async () => {
-    if (viewMode === "collections") {
-      await loadCollections();
-    } else if (selectedCollection) {
+    await loadCollections();
+    if (viewMode === "calendar" && selectedCollection) {
       await loadItems(selectedCollection.id);
+    } else if (viewMode === "agenda") {
+      await loadAgendaItems();
     }
   };
   const handleCreateCollection = async (title, description) => {
@@ -26158,6 +26484,9 @@ var AppView = ({ app }) => {
   const handleDeleteCollection = async (collectionId) => {
     await storage.deleteCollection(collectionId);
     await loadCollections();
+    if (viewMode === "agenda") {
+      await loadAgendaItems();
+    }
   };
   const handleCreateItemSubmit = async (e) => {
     e.preventDefault();
@@ -26176,6 +26505,9 @@ var AppView = ({ app }) => {
       setSelectedItem(updatedItem);
     }
     await storage.updateItem(updatedItem);
+    if (viewMode === "agenda") {
+      await loadAgendaItems();
+    }
   };
   const handleDeleteItem = async (item) => {
     await storage.deleteItem(item);
@@ -26185,6 +26517,9 @@ var AppView = ({ app }) => {
     if (selectedItem?.id === item.id) {
       setSelectedItem(null);
       setIsDrawerOpen(false);
+    }
+    if (viewMode === "agenda") {
+      await loadAgendaItems();
     }
   };
   const handleSelectItem = (item, todoId) => {
@@ -26216,8 +26551,8 @@ var AppView = ({ app }) => {
     setSelectedItem(null);
     setSelectedTodoId(null);
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-calendar-app", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-calendar-app", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
       HeaderNav,
       {
         viewMode,
@@ -26225,6 +26560,7 @@ var AppView = ({ app }) => {
         selectedCollection,
         startDate,
         onBackToCollections: handleBackToCollections,
+        onSelectAgenda: handleSelectAgenda,
         onSelectCollection: handleSelectCollection,
         onNavigateDate: handleNavigateDate,
         onResetToToday: handleResetToToday,
@@ -26232,48 +26568,63 @@ var AppView = ({ app }) => {
         onRefresh: handleRefresh
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "app-main-layout", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "main-content-pane", children: viewMode === "collections" ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-        CollectionsGrid,
-        {
-          collections,
-          onSelectCollection: handleSelectCollection,
-          onCreateCollection: handleCreateCollection,
-          onDeleteCollection: handleDeleteCollection
-        }
-      ) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-        CalendarMatrixView,
-        {
-          items,
-          startDate,
-          selectedItemId: selectedItem?.id || null,
-          isDrawerOpen,
-          onCloseDrawer: handleCloseDrawer,
-          onSelectItem: handleSelectItem,
-          onQuickToggleTodoStatus: handleQuickToggleTodoStatus,
-          onDeleteItem: handleDeleteItem,
-          onOpenCreateItemModal: () => setIsCreateItemModalOpen(true),
-          onUpdateItem: handleUpdateItem
-        }
-      ) }),
-      viewMode === "calendar" && isDrawerOpen && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "app-main-layout", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "main-content-pane", children: [
+        viewMode === "collections" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+          CollectionsGrid,
+          {
+            collections,
+            onSelectCollection: handleSelectCollection,
+            onCreateCollection: handleCreateCollection,
+            onDeleteCollection: handleDeleteCollection
+          }
+        ),
+        viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+          CalendarMatrixView,
+          {
+            items,
+            startDate,
+            selectedItemId: selectedItem?.id || null,
+            isDrawerOpen,
+            onCloseDrawer: handleCloseDrawer,
+            onSelectItem: handleSelectItem,
+            onQuickToggleTodoStatus: handleQuickToggleTodoStatus,
+            onDeleteItem: handleDeleteItem,
+            onOpenCreateItemModal: () => setIsCreateItemModalOpen(true),
+            onUpdateItem: handleUpdateItem
+          }
+        ),
+        viewMode === "agenda" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+          AgendaView,
+          {
+            agendaItems,
+            collections,
+            selectedCollectionId: selectedCollectionFilterId,
+            onSelectCollectionFilter: setSelectedCollectionFilterId,
+            onQuickToggleTodoStatus: handleQuickToggleTodoStatus,
+            onSelectItem: handleSelectItem,
+            onJumpToCollection: handleSelectCollection
+          }
+        )
+      ] }),
+      (viewMode === "calendar" || viewMode === "agenda") && isDrawerOpen && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
         TaskDetailDrawer,
         {
           item: selectedItem,
           selectedTodoId,
           isOpen: isDrawerOpen,
-          onClose: () => setIsDrawerOpen(false),
+          onClose: handleCloseDrawer,
           onUpdateItem: handleUpdateItem,
           onDeleteItem: handleDeleteItem
         }
       )
     ] }),
-    isCreateItemModalOpen && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-modal-backdrop", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-modal-content", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h3", { children: "\u65B0\u898F\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item) \u306E\u4F5C\u6210" }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("form", { onSubmit: handleCreateItemSubmit, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-form-group", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("label", { children: "\u30CE\u30FC\u30C8\u30BF\u30A4\u30C8\u30EB *" }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+    isCreateItemModalOpen && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "todo-cal-modal-backdrop", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-cal-modal-content", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("h3", { children: "\u65B0\u898F\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item) \u306E\u4F5C\u6210" }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("form", { onSubmit: handleCreateItemSubmit, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("label", { children: "\u30CE\u30FC\u30C8\u30BF\u30A4\u30C8\u30EB *" }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
             "input",
             {
               type: "text",
@@ -26286,9 +26637,9 @@ var AppView = ({ app }) => {
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-form-group", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("label", { children: "\u30E1\u30E2 / \u8A73\u7D30\u8AAC\u660E (\u4EFB\u610F)" }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("label", { children: "\u30E1\u30E2 / \u8A73\u7D30\u8AAC\u660E (\u4EFB\u610F)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
             "textarea",
             {
               className: "todo-cal-form-input",
@@ -26299,8 +26650,8 @@ var AppView = ({ app }) => {
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-modal-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-cal-modal-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
             "button",
             {
               type: "button",
@@ -26309,7 +26660,7 @@ var AppView = ({ app }) => {
               children: "\u30AD\u30E3\u30F3\u30BB\u30EB"
             }
           ),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { type: "submit", className: "nav-btn primary-btn", children: "\u4F5C\u6210" })
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("button", { type: "submit", className: "nav-btn primary-btn", children: "\u4F5C\u6210" })
         ] })
       ] })
     ] }) })
@@ -26337,7 +26688,7 @@ var TodoCalendarView = class extends import_obsidian2.ItemView {
     container.addClass("todo-calendar-view-container");
     this.root = (0, import_client.createRoot)(container);
     this.root.render(
-      import_react7.default.createElement(import_react7.default.StrictMode, null, import_react7.default.createElement(AppView, { app: this.app }))
+      import_react8.default.createElement(import_react8.default.StrictMode, null, import_react8.default.createElement(AppView, { app: this.app }))
     );
   }
   async onClose() {
@@ -26551,14 +26902,6 @@ lucide-react/dist/esm/icons/align-left.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
-lucide-react/dist/esm/icons/arrow-left.js:
-  (**
-   * @license lucide-react v0.428.0 - ISC
-   *
-   * This source code is licensed under the ISC license.
-   * See the LICENSE file in the root directory of this source tree.
-   *)
-
 lucide-react/dist/esm/icons/arrow-up-down.js:
   (**
    * @license lucide-react v0.428.0 - ISC
@@ -26591,6 +26934,14 @@ lucide-react/dist/esm/icons/chevron-down.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
+lucide-react/dist/esm/icons/chevron-right.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
 lucide-react/dist/esm/icons/chevron-up.js:
   (**
    * @license lucide-react v0.428.0 - ISC
@@ -26607,6 +26958,38 @@ lucide-react/dist/esm/icons/chevrons-up-down.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
+lucide-react/dist/esm/icons/circle-alert.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/circle-check.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/circle.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/clock.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
 lucide-react/dist/esm/icons/copy.js:
   (**
    * @license lucide-react v0.428.0 - ISC
@@ -26615,7 +26998,23 @@ lucide-react/dist/esm/icons/copy.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
+lucide-react/dist/esm/icons/external-link.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
 lucide-react/dist/esm/icons/file-text.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/filter.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *
@@ -26672,6 +27071,14 @@ lucide-react/dist/esm/icons/refresh-cw.js:
    *)
 
 lucide-react/dist/esm/icons/search.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/square-check-big.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *

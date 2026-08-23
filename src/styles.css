@@ -1359,3 +1359,242 @@
   border-color: var(--interactive-accent);
 }
 
+/* Active Tab Style */
+.todo-calendar-app .active-tab {
+  background-color: var(--interactive-accent) !important;
+  color: var(--text-on-accent, #ffffff) !important;
+  font-weight: 600;
+}
+
+/* Agenda View Styles */
+.todo-calendar-app .todo-cal-agenda-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px 24px;
+  overflow-y: auto;
+  gap: 20px;
+  background-color: var(--background-primary);
+}
+
+.todo-calendar-app .todo-cal-agenda-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color, rgba(128, 128, 128, 0.2));
+}
+
+.todo-calendar-app .todo-cal-agenda-title-group {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.todo-calendar-app .todo-cal-agenda-title-group h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.todo-calendar-app .todo-cal-agenda-date {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-family: var(--font-monospace);
+}
+
+.todo-calendar-app .todo-cal-agenda-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.todo-calendar-app .todo-cal-agenda-filter-select {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.3));
+  background-color: var(--background-secondary);
+  color: var(--text-normal);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.todo-calendar-app .todo-cal-agenda-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.todo-calendar-app .todo-cal-agenda-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.todo-calendar-app .todo-cal-agenda-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.todo-calendar-app .todo-cal-agenda-section-header.collapsible {
+  cursor: pointer;
+  user-select: none;
+}
+
+.todo-calendar-app .todo-cal-agenda-section-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.todo-calendar-app .overdue-icon {
+  color: #ef4444;
+}
+
+.todo-calendar-app .today-icon {
+  color: var(--interactive-accent);
+}
+
+.todo-calendar-app .upcoming-icon {
+  color: #f59e0b;
+}
+
+.todo-calendar-app .count-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.todo-calendar-app .overdue-badge {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.todo-calendar-app .today-badge {
+  background-color: rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.15);
+  color: var(--interactive-accent);
+}
+
+.todo-calendar-app .upcoming-badge {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.todo-calendar-app .nodue-badge {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-muted);
+}
+
+.todo-calendar-app .todo-cal-agenda-empty {
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--background-secondary);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.todo-calendar-app .todo-cal-agenda-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.todo-calendar-app .todo-cal-agenda-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.15));
+  transition: all 0.15s ease;
+}
+
+.todo-calendar-app .todo-cal-agenda-card:hover {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.todo-calendar-app .todo-cal-agenda-card.is-done {
+  opacity: 0.6;
+}
+
+.todo-calendar-app .todo-cal-agenda-checkbox {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.todo-calendar-app .todo-cal-agenda-checkbox .icon-done {
+  color: #22c55e;
+}
+
+.todo-calendar-app .todo-cal-agenda-checkbox:hover .icon-todo {
+  color: var(--interactive-accent);
+}
+
+.todo-calendar-app .todo-cal-agenda-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.todo-calendar-app .todo-cal-agenda-card-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-normal);
+}
+
+.todo-calendar-app .todo-cal-agenda-card.is-done .todo-cal-agenda-card-title {
+  text-decoration: line-through;
+}
+
+.todo-calendar-app .todo-cal-agenda-card-sub {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.todo-calendar-app .todo-cal-agenda-card-sub .due-tag {
+  font-family: var(--font-monospace);
+  color: #ef4444;
+}
+
+.todo-calendar-app .todo-cal-collection-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--background-primary);
+  border: 1px solid var(--interactive-accent);
+  color: var(--text-normal);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.todo-calendar-app .todo-cal-collection-badge:hover {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent, #ffffff);
+}
+
+
