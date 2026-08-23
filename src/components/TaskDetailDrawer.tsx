@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, FileText, AlignLeft, Pencil, ChevronsUpDown, GripVertical, ArrowUpDown, Check, Copy } from 'lucide-react';
+import { X, Plus, Trash2, FileText, AlignLeft, Pencil, ChevronsUpDown, GripVertical, ArrowUpDown, Check, Copy, Calendar } from 'lucide-react';
 import { ItemData, TodoItem } from '../types';
+
+const formatDueDate = (dateStr: string): string => {
+  if (!dateStr) return '日付なし';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const currentYear = new Date().getFullYear().toString();
+    const [year, month, day] = parts;
+    if (year === currentYear) {
+      return `${month}/${day}`;
+    }
+    return `${year.slice(2)}/${month}/${day}`;
+  }
+  return dateStr;
+};
 
 interface TaskDetailDrawerProps {
   item: ItemData | null;
@@ -324,15 +338,22 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                       className={`todo-title-input ${todo.status === 'done' ? 'done-title' : ''}`}
                       placeholder="TODOの件名..."
                       value={todo.title}
+                      title={todo.title}
                       onChange={(e) => handleUpdateTodo(todo.id, { title: e.target.value })}
                     />
 
-                    <input
-                      type="date"
-                      className="due-date-input"
-                      value={todo.due}
-                      onChange={(e) => handleUpdateTodo(todo.id, { due: e.target.value })}
-                    />
+                    <div className="due-date-wrapper" title={`期日: ${todo.due || '未設定'}`}>
+                      <input
+                        type="date"
+                        className="due-date-input-overlay"
+                        value={todo.due || ''}
+                        onChange={(e) => handleUpdateTodo(todo.id, { due: e.target.value })}
+                      />
+                      <div className="due-date-badge">
+                        <Calendar size={12} className="due-date-icon" />
+                        <span>{formatDueDate(todo.due)}</span>
+                      </div>
+                    </div>
 
                     <button
                       className={`icon-btn toggle-desc-btn ${isEditingDesc ? 'active' : ''} ${hasDesc ? 'has-desc' : ''}`}

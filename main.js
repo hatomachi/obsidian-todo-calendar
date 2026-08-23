@@ -25813,6 +25813,19 @@ ${todo.description || ""}`,
 // src/components/TaskDetailDrawer.tsx
 var import_react5 = __toESM(require_react());
 var import_jsx_runtime4 = __toESM(require_jsx_runtime());
+var formatDueDate = (dateStr) => {
+  if (!dateStr) return "\u65E5\u4ED8\u306A\u3057";
+  const parts = dateStr.split("-");
+  if (parts.length === 3) {
+    const currentYear = (/* @__PURE__ */ new Date()).getFullYear().toString();
+    const [year, month, day] = parts;
+    if (year === currentYear) {
+      return `${month}/${day}`;
+    }
+    return `${year.slice(2)}/${month}/${day}`;
+  }
+  return dateStr;
+};
 var TaskDetailDrawer = ({
   item,
   selectedTodoId,
@@ -26099,18 +26112,25 @@ var TaskDetailDrawer = ({
                     className: `todo-title-input ${todo.status === "done" ? "done-title" : ""}`,
                     placeholder: "TODO\u306E\u4EF6\u540D...",
                     value: todo.title,
+                    title: todo.title,
                     onChange: (e) => handleUpdateTodo(todo.id, { title: e.target.value })
                   }
                 ),
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-                  "input",
-                  {
-                    type: "date",
-                    className: "due-date-input",
-                    value: todo.due,
-                    onChange: (e) => handleUpdateTodo(todo.id, { due: e.target.value })
-                  }
-                ),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "due-date-wrapper", title: `\u671F\u65E5: ${todo.due || "\u672A\u8A2D\u5B9A"}`, children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                    "input",
+                    {
+                      type: "date",
+                      className: "due-date-input-overlay",
+                      value: todo.due || "",
+                      onChange: (e) => handleUpdateTodo(todo.id, { due: e.target.value })
+                    }
+                  ),
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "due-date-badge", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Calendar, { size: 12, className: "due-date-icon" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: formatDueDate(todo.due) })
+                  ] })
+                ] }),
                 /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                   "button",
                   {

@@ -623,7 +623,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: 420px;
+  width: 480px;
   max-width: 90%;
   height: 100%;
   background-color: var(--background-secondary);
@@ -780,16 +780,58 @@
   border-bottom-color: var(--interactive-accent);
   background-color: var(--background-secondary-alt, rgba(0, 0, 0, 0.03));
 }
-.todo-calendar-app .due-date-input {
-  width: 110px;
+.todo-calendar-app .due-date-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
+}
+.todo-calendar-app .due-date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   background-color: var(--background-secondary);
-  color: var(--text-normal);
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  color: var(--text-muted);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   border-radius: 4px;
-  padding: 3px 4px;
-  font-size: 11px;
-  outline: none;
+  padding: 3px 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  pointer-events: none;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.todo-calendar-app .due-date-wrapper:hover .due-date-badge {
+  border-color: var(--interactive-accent);
+  color: var(--text-normal);
+  background-color: var(--background-primary);
+}
+.todo-calendar-app .due-date-icon {
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+.todo-calendar-app .due-date-wrapper:hover .due-date-icon {
+  color: var(--interactive-accent);
+}
+.todo-calendar-app .due-date-input-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+.todo-calendar-app .due-date-input-overlay::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
 }
 .todo-calendar-app .toggle-desc-btn {
   color: var(--text-muted);
