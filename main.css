@@ -1402,3 +1402,167 @@
   background-color: var(--interactive-accent);
   color: var(--text-on-accent, #ffffff);
 }
+.todo-calendar-app .nav-btn.active-toggle {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent, #ffffff);
+}
+.todo-calendar-app .editor-group-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--background-secondary);
+  border: 1px dashed var(--border-color, rgba(255, 255, 255, 0.12));
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-bottom: 6px;
+}
+.todo-calendar-app .editor-group-icon {
+  color: var(--interactive-accent);
+  flex-shrink: 0;
+}
+.todo-calendar-app .editor-group-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+.todo-calendar-app .editor-group-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-normal);
+  font-size: 12px;
+  outline: none;
+  font-family: inherit;
+}
+.todo-calendar-app .editor-group-input:focus {
+  color: var(--text-normal);
+}
+.todo-calendar-app .add-group-btn-container {
+  margin-bottom: 8px;
+}
+.todo-calendar-app .subtle-add-group-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 1px dashed var(--border-color, rgba(255, 255, 255, 0.15));
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.todo-calendar-app .subtle-add-group-btn:hover {
+  border-color: var(--interactive-accent);
+  color: var(--interactive-accent);
+  background-color: var(--background-modifier-hover);
+}
+.todo-calendar-app .add-group-inline-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--interactive-accent);
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin-bottom: 10px;
+}
+.todo-calendar-app .add-group-icon {
+  color: var(--interactive-accent);
+  flex-shrink: 0;
+}
+.todo-calendar-app .add-group-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-normal);
+  font-size: 12px;
+  outline: none;
+}
+.todo-calendar-app .grouped-todo-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.todo-calendar-app .todo-group-section {
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 6px;
+  background-color: var(--background-secondary-alt, rgba(0, 0, 0, 0.02));
+  overflow: hidden;
+}
+.todo-calendar-app .group-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background-color: var(--background-secondary);
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease;
+}
+.todo-calendar-app .group-section-header:hover {
+  background-color: var(--background-modifier-hover);
+}
+.todo-calendar-app .group-section-header.ungrouped-header {
+  opacity: 0.85;
+}
+.todo-calendar-app .group-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.todo-calendar-app .collapse-toggle-btn {
+  padding: 2px;
+  color: var(--text-muted);
+}
+.todo-calendar-app .group-header-tag-icon {
+  color: var(--interactive-accent);
+}
+.todo-calendar-app .group-header-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+.todo-calendar-app .group-count-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background-color: var(--background-primary);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+.todo-calendar-app .group-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.todo-calendar-app .subtle-icon-btn.group-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+.todo-calendar-app .subtle-icon-btn.group-add-btn:hover {
+  color: var(--interactive-accent);
+  background-color: var(--background-primary);
+}
+.todo-calendar-app .group-section-body {
+  padding: 8px;
+}
+.todo-calendar-app .empty-group-hint {
+  padding: 10px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-faint);
+  font-style: italic;
+}

@@ -1122,7 +1122,7 @@ var require_react_development = __commonJS({
           var dispatcher = resolveDispatcher();
           return dispatcher.useCallback(callback, deps);
         }
-        function useMemo(create, deps) {
+        function useMemo2(create, deps) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useMemo(create, deps);
         }
@@ -1894,7 +1894,7 @@ var require_react_development = __commonJS({
         exports.useImperativeHandle = useImperativeHandle;
         exports.useInsertionEffect = useInsertionEffect;
         exports.useLayoutEffect = useLayoutEffect;
-        exports.useMemo = useMemo;
+        exports.useMemo = useMemo2;
         exports.useReducer = useReducer;
         exports.useRef = useRef;
         exports.useState = useState5;
@@ -24677,7 +24677,8 @@ ${bodyContent}`;
           title: t.title || "Untitled TODO",
           due: t.due || "",
           status: t.status === "done" ? "done" : "todo",
-          description: t.description || ""
+          description: t.description || "",
+          group: t.group || ""
         })) : [];
         items.push({
           id: frontmatter.id || file.basename,
@@ -24749,7 +24750,8 @@ ${bodyContent}`;
         title: t.title,
         due: t.due,
         status: t.status,
-        description: t.description || ""
+        description: t.description || "",
+        ...t.group ? { group: t.group } : {}
       }))
     };
     const newContent = this.formatMarkdownWithFrontmatter(frontmatter, bodyContent);
@@ -24987,6 +24989,16 @@ var Layers = createLucideIcon("Layers", [
   ["path", { d: "m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65", key: "ep9fru" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/list.js
+var List = createLucideIcon("List", [
+  ["line", { x1: "8", x2: "21", y1: "6", y2: "6", key: "7ey8pc" }],
+  ["line", { x1: "8", x2: "21", y1: "12", y2: "12", key: "rjfblc" }],
+  ["line", { x1: "8", x2: "21", y1: "18", y2: "18", key: "c3b1m8" }],
+  ["line", { x1: "3", x2: "3.01", y1: "6", y2: "6", key: "1g7gq3" }],
+  ["line", { x1: "3", x2: "3.01", y1: "12", y2: "12", key: "1pjlvk" }],
+  ["line", { x1: "3", x2: "3.01", y1: "18", y2: "18", key: "28t2mc" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/pencil.js
 var Pencil = createLucideIcon("Pencil", [
   [
@@ -25023,6 +25035,18 @@ var Search = createLucideIcon("Search", [
 var SquareCheckBig = createLucideIcon("SquareCheckBig", [
   ["path", { d: "M21 10.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.5", key: "1uzm8b" }],
   ["path", { d: "m9 11 3 3L22 4", key: "1pflzl" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/tag.js
+var Tag = createLucideIcon("Tag", [
+  [
+    "path",
+    {
+      d: "M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z",
+      key: "vktsd0"
+    }
+  ],
+  ["circle", { cx: "7.5", cy: "7.5", r: ".5", fill: "currentColor", key: "kqv944" }]
 ]);
 
 // node_modules/lucide-react/dist/esm/icons/trash-2.js
@@ -25813,6 +25837,7 @@ ${todo.description || ""}`,
 // src/components/TaskDetailDrawer.tsx
 var import_react5 = __toESM(require_react());
 var import_jsx_runtime4 = __toESM(require_jsx_runtime());
+var UNGROUPED_LABEL = "\u672A\u5206\u985E";
 var formatDueDate = (dateStr) => {
   if (!dateStr) return "\u65E5\u4ED8\u306A\u3057";
   const parts = dateStr.split("-");
@@ -25839,6 +25864,10 @@ var TaskDetailDrawer = ({
   const [isEditingItemDesc, setIsEditingItemDesc] = (0, import_react5.useState)(false);
   const [draggedIndex, setDraggedIndex] = (0, import_react5.useState)(null);
   const [dragOverIndex, setDragOverIndex] = (0, import_react5.useState)(null);
+  const [isGroupedView, setIsGroupedView] = (0, import_react5.useState)(true);
+  const [collapsedGroups, setCollapsedGroups] = (0, import_react5.useState)({});
+  const [newGroupInput, setNewGroupInput] = (0, import_react5.useState)("");
+  const [showAddGroupInput, setShowAddGroupInput] = (0, import_react5.useState)(false);
   (0, import_react5.useEffect)(() => {
     setLocalItem(item);
   }, [item]);
@@ -25847,6 +25876,38 @@ var TaskDetailDrawer = ({
       setEditingDescIds((prev) => ({ ...prev, [selectedTodoId]: true }));
     }
   }, [selectedTodoId]);
+  const existingGroups = (0, import_react5.useMemo)(() => {
+    if (!localItem) return [];
+    const groups = /* @__PURE__ */ new Set();
+    localItem.todos.forEach((t) => {
+      if (t.group && t.group.trim()) {
+        groups.add(t.group.trim());
+      }
+    });
+    return Array.from(groups);
+  }, [localItem]);
+  const groupedTodos = (0, import_react5.useMemo)(() => {
+    if (!localItem) return [];
+    const map = /* @__PURE__ */ new Map();
+    existingGroups.forEach((g) => map.set(g, []));
+    map.set(UNGROUPED_LABEL, []);
+    localItem.todos.forEach((todo) => {
+      const g = todo.group && todo.group.trim() ? todo.group.trim() : UNGROUPED_LABEL;
+      if (!map.has(g)) {
+        map.set(g, []);
+      }
+      map.get(g).push(todo);
+    });
+    const result = [];
+    existingGroups.forEach((g) => {
+      result.push({ groupName: g, todos: map.get(g) || [] });
+    });
+    const ungrouped = map.get(UNGROUPED_LABEL) || [];
+    if (ungrouped.length > 0 || existingGroups.length === 0) {
+      result.push({ groupName: UNGROUPED_LABEL, todos: ungrouped });
+    }
+    return result;
+  }, [localItem, existingGroups]);
   if (!isOpen || !localItem) return null;
   const handleTitleChange = (newTitle) => {
     const updated = { ...localItem, title: newTitle };
@@ -25858,13 +25919,15 @@ var TaskDetailDrawer = ({
     setLocalItem(updated);
     onUpdateItem(updated);
   };
-  const handleAddTodo = () => {
+  const handleAddTodo = (groupName) => {
+    const defaultGroup = groupName && groupName !== UNGROUPED_LABEL ? groupName : "";
     const newTodo = {
       id: `todo-${Date.now()}`,
       title: "",
       due: (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
       status: "todo",
-      description: ""
+      description: "",
+      group: defaultGroup
     };
     const updated = {
       ...localItem,
@@ -25872,6 +25935,16 @@ var TaskDetailDrawer = ({
     };
     setLocalItem(updated);
     onUpdateItem(updated);
+  };
+  const handleAddGroupSubmit = () => {
+    const groupName = newGroupInput.trim();
+    if (!groupName) {
+      setShowAddGroupInput(false);
+      return;
+    }
+    handleAddTodo(groupName);
+    setNewGroupInput("");
+    setShowAddGroupInput(false);
   };
   const handleUpdateTodo = (todoId, fields) => {
     const updatedTodos = localItem.todos.map((t) => {
@@ -25890,9 +25963,10 @@ var TaskDetailDrawer = ({
     setLocalItem(updated);
     onUpdateItem(updated);
   };
-  const handleDuplicateTodo = (index) => {
+  const handleDuplicateTodo = (todoId) => {
+    const index = localItem.todos.findIndex((t) => t.id === todoId);
+    if (index === -1) return;
     const target = localItem.todos[index];
-    if (!target) return;
     const duplicated = {
       ...target,
       id: `todo-${Date.now()}`
@@ -25916,6 +25990,12 @@ var TaskDetailDrawer = ({
       newMap[t.id] = !areAllEditing;
     });
     setEditingDescIds(newMap);
+  };
+  const handleToggleGroupCollapse = (groupName) => {
+    setCollapsedGroups((prev) => ({
+      ...prev,
+      [groupName]: !prev[groupName]
+    }));
   };
   const handleSortByDueDate = () => {
     const sorted = [...localItem.todos].sort((a, b) => {
@@ -25958,7 +26038,137 @@ var TaskDetailDrawer = ({
     setDraggedIndex(null);
     setDragOverIndex(null);
   };
+  const renderTodoCard = (todo, originalIndex) => {
+    const isFocused = todo.id === selectedTodoId;
+    const isEditingDesc = !!editingDescIds[todo.id];
+    const hasDesc = !!todo.description?.trim();
+    const isDragging = draggedIndex === originalIndex;
+    const isDragOver = dragOverIndex === originalIndex;
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+      "div",
+      {
+        draggable: true,
+        onDragStart: (e) => handleDragStart(e, originalIndex),
+        onDragOver: (e) => handleDragOver(e, originalIndex),
+        onDrop: (e) => handleDrop(e, originalIndex),
+        onDragEnd: handleDragEnd,
+        className: `todo-form-card ${isFocused ? "todo-focused" : ""} ${isDragging ? "dragging" : ""} ${isDragOver ? "drag-over" : ""}`,
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "todo-card-row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "drag-handle", title: "\u30C9\u30E9\u30C3\u30B0\u3057\u3066\u4E26\u3079\u66FF\u3048", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(GripVertical, { size: 14 }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+              "input",
+              {
+                type: "checkbox",
+                checked: todo.status === "done",
+                onChange: (e) => handleUpdateTodo(todo.id, { status: e.target.checked ? "done" : "todo" }),
+                className: "todo-status-checkbox",
+                title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+              "input",
+              {
+                type: "text",
+                className: `todo-title-input ${todo.status === "done" ? "done-title" : ""}`,
+                placeholder: "TODO\u306E\u4EF6\u540D...",
+                value: todo.title,
+                title: todo.title,
+                onChange: (e) => handleUpdateTodo(todo.id, { title: e.target.value })
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "due-date-wrapper", title: `\u671F\u65E5: ${todo.due || "\u672A\u8A2D\u5B9A"}`, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                "input",
+                {
+                  type: "date",
+                  className: "due-date-input-overlay",
+                  value: todo.due || "",
+                  onChange: (e) => handleUpdateTodo(todo.id, { due: e.target.value })
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "due-date-badge", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Calendar, { size: 12, className: "due-date-icon" }),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: formatDueDate(todo.due) })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+              "button",
+              {
+                className: `icon-btn toggle-desc-btn ${isEditingDesc ? "active" : ""} ${hasDesc || !!todo.group?.trim() ? "has-desc" : ""}`,
+                onClick: () => toggleToggleEditDesc(todo.id),
+                title: isEditingDesc ? "\u8A73\u7D30\u7DE8\u96C6\u3092\u9589\u3058\u308B" : "\u30B0\u30EB\u30FC\u30D7\u30FB\u8A73\u7D30\u30E1\u30E2\u3092\u7DE8\u96C6",
+                children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Pencil, { size: 13 })
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+              "button",
+              {
+                className: "icon-btn duplicate-todo-btn",
+                onClick: () => handleDuplicateTodo(todo.id),
+                title: "TODO\u3092\u8907\u88FD",
+                children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Copy, { size: 13 })
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+              "button",
+              {
+                className: "icon-btn delete-todo-btn",
+                onClick: () => handleDeleteTodo(todo.id),
+                title: "TODO\u524A\u9664",
+                children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Trash2, { size: 13 })
+              }
+            )
+          ] }),
+          isEditingDesc ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "todo-card-desc-editor", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "editor-group-bar", title: "\u30B0\u30EB\u30FC\u30D7\u3092\u8A2D\u5B9A\u30FB\u5909\u66F4", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Tag, { size: 13, className: "editor-group-icon" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "editor-group-label", children: "\u30B0\u30EB\u30FC\u30D7:" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                "input",
+                {
+                  type: "text",
+                  list: "existing-groups-list",
+                  className: "editor-group-input",
+                  placeholder: "\u30B0\u30EB\u30FC\u30D7\u540D\uFF08\u672A\u8A2D\u5B9A\u6642\u306F\u672A\u5206\u985E\uFF09...",
+                  value: todo.group || "",
+                  onChange: (e) => handleUpdateTodo(todo.id, { group: e.target.value })
+                }
+              )
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "textarea-wrapper", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(AlignLeft, { size: 13, className: "textarea-icon" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                "textarea",
+                {
+                  className: "todo-desc-textarea",
+                  placeholder: "\u8A73\u7D30\u30FB\u30E1\u30E2\u3092\u5165\u529B...",
+                  value: todo.description || "",
+                  onChange: (e) => handleUpdateTodo(todo.id, { description: e.target.value }),
+                  rows: 2,
+                  autoFocus: true
+                }
+              )
+            ] })
+          ] }) : hasDesc ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+            "div",
+            {
+              className: "todo-desc-preview",
+              onClick: () => toggleToggleEditDesc(todo.id),
+              title: "\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u8A73\u7D30\u30FB\u30B0\u30EB\u30FC\u30D7\u3092\u7DE8\u96C6",
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(AlignLeft, { size: 12, className: "desc-preview-icon" }),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "desc-preview-text", children: todo.description })
+              ]
+            }
+          ) : null
+        ]
+      },
+      todo.id
+    );
+  };
   return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "detail-drawer", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("datalist", { id: "existing-groups-list", children: existingGroups.map((g) => /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("option", { value: g }, g)) }),
     /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "drawer-header", children: [
       /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "header-title-section", children: [
         /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(FileText, { size: 18, className: "item-drawer-icon" }),
@@ -26049,6 +26259,18 @@ var TaskDetailDrawer = ({
             /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
               "button",
               {
+                className: `nav-btn secondary-btn sm-btn ${isGroupedView ? "active-toggle" : ""}`,
+                onClick: () => setIsGroupedView(!isGroupedView),
+                title: isGroupedView ? "\u30D5\u30E9\u30C3\u30C8\u8868\u793A\u306B\u5207\u66FF" : "\u30B0\u30EB\u30FC\u30D7\u8868\u793A\u306B\u5207\u66FF",
+                children: [
+                  isGroupedView ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Layers, { size: 13 }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(List, { size: 13 }),
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: isGroupedView ? "\u30B0\u30EB\u30FC\u30D7\u8868\u793A" : "\u30EA\u30B9\u30C8\u8868\u793A" })
+                ]
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+              "button",
+              {
                 className: "nav-btn secondary-btn sm-btn",
                 onClick: handleSortByDueDate,
                 title: "\u671F\u65E5\u306E\u6607\u9806\u3067\u4E26\u3079\u66FF\u3048",
@@ -26071,124 +26293,86 @@ var TaskDetailDrawer = ({
               }
             )
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("button", { className: "nav-btn primary-btn sm-btn", onClick: handleAddTodo, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("button", { className: "nav-btn primary-btn sm-btn", onClick: () => handleAddTodo(), children: [
             /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Plus, { size: 14 }),
             /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "TODO\u3092\u8FFD\u52A0" })
           ] })
         ] })
       ] }),
-      localItem.todos.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "empty-todos", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { children: "\u3053\u306E\u30CE\u30FC\u30C8\u306B\u306FTODO\u304C\u307E\u3060\u3042\u308A\u307E\u305B\u3093\u3002\u300CTODO\u3092\u8FFD\u52A0\u300D\u30DC\u30BF\u30F3\u3092\u62BC\u3057\u3066\u767B\u9332\u3057\u3066\u304F\u3060\u3055\u3044\u3002" }) }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "todo-form-list", children: localItem.todos.map((todo, index) => {
-        const isFocused = todo.id === selectedTodoId;
-        const isEditingDesc = !!editingDescIds[todo.id];
-        const hasDesc = !!todo.description?.trim();
-        const isDragging = draggedIndex === index;
-        const isDragOver = dragOverIndex === index;
-        return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
-          "div",
+      showAddGroupInput ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "add-group-inline-bar", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Tag, { size: 13, className: "add-group-icon" }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+          "input",
           {
-            draggable: true,
-            onDragStart: (e) => handleDragStart(e, index),
-            onDragOver: (e) => handleDragOver(e, index),
-            onDrop: (e) => handleDrop(e, index),
-            onDragEnd: handleDragEnd,
-            className: `todo-form-card ${isFocused ? "todo-focused" : ""} ${isDragging ? "dragging" : ""} ${isDragOver ? "drag-over" : ""}`,
-            children: [
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "todo-card-row", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "drag-handle", title: "\u30C9\u30E9\u30C3\u30B0\u3057\u3066\u4E26\u3079\u66FF\u3048", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(GripVertical, { size: 14 }) }),
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-                  "input",
-                  {
-                    type: "checkbox",
-                    checked: todo.status === "done",
-                    onChange: (e) => handleUpdateTodo(todo.id, { status: e.target.checked ? "done" : "todo" }),
-                    className: "todo-status-checkbox",
-                    title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
-                  }
-                ),
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-                  "input",
-                  {
-                    type: "text",
-                    className: `todo-title-input ${todo.status === "done" ? "done-title" : ""}`,
-                    placeholder: "TODO\u306E\u4EF6\u540D...",
-                    value: todo.title,
-                    title: todo.title,
-                    onChange: (e) => handleUpdateTodo(todo.id, { title: e.target.value })
-                  }
-                ),
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "due-date-wrapper", title: `\u671F\u65E5: ${todo.due || "\u672A\u8A2D\u5B9A"}`, children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-                    "input",
+            type: "text",
+            className: "add-group-input",
+            placeholder: "\u65B0\u3057\u3044\u30B0\u30EB\u30FC\u30D7\u540D\uFF08\u4F8B: \u30B8\u30D6\u30EA\u30D1\u30FC\u30AF\u3001\u30EC\u30B4\u30E9\u30F3\u30C9\uFF09...",
+            value: newGroupInput,
+            onChange: (e) => setNewGroupInput(e.target.value),
+            onKeyDown: (e) => {
+              if (e.key === "Enter") handleAddGroupSubmit();
+              if (e.key === "Escape") setShowAddGroupInput(false);
+            },
+            autoFocus: true
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { className: "icon-btn", onClick: handleAddGroupSubmit, title: "\u30B0\u30EB\u30FC\u30D7\u8FFD\u52A0", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Check, { size: 13 }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { className: "icon-btn", onClick: () => setShowAddGroupInput(false), title: "\u30AD\u30E3\u30F3\u30BB\u30EB", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(X, { size: 13 }) })
+      ] }) : isGroupedView && localItem.todos.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "add-group-btn-container", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+        "button",
+        {
+          className: "subtle-add-group-btn",
+          onClick: () => setShowAddGroupInput(true),
+          title: "\u65B0\u3057\u3044\u30B0\u30EB\u30FC\u30D7\u3092\u8FFD\u52A0\u3057\u3066\u30BF\u30B9\u30AF\u3092\u4F5C\u6210",
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Plus, { size: 12 }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u65B0\u3057\u3044\u30B0\u30EB\u30FC\u30D7\u3092\u8FFD\u52A0..." })
+          ]
+        }
+      ) }) : null,
+      localItem.todos.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "empty-todos", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { children: "\u3053\u306E\u30CE\u30FC\u30C8\u306B\u306FTODO\u304C\u307E\u3060\u3042\u308A\u307E\u305B\u3093\u3002\u300CTODO\u3092\u8FFD\u52A0\u300D\u30DC\u30BF\u30F3\u3092\u62BC\u3057\u3066\u767B\u9332\u3057\u3066\u304F\u3060\u3055\u3044\u3002" }) }) : isGroupedView ? (
+        /* Grouped View Mode */
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "grouped-todo-container", children: groupedTodos.map(({ groupName, todos: groupTodos }) => {
+          const isCollapsed = !!collapsedGroups[groupName];
+          const isUngrouped = groupName === UNGROUPED_LABEL;
+          return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "todo-group-section", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+              "div",
+              {
+                className: `group-section-header ${isUngrouped ? "ungrouped-header" : ""}`,
+                onClick: () => handleToggleGroupCollapse(groupName),
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "group-header-left", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { className: "icon-btn collapse-toggle-btn", children: isCollapsed ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ChevronRight, { size: 14 }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ChevronDown, { size: 14 }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Tag, { size: 13, className: "group-header-tag-icon" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "group-header-title", children: groupName }),
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "group-count-badge", children: groupTodos.length })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "group-header-actions", onClick: (e) => e.stopPropagation(), children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+                    "button",
                     {
-                      type: "date",
-                      className: "due-date-input-overlay",
-                      value: todo.due || "",
-                      onChange: (e) => handleUpdateTodo(todo.id, { due: e.target.value })
+                      className: "subtle-icon-btn group-add-btn",
+                      onClick: () => handleAddTodo(isUngrouped ? "" : groupName),
+                      title: `"${groupName}" \u306BTODO\u3092\u8FFD\u52A0`,
+                      children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Plus, { size: 13 }),
+                        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u8FFD\u52A0" })
+                      ]
                     }
-                  ),
-                  /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "due-date-badge", children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Calendar, { size: 12, className: "due-date-icon" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: formatDueDate(todo.due) })
-                  ] })
-                ] }),
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-                  "button",
-                  {
-                    className: `icon-btn toggle-desc-btn ${isEditingDesc ? "active" : ""} ${hasDesc ? "has-desc" : ""}`,
-                    onClick: () => toggleToggleEditDesc(todo.id),
-                    title: isEditingDesc ? "\u8A73\u7D30\u7DE8\u96C6\u3092\u9589\u3058\u308B" : "\u8A73\u7D30\u30FB\u30E1\u30E2\u3092\u7DE8\u96C6",
-                    children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Pencil, { size: 13 })
-                  }
-                ),
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-                  "button",
-                  {
-                    className: "icon-btn duplicate-todo-btn",
-                    onClick: () => handleDuplicateTodo(index),
-                    title: "TODO\u3092\u8907\u88FD",
-                    children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Copy, { size: 13 })
-                  }
-                ),
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-                  "button",
-                  {
-                    className: "icon-btn delete-todo-btn",
-                    onClick: () => handleDeleteTodo(todo.id),
-                    title: "TODO\u524A\u9664",
-                    children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Trash2, { size: 13 })
-                  }
-                )
-              ] }),
-              isEditingDesc ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "todo-card-desc-editor", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "textarea-wrapper", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(AlignLeft, { size: 13, className: "textarea-icon" }),
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-                  "textarea",
-                  {
-                    className: "todo-desc-textarea",
-                    placeholder: "\u8A73\u7D30\u30FB\u30E1\u30E2\u3092\u5165\u529B...",
-                    value: todo.description || "",
-                    onChange: (e) => handleUpdateTodo(todo.id, { description: e.target.value }),
-                    rows: 2,
-                    autoFocus: true
-                  }
-                )
-              ] }) }) : hasDesc ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
-                "div",
-                {
-                  className: "todo-desc-preview",
-                  onClick: () => toggleToggleEditDesc(todo.id),
-                  title: "\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u8A73\u7D30\u3092\u7DE8\u96C6",
-                  children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(AlignLeft, { size: 12, className: "desc-preview-icon" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "desc-preview-text", children: todo.description })
-                  ]
-                }
-              ) : null
-            ]
-          },
-          todo.id
-        );
-      }) })
+                  ) })
+                ]
+              }
+            ),
+            !isCollapsed && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "group-section-body", children: groupTodos.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "empty-group-hint", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u30BF\u30B9\u30AF\u306F\u3042\u308A\u307E\u305B\u3093\u3002\u300C\u8FFD\u52A0\u300D\u30DC\u30BF\u30F3\u3067\u3053\u306E\u30B0\u30EB\u30FC\u30D7\u306B\u767B\u9332\u3067\u304D\u307E\u3059\u3002" }) }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "todo-form-list", children: groupTodos.map((todo) => {
+              const originalIndex = localItem.todos.findIndex((t) => t.id === todo.id);
+              return renderTodoCard(todo, originalIndex);
+            }) }) })
+          ] }, groupName);
+        }) })
+      ) : (
+        /* Flat View Mode */
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "todo-form-list", children: localItem.todos.map((todo, index) => renderTodoCard(todo, index)) })
+      )
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "drawer-footer", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "file-path-info", children: [
       "Path: ",
@@ -27066,6 +27250,14 @@ lucide-react/dist/esm/icons/layers.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
+lucide-react/dist/esm/icons/list.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
 lucide-react/dist/esm/icons/pencil.js:
   (**
    * @license lucide-react v0.428.0 - ISC
@@ -27099,6 +27291,14 @@ lucide-react/dist/esm/icons/search.js:
    *)
 
 lucide-react/dist/esm/icons/square-check-big.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/tag.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *

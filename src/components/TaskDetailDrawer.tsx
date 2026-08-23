@@ -1,6 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, FileText, AlignLeft, Pencil, ChevronsUpDown, GripVertical, ArrowUpDown, Check, Copy, Calendar } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  X,
+  Plus,
+  Trash2,
+  FileText,
+  AlignLeft,
+  Pencil,
+  ChevronsUpDown,
+  GripVertical,
+  ArrowUpDown,
+  Check,
+  Copy,
+  Calendar,
+  Tag,
+  ChevronDown,
+  ChevronRight,
+  List,
+  Layers,
+} from 'lucide-react';
 import { ItemData, TodoItem } from '../types';
+
+const UNGROUPED_LABEL = '未分類';
 
 const formatDueDate = (dateStr: string): string => {
   if (!dateStr) return '日付なし';
@@ -39,6 +59,12 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
+  // Grouping features state
+  const [isGroupedView, setIsGroupedView] = useState(true);
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const [newGroupInput, setNewGroupInput] = useState('');
+  const [showAddGroupInput, setShowAddGroupInput] = useState(false);
+
   useEffect(() => {
     setLocalItem(item);
   }, [item]);
@@ -48,6 +74,52 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
       setEditingDescIds((prev) => ({ ...prev, [selectedTodoId]: true }));
     }
   }, [selectedTodoId]);
+
+  // Extract all unique group names (excluding empty string / undefined)
+  const existingGroups = useMemo(() => {
+    if (!localItem) return [];
+    const groups = new Set<string>();
+    localItem.todos.forEach((t) => {
+      if (t.group && t.group.trim()) {
+        groups.add(t.group.trim());
+      }
+    });
+    return Array.from(groups);
+  }, [localItem]);
+
+  // Group items by group name
+  const groupedTodos = useMemo(() => {
+    if (!localItem) return [];
+    const map = new Map<string, TodoItem[]>();
+
+    // Initialize with existing groups
+    existingGroups.forEach((g) => map.set(g, []));
+    map.set(UNGROUPED_LABEL, []);
+
+    localItem.todos.forEach((todo) => {
+      const g = todo.group && todo.group.trim() ? todo.group.trim() : UNGROUPED_LABEL;
+      if (!map.has(g)) {
+        map.set(g, []);
+      }
+      map.get(g)!.push(todo);
+    });
+
+    // Remove empty groups EXCEPT if they were explicitly created or if it's UNGROUPED_LABEL when it has items
+    const result: { groupName: string; todos: TodoItem[] }[] = [];
+
+    // Registered non-empty groups first
+    existingGroups.forEach((g) => {
+      result.push({ groupName: g, todos: map.get(g) || [] });
+    });
+
+    // Add ungrouped at the end
+    const ungrouped = map.get(UNGROUPED_LABEL) || [];
+    if (ungrouped.length > 0 || existingGroups.length === 0) {
+      result.push({ groupName: UNGROUPED_LABEL, todos: ungrouped });
+    }
+
+    return result;
+  }, [localItem, existingGroups]);
 
   if (!isOpen || !localItem) return null;
 
@@ -63,13 +135,15 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     onUpdateItem(updated);
   };
 
-  const handleAddTodo = () => {
+  const handleAddTodo = (groupName?: string) => {
+    const defaultGroup = groupName && groupName !== UNGROUPED_LABEL ? groupName : '';
     const newTodo: TodoItem = {
       id: `todo-${Date.now()}`,
       title: '',
       due: new Date().toISOString().split('T')[0],
       status: 'todo',
       description: '',
+      group: defaultGroup,
     };
     const updated = {
       ...localItem,
@@ -77,6 +151,18 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     };
     setLocalItem(updated);
     onUpdateItem(updated);
+  };
+
+  const handleAddGroupSubmit = () => {
+    const groupName = newGroupInput.trim();
+    if (!groupName) {
+      setShowAddGroupInput(false);
+      return;
+    }
+    // Add a new todo with this group name automatically
+    handleAddTodo(groupName);
+    setNewGroupInput('');
+    setShowAddGroupInput(false);
   };
 
   const handleUpdateTodo = (todoId: string, fields: Partial<TodoItem>) => {
@@ -98,9 +184,10 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     onUpdateItem(updated);
   };
 
-  const handleDuplicateTodo = (index: number) => {
+  const handleDuplicateTodo = (todoId: string) => {
+    const index = localItem.todos.findIndex((t) => t.id === todoId);
+    if (index === -1) return;
     const target = localItem.todos[index];
-    if (!target) return;
 
     const duplicated: TodoItem = {
       ...target,
@@ -132,6 +219,13 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
       newMap[t.id] = !areAllEditing;
     });
     setEditingDescIds(newMap);
+  };
+
+  const handleToggleGroupCollapse = (groupName: string) => {
+    setCollapsedGroups((prev) => ({
+      ...prev,
+      [groupName]: !prev[groupName],
+    }));
   };
 
   const handleSortByDueDate = () => {
@@ -184,8 +278,140 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     setDragOverIndex(null);
   };
 
+  // Helper to render single todo card
+  const renderTodoCard = (todo: TodoItem, originalIndex: number) => {
+    const isFocused = todo.id === selectedTodoId;
+    const isEditingDesc = !!editingDescIds[todo.id];
+    const hasDesc = !!todo.description?.trim();
+    const isDragging = draggedIndex === originalIndex;
+    const isDragOver = dragOverIndex === originalIndex;
+
+    return (
+      <div
+        key={todo.id}
+        draggable
+        onDragStart={(e) => handleDragStart(e, originalIndex)}
+        onDragOver={(e) => handleDragOver(e, originalIndex)}
+        onDrop={(e) => handleDrop(e, originalIndex)}
+        onDragEnd={handleDragEnd}
+        className={`todo-form-card ${isFocused ? 'todo-focused' : ''} ${
+          isDragging ? 'dragging' : ''
+        } ${isDragOver ? 'drag-over' : ''}`}
+      >
+        <div className="todo-card-row">
+          <div className="drag-handle" title="ドラッグして並べ替え">
+            <GripVertical size={14} />
+          </div>
+
+          <input
+            type="checkbox"
+            checked={todo.status === 'done'}
+            onChange={(e) =>
+              handleUpdateTodo(todo.id, { status: e.target.checked ? 'done' : 'todo' })
+            }
+            className="todo-status-checkbox"
+            title={todo.status === 'done' ? '未完了に戻す' : '完了にする'}
+          />
+
+          <input
+            type="text"
+            className={`todo-title-input ${todo.status === 'done' ? 'done-title' : ''}`}
+            placeholder="TODOの件名..."
+            value={todo.title}
+            title={todo.title}
+            onChange={(e) => handleUpdateTodo(todo.id, { title: e.target.value })}
+          />
+
+          <div className="due-date-wrapper" title={`期日: ${todo.due || '未設定'}`}>
+            <input
+              type="date"
+              className="due-date-input-overlay"
+              value={todo.due || ''}
+              onChange={(e) => handleUpdateTodo(todo.id, { due: e.target.value })}
+            />
+            <div className="due-date-badge">
+              <Calendar size={12} className="due-date-icon" />
+              <span>{formatDueDate(todo.due)}</span>
+            </div>
+          </div>
+
+          <button
+            className={`icon-btn toggle-desc-btn ${isEditingDesc ? 'active' : ''} ${
+              hasDesc || !!todo.group?.trim() ? 'has-desc' : ''
+            }`}
+            onClick={() => toggleToggleEditDesc(todo.id)}
+            title={isEditingDesc ? '詳細編集を閉じる' : 'グループ・詳細メモを編集'}
+          >
+            <Pencil size={13} />
+          </button>
+
+          <button
+            className="icon-btn duplicate-todo-btn"
+            onClick={() => handleDuplicateTodo(todo.id)}
+            title="TODOを複製"
+          >
+            <Copy size={13} />
+          </button>
+
+          <button
+            className="icon-btn delete-todo-btn"
+            onClick={() => handleDeleteTodo(todo.id)}
+            title="TODO削除"
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
+
+        {/* Description & Group Editor Section */}
+        {isEditingDesc ? (
+          <div className="todo-card-desc-editor">
+            <div className="editor-group-bar" title="グループを設定・変更">
+              <Tag size={13} className="editor-group-icon" />
+              <span className="editor-group-label">グループ:</span>
+              <input
+                type="text"
+                list="existing-groups-list"
+                className="editor-group-input"
+                placeholder="グループ名（未設定時は未分類）..."
+                value={todo.group || ''}
+                onChange={(e) => handleUpdateTodo(todo.id, { group: e.target.value })}
+              />
+            </div>
+            <div className="textarea-wrapper">
+              <AlignLeft size={13} className="textarea-icon" />
+              <textarea
+                className="todo-desc-textarea"
+                placeholder="詳細・メモを入力..."
+                value={todo.description || ''}
+                onChange={(e) => handleUpdateTodo(todo.id, { description: e.target.value })}
+                rows={2}
+                autoFocus
+              />
+            </div>
+          </div>
+        ) : hasDesc ? (
+          <div
+            className="todo-desc-preview"
+            onClick={() => toggleToggleEditDesc(todo.id)}
+            title="クリックして詳細・グループを編集"
+          >
+            <AlignLeft size={12} className="desc-preview-icon" />
+            <span className="desc-preview-text">{todo.description}</span>
+          </div>
+        ) : null}
+      </div>
+    );
+  };
+
   return (
     <div className="detail-drawer">
+      {/* Datalist for Group auto-completion */}
+      <datalist id="existing-groups-list">
+        {existingGroups.map((g) => (
+          <option key={g} value={g} />
+        ))}
+      </datalist>
+
       <div className="drawer-header">
         <div className="header-title-section">
           <FileText size={18} className="item-drawer-icon" />
@@ -267,6 +493,16 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           <div className="section-actions">
             {localItem.todos.length > 0 && (
               <>
+                {/* Grouping View Toggle Button */}
+                <button
+                  className={`nav-btn secondary-btn sm-btn ${isGroupedView ? 'active-toggle' : ''}`}
+                  onClick={() => setIsGroupedView(!isGroupedView)}
+                  title={isGroupedView ? 'フラット表示に切替' : 'グループ表示に切替'}
+                >
+                  {isGroupedView ? <Layers size={13} /> : <List size={13} />}
+                  <span>{isGroupedView ? 'グループ表示' : 'リスト表示'}</span>
+                </button>
+
                 <button
                   className="nav-btn secondary-btn sm-btn"
                   onClick={handleSortByDueDate}
@@ -286,128 +522,112 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                 </button>
               </>
             )}
-            <button className="nav-btn primary-btn sm-btn" onClick={handleAddTodo}>
+
+            <button className="nav-btn primary-btn sm-btn" onClick={() => handleAddTodo()}>
               <Plus size={14} />
               <span>TODOを追加</span>
             </button>
           </div>
         </div>
 
+        {/* Add Group inline input */}
+        {showAddGroupInput ? (
+          <div className="add-group-inline-bar">
+            <Tag size={13} className="add-group-icon" />
+            <input
+              type="text"
+              className="add-group-input"
+              placeholder="新しいグループ名（例: ジブリパーク、レゴランド）..."
+              value={newGroupInput}
+              onChange={(e) => setNewGroupInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAddGroupSubmit();
+                if (e.key === 'Escape') setShowAddGroupInput(false);
+              }}
+              autoFocus
+            />
+            <button className="icon-btn" onClick={handleAddGroupSubmit} title="グループ追加">
+              <Check size={13} />
+            </button>
+            <button className="icon-btn" onClick={() => setShowAddGroupInput(false)} title="キャンセル">
+              <X size={13} />
+            </button>
+          </div>
+        ) : isGroupedView && localItem.todos.length > 0 ? (
+          <div className="add-group-btn-container">
+            <button
+              className="subtle-add-group-btn"
+              onClick={() => setShowAddGroupInput(true)}
+              title="新しいグループを追加してタスクを作成"
+            >
+              <Plus size={12} />
+              <span>新しいグループを追加...</span>
+            </button>
+          </div>
+        ) : null}
+
         {localItem.todos.length === 0 ? (
           <div className="empty-todos">
             <p>このノートにはTODOがまだありません。「TODOを追加」ボタンを押して登録してください。</p>
           </div>
-        ) : (
-          <div className="todo-form-list">
-            {localItem.todos.map((todo, index) => {
-              const isFocused = todo.id === selectedTodoId;
-              const isEditingDesc = !!editingDescIds[todo.id];
-              const hasDesc = !!todo.description?.trim();
-              const isDragging = draggedIndex === index;
-              const isDragOver = dragOverIndex === index;
+        ) : isGroupedView ? (
+          /* Grouped View Mode */
+          <div className="grouped-todo-container">
+            {groupedTodos.map(({ groupName, todos: groupTodos }) => {
+              const isCollapsed = !!collapsedGroups[groupName];
+              const isUngrouped = groupName === UNGROUPED_LABEL;
 
               return (
-                <div
-                  key={todo.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={(e) => handleDragOver(e, index)}
-                  onDrop={(e) => handleDrop(e, index)}
-                  onDragEnd={handleDragEnd}
-                  className={`todo-form-card ${isFocused ? 'todo-focused' : ''} ${
-                    isDragging ? 'dragging' : ''
-                  } ${isDragOver ? 'drag-over' : ''}`}
-                >
-                  <div className="todo-card-row">
-                    <div className="drag-handle" title="ドラッグして並べ替え">
-                      <GripVertical size={14} />
+                <div key={groupName} className="todo-group-section">
+                  <div
+                    className={`group-section-header ${isUngrouped ? 'ungrouped-header' : ''}`}
+                    onClick={() => handleToggleGroupCollapse(groupName)}
+                  >
+                    <div className="group-header-left">
+                      <button className="icon-btn collapse-toggle-btn">
+                        {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+                      </button>
+                      <Tag size={13} className="group-header-tag-icon" />
+                      <span className="group-header-title">{groupName}</span>
+                      <span className="group-count-badge">{groupTodos.length}</span>
                     </div>
 
-                    <input
-                      type="checkbox"
-                      checked={todo.status === 'done'}
-                      onChange={(e) =>
-                        handleUpdateTodo(todo.id, { status: e.target.checked ? 'done' : 'todo' })
-                      }
-                      className="todo-status-checkbox"
-                      title={todo.status === 'done' ? '未完了に戻す' : '完了にする'}
-                    />
-
-                    <input
-                      type="text"
-                      className={`todo-title-input ${todo.status === 'done' ? 'done-title' : ''}`}
-                      placeholder="TODOの件名..."
-                      value={todo.title}
-                      title={todo.title}
-                      onChange={(e) => handleUpdateTodo(todo.id, { title: e.target.value })}
-                    />
-
-                    <div className="due-date-wrapper" title={`期日: ${todo.due || '未設定'}`}>
-                      <input
-                        type="date"
-                        className="due-date-input-overlay"
-                        value={todo.due || ''}
-                        onChange={(e) => handleUpdateTodo(todo.id, { due: e.target.value })}
-                      />
-                      <div className="due-date-badge">
-                        <Calendar size={12} className="due-date-icon" />
-                        <span>{formatDueDate(todo.due)}</span>
-                      </div>
+                    <div className="group-header-actions" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        className="subtle-icon-btn group-add-btn"
+                        onClick={() => handleAddTodo(isUngrouped ? '' : groupName)}
+                        title={`"${groupName}" にTODOを追加`}
+                      >
+                        <Plus size={13} />
+                        <span>追加</span>
+                      </button>
                     </div>
-
-                    <button
-                      className={`icon-btn toggle-desc-btn ${isEditingDesc ? 'active' : ''} ${hasDesc ? 'has-desc' : ''}`}
-                      onClick={() => toggleToggleEditDesc(todo.id)}
-                      title={isEditingDesc ? '詳細編集を閉じる' : '詳細・メモを編集'}
-                    >
-                      <Pencil size={13} />
-                    </button>
-
-                    <button
-                      className="icon-btn duplicate-todo-btn"
-                      onClick={() => handleDuplicateTodo(index)}
-                      title="TODOを複製"
-                    >
-                      <Copy size={13} />
-                    </button>
-
-                    <button
-                      className="icon-btn delete-todo-btn"
-                      onClick={() => handleDeleteTodo(todo.id)}
-                      title="TODO削除"
-                    >
-                      <Trash2 size={13} />
-                    </button>
                   </div>
 
-                  {/* Description Section */}
-                  {isEditingDesc ? (
-                    <div className="todo-card-desc-editor">
-                      <div className="textarea-wrapper">
-                        <AlignLeft size={13} className="textarea-icon" />
-                        <textarea
-                          className="todo-desc-textarea"
-                          placeholder="詳細・メモを入力..."
-                          value={todo.description || ''}
-                          onChange={(e) => handleUpdateTodo(todo.id, { description: e.target.value })}
-                          rows={2}
-                          autoFocus
-                        />
-                      </div>
+                  {!isCollapsed && (
+                    <div className="group-section-body">
+                      {groupTodos.length === 0 ? (
+                        <div className="empty-group-hint">
+                          <span>タスクはありません。「追加」ボタンでこのグループに登録できます。</span>
+                        </div>
+                      ) : (
+                        <div className="todo-form-list">
+                          {groupTodos.map((todo) => {
+                            const originalIndex = localItem.todos.findIndex((t) => t.id === todo.id);
+                            return renderTodoCard(todo, originalIndex);
+                          })}
+                        </div>
+                      )}
                     </div>
-                  ) : hasDesc ? (
-                    <div
-                      className="todo-desc-preview"
-                      onClick={() => toggleToggleEditDesc(todo.id)}
-                      title="クリックして詳細を編集"
-                    >
-                      <AlignLeft size={12} className="desc-preview-icon" />
-                      <span className="desc-preview-text">{todo.description}</span>
-                    </div>
-                  ) : null}
+                  )}
                 </div>
               );
             })}
+          </div>
+        ) : (
+          /* Flat View Mode */
+          <div className="todo-form-list">
+            {localItem.todos.map((todo, index) => renderTodoCard(todo, index))}
           </div>
         )}
       </div>
@@ -418,5 +638,3 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     </div>
   );
 };
-
-

@@ -189,6 +189,7 @@ export class StorageManager {
               due: t.due || '',
               status: t.status === 'done' ? 'done' : 'todo',
               description: t.description || '',
+              group: t.group || '',
             }))
           : [];
 
@@ -274,6 +275,7 @@ export class StorageManager {
         due: t.due,
         status: t.status,
         description: t.description || '',
+        ...(t.group ? { group: t.group } : {}),
       })),
     };
 

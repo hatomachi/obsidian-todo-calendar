@@ -72,11 +72,13 @@ todos:
     due: "2026-08-22"           # YYYY-MM-DD 形式（未設定の場合は空文字 ""）
     status: "todo"              # "todo" または "done"
     description: "タスクの具体的な詳細メモ"
+    group: "ジブリパーク"       # （オプション）グループ名・カテゴリ名
   - id: "todo-1-1724300010000"
     title: "タスクタイトル2"
     due: "2026-08-25"
     status: "done"              # 完了済みタスク
     description: ""
+    group: ""
 ---
 # アイテム名
 

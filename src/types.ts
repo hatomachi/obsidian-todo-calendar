@@ -6,6 +6,7 @@ export interface TodoItem {
   due: string; // YYYY-MM-DD
   status: TodoStatus;
   description?: string;
+  group?: string;
 }
 
 export interface ItemData {
