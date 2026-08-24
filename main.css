@@ -131,6 +131,64 @@
 .todo-calendar-app .badge-icon {
   color: var(--interactive-accent);
 }
+.todo-calendar-app .nav-type-dropdown-btn {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  border-radius: 6px;
+  padding: 6px 26px 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  transition: all 0.15s ease;
+  background-color: var(--background-modifier-hover, rgba(255, 255, 255, 0.08));
+}
+.todo-calendar-app .nav-type-dropdown-btn.active-tab {
+  background-color: rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.15);
+  color: var(--interactive-accent);
+  border-color: rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.4);
+}
+.todo-calendar-app .nav-type-dropdown-btn:hover {
+  background-color: var(--background-modifier-active-hover, rgba(255, 255, 255, 0.14));
+  border-color: var(--interactive-accent);
+}
+.todo-calendar-app .nav-type-dropdown-select {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 0;
+  margin: 0;
+}
+.todo-calendar-app .nav-type-dropdown-select option {
+  background-color: var(--background-secondary, #1e1e1e);
+  color: var(--text-normal, #ffffff);
+}
+.todo-calendar-app .item-cross-collection-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background-color: var(--background-modifier-hover, rgba(255, 255, 255, 0.08));
+  color: var(--text-muted);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15));
+  margin-right: 4px;
+  white-space: nowrap;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
 .todo-calendar-app .nav-btn {
   display: inline-flex;
   align-items: center;

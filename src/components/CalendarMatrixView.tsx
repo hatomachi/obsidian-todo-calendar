@@ -11,7 +11,7 @@ import {
   Trash2,
   AlertTriangle,
 } from 'lucide-react';
-import { ItemData, TodoItem, TodoStatus } from '../types';
+import { CollectionData, ItemData, TodoItem, TodoStatus } from '../types';
 import { isJapaneseHoliday } from '../utils/holidays';
 import { ItemType } from '../features/item-types/types';
 import {
@@ -28,6 +28,9 @@ interface CalendarMatrixViewProps {
   showCompletedItems?: boolean;
   enableItemTypes?: boolean;
   itemTypes?: ItemType[];
+  collections?: CollectionData[];
+  isCrossCollection?: boolean;
+  typeName?: string;
   onToggleShowCompleted?: () => void;
   onToggleItemStatus: (item: ItemData) => void;
   isDrawerOpen?: boolean;
@@ -64,6 +67,9 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
   showCompletedItems = false,
   enableItemTypes = true,
   itemTypes = [],
+  collections = [],
+  isCrossCollection = false,
+  typeName,
   onToggleShowCompleted,
   onToggleItemStatus,
   isDrawerOpen,
@@ -295,7 +301,11 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
               <tr>
                 <td colSpan={10} className="empty-matrix-td">
                   <div className="empty-matrix-state">
-                    <p>このコレクションにはまだアイテムがありません。</p>
+                    <p>
+                      {isCrossCollection
+                        ? `タイプ「${typeName || '指定タイプ'}」のアイテムはまだありません。`
+                        : 'このコレクションにはまだアイテムがありません。'}
+                    </p>
                     <button className="nav-btn primary-btn" onClick={onOpenCreateItemModal}>
                       <Plus size={16} />
                       <span>新規アイテムを作成</span>
@@ -344,6 +354,7 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                 const itemType = enableItemTypes ? findItemType(itemTypes, item.type) : undefined;
                 const itemTemplate = enableItemTypes ? findItemTemplate(itemType, item.template) : undefined;
                 const templateStatus = enableItemTypes && itemTemplate ? checkTemplateStatus(item, itemTemplate) : null;
+                const parentCollection = isCrossCollection ? collections.find((c) => c.id === item.collectionId) : null;
 
                 return (
                   <tr
@@ -367,6 +378,14 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                             className="item-row-checkbox"
                             title={isItemDone ? '未完了に戻す' : 'アクションを完了にする'}
                           />
+                          {parentCollection && (
+                            <span
+                              className="item-cross-collection-badge"
+                              title={`コレクション: ${parentCollection.title}`}
+                            >
+                              {parentCollection.title}
+                            </span>
+                          )}
                           {enableItemTypes && itemType && (
                             <TypeBadge itemType={itemType} size="sm" />
                           )}

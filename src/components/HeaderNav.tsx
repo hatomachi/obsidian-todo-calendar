@@ -12,22 +12,28 @@ import {
   Eye,
   EyeOff,
   Settings,
+  Tag,
 } from 'lucide-react';
 import { CollectionData } from '../types';
+import { ItemType } from '../features/item-types/types';
 
 interface HeaderNavProps {
-  viewMode: 'collections' | 'calendar' | 'agenda';
+  viewMode: 'collections' | 'calendar' | 'agenda' | 'type-calendar';
   collections: CollectionData[];
   selectedCollection: CollectionData | null;
   startDate: Date;
   showCompletedItems?: boolean;
   completedItemsCount?: number;
   enableItemTypes?: boolean;
+  itemTypes?: ItemType[];
+  selectedType?: ItemType | null;
   onToggleShowCompleted?: () => void;
   onBackToCollections: () => void;
   onSelectAgenda: () => void;
   onSelectCollection: (collection: CollectionData) => void;
   onNavigateCollection?: (direction: -1 | 1) => void;
+  onSelectType?: (type: ItemType) => void;
+  onNavigateType?: (direction: -1 | 1) => void;
   onNavigateDate: (days: number) => void;
   onResetToToday: () => void;
   onOpenCreateItemModal: () => void;
@@ -43,11 +49,15 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   showCompletedItems = false,
   completedItemsCount = 0,
   enableItemTypes = true,
+  itemTypes = [],
+  selectedType = null,
   onToggleShowCompleted,
   onBackToCollections,
   onSelectAgenda,
   onSelectCollection,
   onNavigateCollection,
+  onSelectType,
+  onNavigateType,
   onNavigateDate,
   onResetToToday,
   onOpenCreateItemModal,
@@ -64,6 +74,12 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   const currentCollectionIndex = selectedCollection
     ? collections.findIndex((c) => c.id === selectedCollection.id)
     : -1;
+
+  const currentTypeIndex = selectedType
+    ? itemTypes.findIndex((t) => t.id === selectedType.id)
+    : -1;
+
+  const isMatrixView = viewMode === 'calendar' || viewMode === 'type-calendar';
 
   return (
     <div className="todo-cal-header">
@@ -85,6 +101,32 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           <CheckSquare size={16} />
           <span>今日のアジェンダ</span>
         </button>
+
+        {enableItemTypes && itemTypes.length > 0 && (
+          <div className={`nav-type-dropdown-btn ${viewMode === 'type-calendar' ? 'active-tab' : 'secondary-btn'}`}>
+            <Tag size={16} className="badge-icon" />
+            <select
+              className="nav-type-dropdown-select"
+              value={viewMode === 'type-calendar' && selectedType ? selectedType.id : ''}
+              onChange={(e) => {
+                const targetType = itemTypes.find((t) => t.id === e.target.value);
+                if (targetType && onSelectType) {
+                  onSelectType(targetType);
+                }
+              }}
+            >
+              <option value="" disabled={viewMode === 'type-calendar'}>
+                タイプ別...
+              </option>
+              {itemTypes.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.icon ? `${t.icon} ` : ''}{t.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={14} className="dropdown-arrow-icon" />
+          </div>
+        )}
 
         {viewMode === 'calendar' && (
           <>
@@ -136,10 +178,61 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             </div>
           </>
         )}
+
+        {viewMode === 'type-calendar' && selectedType && (
+          <>
+            <span className="breadcrumb-separator">/</span>
+            <div className="collection-stepper-container type-stepper-container">
+              <button
+                className="collection-stepper-btn"
+                onClick={() => onNavigateType && onNavigateType(-1)}
+                title="前のタイプ (← または [ )"
+                disabled={itemTypes.length <= 1}
+              >
+                <ChevronLeft size={16} />
+              </button>
+
+              <div className="collection-select-badge type-select-badge" title="タイプを切り替え">
+                <Tag size={16} className="badge-icon" />
+                <select
+                  className="collection-select-dropdown"
+                  value={selectedType.id}
+                  onChange={(e) => {
+                    const targetType = itemTypes.find((t) => t.id === e.target.value);
+                    if (targetType && onSelectType) {
+                      onSelectType(targetType);
+                    }
+                  }}
+                >
+                  {itemTypes.map((t, idx) => (
+                    <option key={t.id} value={t.id}>
+                      {t.icon ? `${t.icon} ` : ''}{t.name} ({idx + 1}/{itemTypes.length})
+                    </option>
+                  ))}
+                </select>
+                {itemTypes.length > 1 && currentTypeIndex !== -1 && (
+                  <span className="collection-index-indicator">
+                    {currentTypeIndex + 1}/{itemTypes.length}
+                  </span>
+                )}
+                <ChevronDown size={14} className="dropdown-arrow-icon" />
+              </div>
+
+              <button
+                className="collection-stepper-btn"
+                onClick={() => onNavigateType && onNavigateType(1)}
+                title="次のタイプ (→ または ] )"
+                disabled={itemTypes.length <= 1}
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="header-right">
-        {viewMode === 'calendar' && (
+        {isMatrixView && (
           <>
             {onToggleShowCompleted && (
               <button
@@ -186,7 +279,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           </button>
         )}
 
-        {viewMode === 'calendar' && (
+        {isMatrixView && (
           <button className="nav-btn primary-btn" onClick={onOpenCreateItemModal}>
             <Plus size={16} />
             <span>新規アイテム</span>

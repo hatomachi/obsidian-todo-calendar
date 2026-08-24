@@ -29,9 +29,10 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
   const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
   const [isTemplateSettingsOpen, setIsTemplateSettingsOpen] = useState(false);
 
-  const [viewMode, setViewMode] = useState<'collections' | 'calendar' | 'agenda'>('collections');
+  const [viewMode, setViewMode] = useState<'collections' | 'calendar' | 'agenda' | 'type-calendar'>('collections');
   const [collections, setCollections] = useState<CollectionData[]>([]);
   const [selectedCollection, setSelectedCollection] = useState<CollectionData | null>(null);
+  const [selectedType, setSelectedType] = useState<ItemType | null>(null);
 
   const [items, setItems] = useState<ItemData[]>([]);
   const [agendaItems, setAgendaItems] = useState<AgendaTodoItem[]>([]);
@@ -48,6 +49,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
   const [newItemDescription, setNewItemDescription] = useState('');
   const [newItemType, setNewItemType] = useState<string>('');
   const [newItemTemplate, setNewItemTemplate] = useState<string>('');
+  const [newItemCollectionId, setNewItemCollectionId] = useState<string>('');
 
   // Listen to plugin settings changes
   useEffect(() => {
@@ -95,12 +97,27 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
   const handleSelectCollection = useCallback(
     async (collection: CollectionData) => {
       setSelectedCollection(collection);
+      setSelectedType(null);
       await loadItems(collection.id);
       setViewMode('calendar');
       setIsDrawerOpen(false);
       setSelectedItem(null);
     },
     [loadItems]
+  );
+
+  // Handle select type (to Cross-Collection Type Calendar view)
+  const handleSelectType = useCallback(
+    async (type: ItemType) => {
+      setSelectedType(type);
+      setSelectedCollection(null);
+      const loadedItems = await storage.getItemsByType(type.id);
+      setItems(loadedItems);
+      setViewMode('type-calendar');
+      setIsDrawerOpen(false);
+      setSelectedItem(null);
+    },
+    [storage]
   );
 
   // Navigate collection by step (+1 or -1)
@@ -122,11 +139,29 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
     [collections, selectedCollection, handleSelectCollection]
   );
 
-  // Keyboard navigation for collections (ArrowLeft / ArrowRight / [ / ])
+  // Navigate type by step (+1 or -1)
+  const handleNavigateType = useCallback(
+    async (direction: -1 | 1) => {
+      if (itemTypes.length <= 1 || !selectedType) return;
+      const currentIndex = itemTypes.findIndex((t) => t.id === selectedType.id);
+      if (currentIndex === -1) return;
+
+      let nextIndex = currentIndex + direction;
+      if (nextIndex < 0) {
+        nextIndex = itemTypes.length - 1;
+      } else if (nextIndex >= itemTypes.length) {
+        nextIndex = 0;
+      }
+
+      await handleSelectType(itemTypes[nextIndex]);
+    },
+    [itemTypes, selectedType, handleSelectType]
+  );
+
+  // Keyboard navigation for collections (viewMode === 'calendar') or types (viewMode === 'type-calendar')
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (viewMode !== 'calendar' || collections.length <= 1) return;
-      if (isCreateItemModalOpen) return;
+      if (isCreateItemModalOpen || isTemplateSettingsOpen) return;
 
       const target = e.target as HTMLElement | null;
       const tagName = target?.tagName?.toLowerCase();
@@ -136,11 +171,21 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
       }
 
       if (e.key === 'ArrowLeft' || e.key === '[') {
-        e.preventDefault();
-        handleNavigateCollection(-1);
+        if (viewMode === 'calendar' && collections.length > 1) {
+          e.preventDefault();
+          handleNavigateCollection(-1);
+        } else if (viewMode === 'type-calendar' && itemTypes.length > 1) {
+          e.preventDefault();
+          handleNavigateType(-1);
+        }
       } else if (e.key === 'ArrowRight' || e.key === ']') {
-        e.preventDefault();
-        handleNavigateCollection(1);
+        if (viewMode === 'calendar' && collections.length > 1) {
+          e.preventDefault();
+          handleNavigateCollection(1);
+        } else if (viewMode === 'type-calendar' && itemTypes.length > 1) {
+          e.preventDefault();
+          handleNavigateType(1);
+        }
       }
     };
 
@@ -148,13 +193,23 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [viewMode, collections.length, isCreateItemModalOpen, handleNavigateCollection]);
+  }, [
+    viewMode,
+    collections.length,
+    itemTypes.length,
+    isCreateItemModalOpen,
+    isTemplateSettingsOpen,
+    handleNavigateCollection,
+    handleNavigateType,
+  ]);
 
   // Switch to Agenda view
   const handleSelectAgenda = async () => {
     await loadCollections();
     await loadAgendaItems();
     setViewMode('agenda');
+    setSelectedCollection(null);
+    setSelectedType(null);
     setIsDrawerOpen(false);
     setSelectedItem(null);
   };
@@ -163,6 +218,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
   const handleBackToCollections = async () => {
     setViewMode('collections');
     setSelectedCollection(null);
+    setSelectedType(null);
     setSelectedItem(null);
     setIsDrawerOpen(false);
     await loadCollections();
@@ -173,6 +229,9 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
     await loadCollections();
     if (viewMode === 'calendar' && selectedCollection) {
       await loadItems(selectedCollection.id);
+    } else if (viewMode === 'type-calendar' && selectedType) {
+      const loaded = await storage.getItemsByType(selectedType.id);
+      setItems(loaded);
     } else if (viewMode === 'agenda') {
       await loadAgendaItems();
     }
@@ -193,22 +252,37 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
     }
   };
 
+  // Open Create Item Modal
+  const handleOpenCreateItemModal = () => {
+    if (viewMode === 'type-calendar' && selectedType) {
+      setNewItemType(selectedType.id);
+      setNewItemTemplate(selectedType.templates[0]?.name || '');
+      if (collections.length > 0) {
+        setNewItemCollectionId(collections[0].id);
+      }
+    } else if (selectedCollection) {
+      setNewItemCollectionId(selectedCollection.id);
+    }
+    setIsCreateItemModalOpen(true);
+  };
+
   // Create Item
   const handleCreateItemSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCollection || !newItemTitle.trim()) return;
+    const targetCollectionId = selectedCollection?.id || newItemCollectionId || collections[0]?.id;
+    if (!targetCollectionId || !newItemTitle.trim()) return;
 
     let initialTodos: TodoItem[] = [];
-    let selectedType: string | undefined = undefined;
-    let selectedTemplate: string | undefined = undefined;
+    let selectedTypeVal: string | undefined = undefined;
+    let selectedTemplateVal: string | undefined = undefined;
 
     if (pluginSettings.enableItemTypes && newItemType) {
-      selectedType = newItemType;
+      selectedTypeVal = newItemType;
       const typeObj = findItemType(itemTypes, newItemType);
       if (typeObj) {
         const templateObj = findItemTemplate(typeObj, newItemTemplate) || typeObj.templates[0];
         if (templateObj) {
-          selectedTemplate = templateObj.name;
+          selectedTemplateVal = templateObj.name;
           const now = Date.now();
           initialTodos = (templateObj.todos || []).map((t, idx) => ({
             id: `todo-${now}-${idx}`,
@@ -223,19 +297,26 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
     }
 
     const newItem = await storage.createItem(
-      selectedCollection.id,
+      targetCollectionId,
       newItemTitle,
       newItemDescription,
-      selectedType,
-      selectedTemplate,
+      selectedTypeVal,
+      selectedTemplateVal,
       initialTodos
     );
 
-    await loadItems(selectedCollection.id);
+    if (viewMode === 'calendar' && selectedCollection) {
+      await loadItems(selectedCollection.id);
+    } else if (viewMode === 'type-calendar' && selectedType) {
+      const loaded = await storage.getItemsByType(selectedType.id);
+      setItems(loaded);
+    }
+
     setNewItemTitle('');
     setNewItemDescription('');
     setNewItemType('');
     setNewItemTemplate('');
+    setNewItemCollectionId('');
     setIsCreateItemModalOpen(false);
 
     // Open detail drawer for newly created item
@@ -267,8 +348,11 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
   // Delete Item
   const handleDeleteItem = async (item: ItemData) => {
     await storage.deleteItem(item);
-    if (selectedCollection) {
+    if (viewMode === 'calendar' && selectedCollection) {
       await loadItems(selectedCollection.id);
+    } else if (viewMode === 'type-calendar' && selectedType) {
+      const loaded = await storage.getItemsByType(selectedType.id);
+      setItems(loaded);
     }
     if (selectedItem?.id === item.id) {
       setSelectedItem(null);
@@ -337,14 +421,18 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
         showCompletedItems={showCompletedItems}
         completedItemsCount={items.filter((it) => it.status === 'done').length}
         enableItemTypes={pluginSettings.enableItemTypes}
+        itemTypes={itemTypes}
+        selectedType={selectedType}
         onToggleShowCompleted={() => setShowCompletedItems((prev) => !prev)}
         onBackToCollections={handleBackToCollections}
         onSelectAgenda={handleSelectAgenda}
         onSelectCollection={handleSelectCollection}
         onNavigateCollection={handleNavigateCollection}
+        onSelectType={handleSelectType}
+        onNavigateType={handleNavigateType}
         onNavigateDate={handleNavigateDate}
         onResetToToday={handleResetToToday}
-        onOpenCreateItemModal={() => setIsCreateItemModalOpen(true)}
+        onOpenCreateItemModal={handleOpenCreateItemModal}
         onOpenTemplateSettings={() => setIsTemplateSettingsOpen(true)}
         onRefresh={handleRefresh}
       />
@@ -368,6 +456,8 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
               showCompletedItems={showCompletedItems}
               enableItemTypes={pluginSettings.enableItemTypes}
               itemTypes={itemTypes}
+              collections={collections}
+              isCrossCollection={false}
               onToggleShowCompleted={() => setShowCompletedItems((prev) => !prev)}
               onToggleItemStatus={handleToggleItemStatus}
               isDrawerOpen={isDrawerOpen}
@@ -375,7 +465,30 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
               onSelectItem={handleSelectItem}
               onQuickToggleTodoStatus={handleQuickToggleTodoStatus}
               onDeleteItem={handleDeleteItem}
-              onOpenCreateItemModal={() => setIsCreateItemModalOpen(true)}
+              onOpenCreateItemModal={handleOpenCreateItemModal}
+              onUpdateItem={handleUpdateItem}
+            />
+          )}
+
+          {viewMode === 'type-calendar' && (
+            <CalendarMatrixView
+              items={items}
+              startDate={startDate}
+              selectedItemId={selectedItem?.id || null}
+              showCompletedItems={showCompletedItems}
+              enableItemTypes={pluginSettings.enableItemTypes}
+              itemTypes={itemTypes}
+              collections={collections}
+              isCrossCollection={true}
+              typeName={selectedType?.name}
+              onToggleShowCompleted={() => setShowCompletedItems((prev) => !prev)}
+              onToggleItemStatus={handleToggleItemStatus}
+              isDrawerOpen={isDrawerOpen}
+              onCloseDrawer={handleCloseDrawer}
+              onSelectItem={handleSelectItem}
+              onQuickToggleTodoStatus={handleQuickToggleTodoStatus}
+              onDeleteItem={handleDeleteItem}
+              onOpenCreateItemModal={handleOpenCreateItemModal}
               onUpdateItem={handleUpdateItem}
             />
           )}
@@ -394,7 +507,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
         </div>
 
         {/* Right Side Drawer Inspector */}
-        {(viewMode === 'calendar' || viewMode === 'agenda') && isDrawerOpen && (
+        {(viewMode === 'calendar' || viewMode === 'type-calendar' || viewMode === 'agenda') && isDrawerOpen && (
           <TaskDetailDrawer
             item={selectedItem}
             selectedTodoId={selectedTodoId}
@@ -414,6 +527,24 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
           <div className="todo-cal-modal-content">
             <h3>新規タスクノート (Item) の作成</h3>
             <form onSubmit={handleCreateItemSubmit}>
+              {!selectedCollection && collections.length > 0 && (
+                <div className="todo-cal-form-group">
+                  <label>所属コレクション *</label>
+                  <select
+                    className="todo-cal-form-input"
+                    value={newItemCollectionId || collections[0].id}
+                    onChange={(e) => setNewItemCollectionId(e.target.value)}
+                    required
+                  >
+                    {collections.map((col) => (
+                      <option key={col.id} value={col.id}>
+                        {col.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="todo-cal-form-group">
                 <label>ノートタイトル *</label>
                 <input

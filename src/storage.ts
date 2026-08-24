@@ -313,6 +313,25 @@ export class StorageManager {
   }
 
   /**
+   * Get all items of a specific type across all collections
+   */
+  async getItemsByType(typeId: string): Promise<ItemData[]> {
+    const collections = await this.getCollections();
+    const matchedItems: ItemData[] = [];
+
+    for (const col of collections) {
+      const items = await this.getItems(col.id);
+      for (const item of items) {
+        if (item.type === typeId) {
+          matchedItems.push(item);
+        }
+      }
+    }
+
+    return matchedItems.sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
+  }
+
+  /**
    * Get all TODO items across all collections for Agenda view
    */
   async getAllAgendaItems(): Promise<AgendaTodoItem[]> {

@@ -24779,6 +24779,22 @@ ${bodyContent}`;
     }
   }
   /**
+   * Get all items of a specific type across all collections
+   */
+  async getItemsByType(typeId) {
+    const collections = await this.getCollections();
+    const matchedItems = [];
+    for (const col of collections) {
+      const items = await this.getItems(col.id);
+      for (const item of items) {
+        if (item.type === typeId) {
+          matchedItems.push(item);
+        }
+      }
+    }
+    return matchedItems.sort((a, b) => a.createdAt < b.createdAt ? -1 : 1);
+  }
+  /**
    * Get all TODO items across all collections for Agenda view
    */
   async getAllAgendaItems() {
@@ -25214,11 +25230,15 @@ var HeaderNav = ({
   showCompletedItems = false,
   completedItemsCount = 0,
   enableItemTypes = true,
+  itemTypes = [],
+  selectedType = null,
   onToggleShowCompleted,
   onBackToCollections,
   onSelectAgenda,
   onSelectCollection,
   onNavigateCollection,
+  onSelectType,
+  onNavigateType,
   onNavigateDate,
   onResetToToday,
   onOpenCreateItemModal,
@@ -25232,6 +25252,8 @@ var HeaderNav = ({
     return `${start.toLocaleDateString("ja-JP", options)} - ${end.toLocaleDateString("ja-JP", options)}`;
   };
   const currentCollectionIndex = selectedCollection ? collections.findIndex((c) => c.id === selectedCollection.id) : -1;
+  const currentTypeIndex = selectedType ? itemTypes.findIndex((t) => t.id === selectedType.id) : -1;
+  const isMatrixView = viewMode === "calendar" || viewMode === "type-calendar";
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "todo-cal-header", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "header-left", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
@@ -25258,6 +25280,30 @@ var HeaderNav = ({
           ]
         }
       ),
+      enableItemTypes && itemTypes.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `nav-type-dropdown-btn ${viewMode === "type-calendar" ? "active-tab" : "secondary-btn"}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Tag, { size: 16, className: "badge-icon" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "select",
+          {
+            className: "nav-type-dropdown-select",
+            value: viewMode === "type-calendar" && selectedType ? selectedType.id : "",
+            onChange: (e) => {
+              const targetType = itemTypes.find((t) => t.id === e.target.value);
+              if (targetType && onSelectType) {
+                onSelectType(targetType);
+              }
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", disabled: viewMode === "type-calendar", children: "\u30BF\u30A4\u30D7\u5225..." }),
+              itemTypes.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: t.id, children: [
+                t.icon ? `${t.icon} ` : "",
+                t.name
+              ] }, t.id))
+            ]
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { size: 14, className: "dropdown-arrow-icon" })
+      ] }),
       viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "breadcrumb-separator", children: "/" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "collection-stepper-container", children: [
@@ -25312,10 +25358,66 @@ var HeaderNav = ({
             }
           )
         ] })
+      ] }),
+      viewMode === "type-calendar" && selectedType && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "breadcrumb-separator", children: "/" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "collection-stepper-container type-stepper-container", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "button",
+            {
+              className: "collection-stepper-btn",
+              onClick: () => onNavigateType && onNavigateType(-1),
+              title: "\u524D\u306E\u30BF\u30A4\u30D7 (\u2190 \u307E\u305F\u306F [ )",
+              disabled: itemTypes.length <= 1,
+              children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { size: 16 })
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "collection-select-badge type-select-badge", title: "\u30BF\u30A4\u30D7\u3092\u5207\u308A\u66FF\u3048", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Tag, { size: 16, className: "badge-icon" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "select",
+              {
+                className: "collection-select-dropdown",
+                value: selectedType.id,
+                onChange: (e) => {
+                  const targetType = itemTypes.find((t) => t.id === e.target.value);
+                  if (targetType && onSelectType) {
+                    onSelectType(targetType);
+                  }
+                },
+                children: itemTypes.map((t, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: t.id, children: [
+                  t.icon ? `${t.icon} ` : "",
+                  t.name,
+                  " (",
+                  idx + 1,
+                  "/",
+                  itemTypes.length,
+                  ")"
+                ] }, t.id))
+              }
+            ),
+            itemTypes.length > 1 && currentTypeIndex !== -1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "collection-index-indicator", children: [
+              currentTypeIndex + 1,
+              "/",
+              itemTypes.length
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { size: 14, className: "dropdown-arrow-icon" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "button",
+            {
+              className: "collection-stepper-btn",
+              onClick: () => onNavigateType && onNavigateType(1),
+              title: "\u6B21\u306E\u30BF\u30A4\u30D7 (\u2192 \u307E\u305F\u306F ] )",
+              disabled: itemTypes.length <= 1,
+              children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { size: 16 })
+            }
+          )
+        ] })
       ] })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "header-right", children: [
-      viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      isMatrixView && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
         onToggleShowCompleted && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
           "button",
           {
@@ -25345,7 +25447,7 @@ var HeaderNav = ({
           children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Settings, { size: 16 })
         }
       ),
-      viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { className: "nav-btn primary-btn", onClick: onOpenCreateItemModal, children: [
+      isMatrixView && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { className: "nav-btn primary-btn", onClick: onOpenCreateItemModal, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { size: 16 }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "\u65B0\u898F\u30A2\u30A4\u30C6\u30E0" })
       ] })
@@ -25754,6 +25856,9 @@ var CalendarMatrixView = ({
   showCompletedItems = false,
   enableItemTypes = true,
   itemTypes = [],
+  collections = [],
+  isCrossCollection = false,
+  typeName,
   onToggleShowCompleted,
   onToggleItemStatus,
   isDrawerOpen,
@@ -25937,7 +26042,7 @@ var CalendarMatrixView = ({
       /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "future-header-th", children: "\u672A\u6765" })
     ] }) }),
     /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tbody", { children: items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { colSpan: 10, className: "empty-matrix-td", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "empty-matrix-state", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { children: "\u3053\u306E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u306B\u306F\u307E\u3060\u30A2\u30A4\u30C6\u30E0\u304C\u3042\u308A\u307E\u305B\u3093\u3002" }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { children: isCrossCollection ? `\u30BF\u30A4\u30D7\u300C${typeName || "\u6307\u5B9A\u30BF\u30A4\u30D7"}\u300D\u306E\u30A2\u30A4\u30C6\u30E0\u306F\u307E\u3060\u3042\u308A\u307E\u305B\u3093\u3002` : "\u3053\u306E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u306B\u306F\u307E\u3060\u30A2\u30A4\u30C6\u30E0\u304C\u3042\u308A\u307E\u305B\u3093\u3002" }),
       /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("button", { className: "nav-btn primary-btn", onClick: onOpenCreateItemModal, children: [
         /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Plus, { size: 16 }),
         /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u65B0\u898F\u30A2\u30A4\u30C6\u30E0\u3092\u4F5C\u6210" })
@@ -25965,6 +26070,7 @@ var CalendarMatrixView = ({
       const itemType = enableItemTypes ? findItemType(itemTypes, item.type) : void 0;
       const itemTemplate = enableItemTypes ? findItemTemplate(itemType, item.template) : void 0;
       const templateStatus = enableItemTypes && itemTemplate ? checkTemplateStatus(item, itemTemplate) : null;
+      const parentCollection = isCrossCollection ? collections.find((c) => c.id === item.collectionId) : null;
       return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
         "tr",
         {
@@ -25984,6 +26090,14 @@ var CalendarMatrixView = ({
                     onClick: (e) => e.stopPropagation(),
                     className: "item-row-checkbox",
                     title: isItemDone ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u30A2\u30AF\u30B7\u30E7\u30F3\u3092\u5B8C\u4E86\u306B\u3059\u308B"
+                  }
+                ),
+                parentCollection && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                  "span",
+                  {
+                    className: "item-cross-collection-badge",
+                    title: `\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3: ${parentCollection.title}`,
+                    children: parentCollection.title
                   }
                 ),
                 enableItemTypes && itemType && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(TypeBadge, { itemType, size: "sm" }),
@@ -27702,6 +27816,7 @@ var AppView = ({ app, plugin, settings }) => {
   const [viewMode, setViewMode] = (0, import_react8.useState)("collections");
   const [collections, setCollections] = (0, import_react8.useState)([]);
   const [selectedCollection, setSelectedCollection] = (0, import_react8.useState)(null);
+  const [selectedType, setSelectedType] = (0, import_react8.useState)(null);
   const [items, setItems] = (0, import_react8.useState)([]);
   const [agendaItems, setAgendaItems] = (0, import_react8.useState)([]);
   const [selectedCollectionFilterId, setSelectedCollectionFilterId] = (0, import_react8.useState)(null);
@@ -27715,6 +27830,7 @@ var AppView = ({ app, plugin, settings }) => {
   const [newItemDescription, setNewItemDescription] = (0, import_react8.useState)("");
   const [newItemType, setNewItemType] = (0, import_react8.useState)("");
   const [newItemTemplate, setNewItemTemplate] = (0, import_react8.useState)("");
+  const [newItemCollectionId, setNewItemCollectionId] = (0, import_react8.useState)("");
   (0, import_react8.useEffect)(() => {
     if (plugin) {
       const unsubscribe = plugin.onSettingsChange((newSettings) => {
@@ -27748,12 +27864,25 @@ var AppView = ({ app, plugin, settings }) => {
   const handleSelectCollection = (0, import_react8.useCallback)(
     async (collection) => {
       setSelectedCollection(collection);
+      setSelectedType(null);
       await loadItems(collection.id);
       setViewMode("calendar");
       setIsDrawerOpen(false);
       setSelectedItem(null);
     },
     [loadItems]
+  );
+  const handleSelectType = (0, import_react8.useCallback)(
+    async (type) => {
+      setSelectedType(type);
+      setSelectedCollection(null);
+      const loadedItems = await storage.getItemsByType(type.id);
+      setItems(loadedItems);
+      setViewMode("type-calendar");
+      setIsDrawerOpen(false);
+      setSelectedItem(null);
+    },
+    [storage]
   );
   const handleNavigateCollection = (0, import_react8.useCallback)(
     async (direction) => {
@@ -27770,10 +27899,24 @@ var AppView = ({ app, plugin, settings }) => {
     },
     [collections, selectedCollection, handleSelectCollection]
   );
+  const handleNavigateType = (0, import_react8.useCallback)(
+    async (direction) => {
+      if (itemTypes.length <= 1 || !selectedType) return;
+      const currentIndex = itemTypes.findIndex((t) => t.id === selectedType.id);
+      if (currentIndex === -1) return;
+      let nextIndex = currentIndex + direction;
+      if (nextIndex < 0) {
+        nextIndex = itemTypes.length - 1;
+      } else if (nextIndex >= itemTypes.length) {
+        nextIndex = 0;
+      }
+      await handleSelectType(itemTypes[nextIndex]);
+    },
+    [itemTypes, selectedType, handleSelectType]
+  );
   (0, import_react8.useEffect)(() => {
     const handleKeyDown = (e) => {
-      if (viewMode !== "calendar" || collections.length <= 1) return;
-      if (isCreateItemModalOpen) return;
+      if (isCreateItemModalOpen || isTemplateSettingsOpen) return;
       const target = e.target;
       const tagName = target?.tagName?.toLowerCase();
       const isContentEditable = target?.isContentEditable;
@@ -27781,28 +27924,49 @@ var AppView = ({ app, plugin, settings }) => {
         return;
       }
       if (e.key === "ArrowLeft" || e.key === "[") {
-        e.preventDefault();
-        handleNavigateCollection(-1);
+        if (viewMode === "calendar" && collections.length > 1) {
+          e.preventDefault();
+          handleNavigateCollection(-1);
+        } else if (viewMode === "type-calendar" && itemTypes.length > 1) {
+          e.preventDefault();
+          handleNavigateType(-1);
+        }
       } else if (e.key === "ArrowRight" || e.key === "]") {
-        e.preventDefault();
-        handleNavigateCollection(1);
+        if (viewMode === "calendar" && collections.length > 1) {
+          e.preventDefault();
+          handleNavigateCollection(1);
+        } else if (viewMode === "type-calendar" && itemTypes.length > 1) {
+          e.preventDefault();
+          handleNavigateType(1);
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [viewMode, collections.length, isCreateItemModalOpen, handleNavigateCollection]);
+  }, [
+    viewMode,
+    collections.length,
+    itemTypes.length,
+    isCreateItemModalOpen,
+    isTemplateSettingsOpen,
+    handleNavigateCollection,
+    handleNavigateType
+  ]);
   const handleSelectAgenda = async () => {
     await loadCollections();
     await loadAgendaItems();
     setViewMode("agenda");
+    setSelectedCollection(null);
+    setSelectedType(null);
     setIsDrawerOpen(false);
     setSelectedItem(null);
   };
   const handleBackToCollections = async () => {
     setViewMode("collections");
     setSelectedCollection(null);
+    setSelectedType(null);
     setSelectedItem(null);
     setIsDrawerOpen(false);
     await loadCollections();
@@ -27811,6 +27975,9 @@ var AppView = ({ app, plugin, settings }) => {
     await loadCollections();
     if (viewMode === "calendar" && selectedCollection) {
       await loadItems(selectedCollection.id);
+    } else if (viewMode === "type-calendar" && selectedType) {
+      const loaded = await storage.getItemsByType(selectedType.id);
+      setItems(loaded);
     } else if (viewMode === "agenda") {
       await loadAgendaItems();
     }
@@ -27826,19 +27993,32 @@ var AppView = ({ app, plugin, settings }) => {
       await loadAgendaItems();
     }
   };
+  const handleOpenCreateItemModal = () => {
+    if (viewMode === "type-calendar" && selectedType) {
+      setNewItemType(selectedType.id);
+      setNewItemTemplate(selectedType.templates[0]?.name || "");
+      if (collections.length > 0) {
+        setNewItemCollectionId(collections[0].id);
+      }
+    } else if (selectedCollection) {
+      setNewItemCollectionId(selectedCollection.id);
+    }
+    setIsCreateItemModalOpen(true);
+  };
   const handleCreateItemSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedCollection || !newItemTitle.trim()) return;
+    const targetCollectionId = selectedCollection?.id || newItemCollectionId || collections[0]?.id;
+    if (!targetCollectionId || !newItemTitle.trim()) return;
     let initialTodos = [];
-    let selectedType = void 0;
-    let selectedTemplate = void 0;
+    let selectedTypeVal = void 0;
+    let selectedTemplateVal = void 0;
     if (pluginSettings.enableItemTypes && newItemType) {
-      selectedType = newItemType;
+      selectedTypeVal = newItemType;
       const typeObj = findItemType(itemTypes, newItemType);
       if (typeObj) {
         const templateObj = findItemTemplate(typeObj, newItemTemplate) || typeObj.templates[0];
         if (templateObj) {
-          selectedTemplate = templateObj.name;
+          selectedTemplateVal = templateObj.name;
           const now = Date.now();
           initialTodos = (templateObj.todos || []).map((t, idx) => ({
             id: `todo-${now}-${idx}`,
@@ -27853,18 +28033,24 @@ var AppView = ({ app, plugin, settings }) => {
       }
     }
     const newItem = await storage.createItem(
-      selectedCollection.id,
+      targetCollectionId,
       newItemTitle,
       newItemDescription,
-      selectedType,
-      selectedTemplate,
+      selectedTypeVal,
+      selectedTemplateVal,
       initialTodos
     );
-    await loadItems(selectedCollection.id);
+    if (viewMode === "calendar" && selectedCollection) {
+      await loadItems(selectedCollection.id);
+    } else if (viewMode === "type-calendar" && selectedType) {
+      const loaded = await storage.getItemsByType(selectedType.id);
+      setItems(loaded);
+    }
     setNewItemTitle("");
     setNewItemDescription("");
     setNewItemType("");
     setNewItemTemplate("");
+    setNewItemCollectionId("");
     setIsCreateItemModalOpen(false);
     setSelectedItem(newItem);
     setIsDrawerOpen(true);
@@ -27885,8 +28071,11 @@ var AppView = ({ app, plugin, settings }) => {
   };
   const handleDeleteItem = async (item) => {
     await storage.deleteItem(item);
-    if (selectedCollection) {
+    if (viewMode === "calendar" && selectedCollection) {
       await loadItems(selectedCollection.id);
+    } else if (viewMode === "type-calendar" && selectedType) {
+      const loaded = await storage.getItemsByType(selectedType.id);
+      setItems(loaded);
     }
     if (selectedItem?.id === item.id) {
       setSelectedItem(null);
@@ -27942,14 +28131,18 @@ var AppView = ({ app, plugin, settings }) => {
         showCompletedItems,
         completedItemsCount: items.filter((it) => it.status === "done").length,
         enableItemTypes: pluginSettings.enableItemTypes,
+        itemTypes,
+        selectedType,
         onToggleShowCompleted: () => setShowCompletedItems((prev) => !prev),
         onBackToCollections: handleBackToCollections,
         onSelectAgenda: handleSelectAgenda,
         onSelectCollection: handleSelectCollection,
         onNavigateCollection: handleNavigateCollection,
+        onSelectType: handleSelectType,
+        onNavigateType: handleNavigateType,
         onNavigateDate: handleNavigateDate,
         onResetToToday: handleResetToToday,
-        onOpenCreateItemModal: () => setIsCreateItemModalOpen(true),
+        onOpenCreateItemModal: handleOpenCreateItemModal,
         onOpenTemplateSettings: () => setIsTemplateSettingsOpen(true),
         onRefresh: handleRefresh
       }
@@ -27974,6 +28167,8 @@ var AppView = ({ app, plugin, settings }) => {
             showCompletedItems,
             enableItemTypes: pluginSettings.enableItemTypes,
             itemTypes,
+            collections,
+            isCrossCollection: false,
             onToggleShowCompleted: () => setShowCompletedItems((prev) => !prev),
             onToggleItemStatus: handleToggleItemStatus,
             isDrawerOpen,
@@ -27981,7 +28176,30 @@ var AppView = ({ app, plugin, settings }) => {
             onSelectItem: handleSelectItem,
             onQuickToggleTodoStatus: handleQuickToggleTodoStatus,
             onDeleteItem: handleDeleteItem,
-            onOpenCreateItemModal: () => setIsCreateItemModalOpen(true),
+            onOpenCreateItemModal: handleOpenCreateItemModal,
+            onUpdateItem: handleUpdateItem
+          }
+        ),
+        viewMode === "type-calendar" && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+          CalendarMatrixView,
+          {
+            items,
+            startDate,
+            selectedItemId: selectedItem?.id || null,
+            showCompletedItems,
+            enableItemTypes: pluginSettings.enableItemTypes,
+            itemTypes,
+            collections,
+            isCrossCollection: true,
+            typeName: selectedType?.name,
+            onToggleShowCompleted: () => setShowCompletedItems((prev) => !prev),
+            onToggleItemStatus: handleToggleItemStatus,
+            isDrawerOpen,
+            onCloseDrawer: handleCloseDrawer,
+            onSelectItem: handleSelectItem,
+            onQuickToggleTodoStatus: handleQuickToggleTodoStatus,
+            onDeleteItem: handleDeleteItem,
+            onOpenCreateItemModal: handleOpenCreateItemModal,
             onUpdateItem: handleUpdateItem
           }
         ),
@@ -27998,7 +28216,7 @@ var AppView = ({ app, plugin, settings }) => {
           }
         )
       ] }),
-      (viewMode === "calendar" || viewMode === "agenda") && isDrawerOpen && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+      (viewMode === "calendar" || viewMode === "type-calendar" || viewMode === "agenda") && isDrawerOpen && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
         TaskDetailDrawer,
         {
           item: selectedItem,
@@ -28015,6 +28233,19 @@ var AppView = ({ app, plugin, settings }) => {
     isCreateItemModalOpen && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "todo-cal-modal-backdrop", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-cal-modal-content", children: [
       /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("h3", { children: "\u65B0\u898F\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item) \u306E\u4F5C\u6210" }),
       /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("form", { onSubmit: handleCreateItemSubmit, children: [
+        !selectedCollection && collections.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("label", { children: "\u6240\u5C5E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3 *" }),
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+            "select",
+            {
+              className: "todo-cal-form-input",
+              value: newItemCollectionId || collections[0].id,
+              onChange: (e) => setNewItemCollectionId(e.target.value),
+              required: true,
+              children: collections.map((col) => /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("option", { value: col.id, children: col.title }, col.id))
+            }
+          )
+        ] }),
         /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-cal-form-group", children: [
           /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("label", { children: "\u30CE\u30FC\u30C8\u30BF\u30A4\u30C8\u30EB *" }),
           /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
