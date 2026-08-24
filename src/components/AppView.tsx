@@ -1,19 +1,33 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { App } from 'obsidian';
 import { StorageManager } from '../storage';
-import { CollectionData, ItemData, TodoStatus, AgendaTodoItem } from '../types';
+import { CollectionData, ItemData, TodoStatus, AgendaTodoItem, PluginSettings, DEFAULT_SETTINGS, TodoItem } from '../types';
 import { HeaderNav } from './HeaderNav';
 import { CollectionsGrid } from './CollectionsGrid';
 import { CalendarMatrixView } from './CalendarMatrixView';
 import { TaskDetailDrawer } from './TaskDetailDrawer';
 import { AgendaView } from './AgendaView';
+import { ItemType } from '../features/item-types/types';
+import { TemplateStorage } from '../features/item-types/templateStorage';
+import { findItemTemplate, findItemType } from '../features/item-types/templateUtils';
+import { TemplateSettingsModal } from '../features/item-types/TemplateSettingsModal';
+import type TodoCalendarPlugin from '../main';
 
 interface AppViewProps {
   app: App;
+  plugin?: TodoCalendarPlugin;
+  settings?: PluginSettings;
 }
 
-export const AppView: React.FC<AppViewProps> = ({ app }) => {
+export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
   const [storage] = useState(() => new StorageManager(app));
+  const [templateStorage] = useState(() => new TemplateStorage(app));
+
+  const [pluginSettings, setPluginSettings] = useState<PluginSettings>(
+    () => settings || plugin?.settings || DEFAULT_SETTINGS
+  );
+  const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
+  const [isTemplateSettingsOpen, setIsTemplateSettingsOpen] = useState(false);
 
   const [viewMode, setViewMode] = useState<'collections' | 'calendar' | 'agenda'>('collections');
   const [collections, setCollections] = useState<CollectionData[]>([]);
@@ -32,6 +46,28 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false);
   const [newItemTitle, setNewItemTitle] = useState('');
   const [newItemDescription, setNewItemDescription] = useState('');
+  const [newItemType, setNewItemType] = useState<string>('');
+  const [newItemTemplate, setNewItemTemplate] = useState<string>('');
+
+  // Listen to plugin settings changes
+  useEffect(() => {
+    if (plugin) {
+      const unsubscribe = plugin.onSettingsChange((newSettings) => {
+        setPluginSettings(newSettings);
+      });
+      return unsubscribe;
+    }
+  }, [plugin]);
+
+  // Load templates
+  const loadTemplates = useCallback(async () => {
+    const loaded = await templateStorage.loadTemplates();
+    setItemTypes(loaded);
+  }, [templateStorage]);
+
+  useEffect(() => {
+    loadTemplates();
+  }, [loadTemplates]);
 
   // Load collections
   const loadCollections = useCallback(async () => {
@@ -162,15 +198,55 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
     e.preventDefault();
     if (!selectedCollection || !newItemTitle.trim()) return;
 
-    const newItem = await storage.createItem(selectedCollection.id, newItemTitle, newItemDescription);
+    let initialTodos: TodoItem[] = [];
+    let selectedType: string | undefined = undefined;
+    let selectedTemplate: string | undefined = undefined;
+
+    if (pluginSettings.enableItemTypes && newItemType) {
+      selectedType = newItemType;
+      const typeObj = findItemType(itemTypes, newItemType);
+      if (typeObj) {
+        const templateObj = findItemTemplate(typeObj, newItemTemplate) || typeObj.templates[0];
+        if (templateObj) {
+          selectedTemplate = templateObj.name;
+          const now = Date.now();
+          initialTodos = (templateObj.todos || []).map((t, idx) => ({
+            id: `todo-${now}-${idx}`,
+            title: t.title,
+            due: '', // empty due date initially
+            status: 'todo',
+            description: '',
+            group: t.group || '',
+          }));
+        }
+      }
+    }
+
+    const newItem = await storage.createItem(
+      selectedCollection.id,
+      newItemTitle,
+      newItemDescription,
+      selectedType,
+      selectedTemplate,
+      initialTodos
+    );
+
     await loadItems(selectedCollection.id);
     setNewItemTitle('');
     setNewItemDescription('');
+    setNewItemType('');
+    setNewItemTemplate('');
     setIsCreateItemModalOpen(false);
 
     // Open detail drawer for newly created item
     setSelectedItem(newItem);
     setIsDrawerOpen(true);
+  };
+
+  // Save updated templates
+  const handleSaveTemplates = async (newTypes: ItemType[]) => {
+    await templateStorage.saveTemplates(newTypes);
+    setItemTypes(newTypes);
   };
 
   // Update Item
@@ -249,6 +325,8 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
     setSelectedTodoId(null);
   };
 
+  const selectedNewTypeObj = findItemType(itemTypes, newItemType);
+
   return (
     <div className="todo-calendar-app">
       <HeaderNav
@@ -258,6 +336,7 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
         startDate={startDate}
         showCompletedItems={showCompletedItems}
         completedItemsCount={items.filter((it) => it.status === 'done').length}
+        enableItemTypes={pluginSettings.enableItemTypes}
         onToggleShowCompleted={() => setShowCompletedItems((prev) => !prev)}
         onBackToCollections={handleBackToCollections}
         onSelectAgenda={handleSelectAgenda}
@@ -266,6 +345,7 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
         onNavigateDate={handleNavigateDate}
         onResetToToday={handleResetToToday}
         onOpenCreateItemModal={() => setIsCreateItemModalOpen(true)}
+        onOpenTemplateSettings={() => setIsTemplateSettingsOpen(true)}
         onRefresh={handleRefresh}
       />
 
@@ -286,6 +366,8 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
               startDate={startDate}
               selectedItemId={selectedItem?.id || null}
               showCompletedItems={showCompletedItems}
+              enableItemTypes={pluginSettings.enableItemTypes}
+              itemTypes={itemTypes}
               onToggleShowCompleted={() => setShowCompletedItems((prev) => !prev)}
               onToggleItemStatus={handleToggleItemStatus}
               isDrawerOpen={isDrawerOpen}
@@ -317,6 +399,8 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
             item={selectedItem}
             selectedTodoId={selectedTodoId}
             isOpen={isDrawerOpen}
+            enableItemTypes={pluginSettings.enableItemTypes}
+            itemTypes={itemTypes}
             onClose={handleCloseDrawer}
             onUpdateItem={handleUpdateItem}
             onDeleteItem={handleDeleteItem}
@@ -335,13 +419,65 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
                 <input
                   type="text"
                   className="todo-cal-form-input"
-                  placeholder="例: UIデザイン ＆ 仕様策定"
+                  placeholder="例: 2026年9月定期リリース"
                   value={newItemTitle}
                   onChange={(e) => setNewItemTitle(e.target.value)}
                   autoFocus
                   required
                 />
               </div>
+
+              {/* Type Selection (Optional) */}
+              {pluginSettings.enableItemTypes && itemTypes.length > 0 && (
+                <div className="todo-cal-form-group">
+                  <label>タイプ (任意・テンプレTODOを自動セット)</label>
+                  <div className="create-type-selection-row">
+                    <select
+                      className="todo-cal-form-input flex-1"
+                      value={newItemType}
+                      onChange={(e) => {
+                        setNewItemType(e.target.value);
+                        const tObj = findItemType(itemTypes, e.target.value);
+                        setNewItemTemplate(tObj?.templates[0]?.name || '');
+                      }}
+                    >
+                      <option value="">(指定なし - 空のアイテム)</option>
+                      {itemTypes.map((type) => (
+                        <option key={type.id} value={type.id}>
+                          {type.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    {selectedNewTypeObj && selectedNewTypeObj.templates.length > 1 && (
+                      <select
+                        className="todo-cal-form-input flex-1"
+                        value={newItemTemplate || selectedNewTypeObj.templates[0]?.name || ''}
+                        onChange={(e) => setNewItemTemplate(e.target.value)}
+                      >
+                        {selectedNewTypeObj.templates.map((tpl) => (
+                          <option key={tpl.id} value={tpl.name}>
+                            {tpl.name} ({tpl.todos.length}タスク)
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                  {selectedNewTypeObj && (
+                    <div className="create-template-hint">
+                      💡 選択されたテンプレートのTODO（
+                      {
+                        (
+                          findItemTemplate(selectedNewTypeObj, newItemTemplate) ||
+                          selectedNewTypeObj.templates[0]
+                        )?.todos.length
+                      }
+                      件）が日付なしで自動作成されます。
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="todo-cal-form-group">
                 <label>メモ / 詳細説明 (任意)</label>
                 <textarea
@@ -352,6 +488,7 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
                   rows={2}
                 />
               </div>
+
               <div className="todo-cal-modal-actions">
                 <button
                   type="button"
@@ -363,10 +500,20 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
                 <button type="submit" className="nav-btn primary-btn">
                   作成
                 </button>
-                </div>
+              </div>
             </form>
           </div>
         </div>
+      )}
+
+      {/* Template Settings Modal */}
+      {isTemplateSettingsOpen && (
+        <TemplateSettingsModal
+          isOpen={isTemplateSettingsOpen}
+          types={itemTypes}
+          onClose={() => setIsTemplateSettingsOpen(false)}
+          onSave={handleSaveTemplates}
+        />
       )}
     </div>
   );

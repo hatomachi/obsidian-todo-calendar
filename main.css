@@ -1647,3 +1647,505 @@
   color: var(--text-faint);
   font-style: italic;
 }
+.item-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  flex-shrink: 0;
+  white-space: nowrap;
+  user-select: none;
+}
+.item-type-badge.badge-size-md {
+  padding: 2px 8px;
+  font-size: 12px;
+}
+.item-type-badge.clickable {
+  cursor: pointer;
+}
+.item-type-badge.badge-color-blue {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+.theme-dark .item-type-badge.badge-color-blue {
+  background-color: rgba(59, 130, 246, 0.22);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.45);
+}
+.item-type-badge.badge-color-green {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+.theme-dark .item-type-badge.badge-color-green {
+  background-color: rgba(34, 197, 94, 0.22);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.45);
+}
+.item-type-badge.badge-color-purple {
+  background-color: rgba(168, 85, 247, 0.15);
+  color: #9333ea;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+}
+.theme-dark .item-type-badge.badge-color-purple {
+  background-color: rgba(168, 85, 247, 0.22);
+  color: #c084fc;
+  border-color: rgba(168, 85, 247, 0.45);
+}
+.item-type-badge.badge-color-orange {
+  background-color: rgba(249, 115, 22, 0.15);
+  color: #ea580c;
+  border: 1px solid rgba(249, 115, 22, 0.35);
+}
+.theme-dark .item-type-badge.badge-color-orange {
+  background-color: rgba(249, 115, 22, 0.22);
+  color: #fb923c;
+  border-color: rgba(249, 115, 22, 0.45);
+}
+.item-type-badge.badge-color-red {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+.theme-dark .item-type-badge.badge-color-red {
+  background-color: rgba(239, 68, 68, 0.22);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.45);
+}
+.item-type-badge.badge-color-cyan {
+  background-color: rgba(6, 182, 212, 0.15);
+  color: #0891b2;
+  border: 1px solid rgba(6, 182, 212, 0.35);
+}
+.theme-dark .item-type-badge.badge-color-cyan {
+  background-color: rgba(6, 182, 212, 0.22);
+  color: #22d3ee;
+  border-color: rgba(6, 182, 212, 0.45);
+}
+.todo-calendar-app .item-row-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+}
+.todo-calendar-app .item-row-main-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.todo-calendar-app .item-row-template-warning-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 24px;
+  flex-wrap: wrap;
+}
+.todo-calendar-app .item-row-template-warning-bar .warning-icon {
+  color: #f59e0b;
+  flex-shrink: 0;
+}
+.todo-calendar-app .warning-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+.todo-calendar-app .warning-badge.missing-todos-badge {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.theme-dark .todo-calendar-app .warning-badge.missing-todos-badge {
+  background-color: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.45);
+}
+.todo-calendar-app .warning-badge.missing-due-badge {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.theme-dark .todo-calendar-app .warning-badge.missing-due-badge {
+  background-color: rgba(245, 158, 11, 0.25);
+  color: #fcd34d;
+  border-color: rgba(245, 158, 11, 0.45);
+}
+.todo-calendar-app .due-date-badge.empty-due-badge {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  font-weight: 600;
+}
+.theme-dark .todo-calendar-app .due-date-badge.empty-due-badge {
+  background-color: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.5);
+}
+.todo-calendar-app .drawer-type-selector-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background-color: var(--background-secondary-alt, rgba(0, 0, 0, 0.02));
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  flex-wrap: wrap;
+}
+.todo-calendar-app .type-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.todo-calendar-app .type-selector-group .selector-icon {
+  color: var(--text-muted);
+}
+.todo-calendar-app .type-selector-group .selector-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.todo-calendar-app .type-dropdown-select {
+  background-color: var(--background-primary);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15));
+  border-radius: 4px;
+  color: var(--text-normal);
+  font-size: 12px;
+  padding: 3px 8px;
+  outline: none;
+}
+.todo-calendar-app .type-dropdown-select:focus {
+  border-color: var(--interactive-accent);
+}
+.todo-calendar-app .template-alert-banner {
+  margin: 10px 16px 4px 16px;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+}
+.todo-calendar-app .template-alert-banner.complete {
+  background-color: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+.todo-calendar-app .template-alert-banner.complete .banner-title {
+  color: #16a34a;
+  font-weight: 600;
+}
+.theme-dark .todo-calendar-app .template-alert-banner.complete .banner-title {
+  color: #4ade80;
+}
+.todo-calendar-app .template-alert-banner.complete .banner-icon-success {
+  color: #16a34a;
+}
+.theme-dark .todo-calendar-app .template-alert-banner.complete .banner-icon-success {
+  color: #4ade80;
+}
+.todo-calendar-app .template-alert-banner.warning {
+  background-color: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.todo-calendar-app .banner-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.todo-calendar-app .banner-icon-warning {
+  color: #f59e0b;
+}
+.todo-calendar-app .banner-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.todo-calendar-app .banner-issue-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.todo-calendar-app .issue-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 11.5px;
+}
+.todo-calendar-app .issue-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.todo-calendar-app .issue-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.todo-calendar-app .issue-item.flex-between {
+  justify-content: space-between;
+}
+.todo-calendar-app .issue-todo-name {
+  font-weight: 500;
+  color: var(--text-normal);
+}
+.todo-calendar-app .issue-group-tag {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+.todo-calendar-app .issue-hint {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.todo-calendar-app .subtle-btn-add-single {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--interactive-accent);
+  background-color: var(--background-primary);
+  color: var(--interactive-accent);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.todo-calendar-app .subtle-btn-add-single:hover {
+  background-color: var(--interactive-accent);
+  color: #ffffff;
+}
+.todo-calendar-app .add-all-missing-btn {
+  margin-top: 4px;
+  align-self: flex-start;
+}
+.todo-cal-modal-content .create-type-selection-row {
+  display: flex;
+  gap: 8px;
+}
+.todo-cal-modal-content .create-template-hint {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+.template-settings-modal {
+  max-width: 760px;
+  width: 95%;
+  height: 80vh;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+.template-settings-modal .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+.template-settings-modal .modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.template-settings-body {
+  display: flex;
+  flex: 1;
+  gap: 16px;
+  overflow: hidden;
+}
+.template-settings-body .settings-sidebar {
+  width: 180px;
+  border-right: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  padding-right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.settings-sidebar .sidebar-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.settings-sidebar .types-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+.settings-sidebar .type-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12.5px;
+  transition: background-color 0.15s ease;
+}
+.settings-sidebar .type-nav-item:hover {
+  background-color: var(--background-modifier-hover);
+}
+.settings-sidebar .type-nav-item.active {
+  background-color: var(--interactive-accent);
+  color: #ffffff;
+}
+.type-color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.type-color-dot.dot-blue {
+  background-color: #3b82f6;
+}
+.type-color-dot.dot-green {
+  background-color: #22c55e;
+}
+.type-color-dot.dot-purple {
+  background-color: #a855f7;
+}
+.type-color-dot.dot-orange {
+  background-color: #f97316;
+}
+.type-color-dot.dot-red {
+  background-color: #ef4444;
+}
+.type-color-dot.dot-cyan {
+  background-color: #06b6d4;
+}
+.type-nav-item .type-nav-name {
+  flex: 1;
+  font-weight: 500;
+}
+.type-nav-item .type-tpl-count {
+  font-size: 11px;
+  opacity: 0.7;
+}
+.settings-editor-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.settings-editor-pane .editor-card {
+  background-color: var(--background-primary);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  padding: 12px;
+}
+.settings-editor-pane .card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.settings-editor-pane .card-header-row h4 {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.settings-editor-pane .form-row-compact {
+  display: flex;
+  gap: 8px;
+}
+.settings-editor-pane .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.settings-editor-pane .form-group.flex-1 {
+  flex: 1;
+}
+.settings-editor-pane .form-group.flex-2 {
+  flex: 2;
+}
+.settings-editor-pane .template-tab-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.settings-editor-pane .template-tab-btn {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  background-color: var(--background-secondary);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.settings-editor-pane .template-tab-btn.active {
+  border-color: var(--interactive-accent);
+  background-color: var(--interactive-accent);
+  color: #ffffff;
+}
+.settings-editor-pane .template-tab-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  border: 1px dashed var(--border-color, rgba(255, 255, 255, 0.2));
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.template-todos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  margin-bottom: 10px;
+}
+.tpl-todo-item-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tpl-todo-title-input {
+  flex: 3;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  background-color: var(--background-secondary);
+  color: var(--text-normal);
+  font-size: 12px;
+}
+.tpl-todo-group-input {
+  flex: 1.5;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  background-color: var(--background-secondary);
+  color: var(--text-normal);
+  font-size: 12px;
+}
+.add-tpl-todo-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border-color, rgba(255, 255, 255, 0.1));
+}
+.add-tpl-todo-row .tpl-todo-title-input {
+  background-color: var(--background-primary);
+  border-color: var(--interactive-accent);
+}

@@ -1,13 +1,33 @@
 import React from 'react';
-import { CheckCircle2, ChevronDown, ChevronUp, Circle, Clock, FileText, Layers, Plus, Trash2 } from 'lucide-react';
+import {
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Circle,
+  Clock,
+  FileText,
+  Layers,
+  Plus,
+  Trash2,
+  AlertTriangle,
+} from 'lucide-react';
 import { ItemData, TodoItem, TodoStatus } from '../types';
 import { isJapaneseHoliday } from '../utils/holidays';
+import { ItemType } from '../features/item-types/types';
+import {
+  checkTemplateStatus,
+  findItemTemplate,
+  findItemType,
+} from '../features/item-types/templateUtils';
+import { TypeBadge } from '../features/item-types/TypeBadge';
 
 interface CalendarMatrixViewProps {
   items: ItemData[];
   startDate: Date;
   selectedItemId: string | null;
   showCompletedItems?: boolean;
+  enableItemTypes?: boolean;
+  itemTypes?: ItemType[];
   onToggleShowCompleted?: () => void;
   onToggleItemStatus: (item: ItemData) => void;
   isDrawerOpen?: boolean;
@@ -42,6 +62,8 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
   startDate,
   selectedItemId,
   showCompletedItems = false,
+  enableItemTypes = true,
+  itemTypes = [],
   onToggleShowCompleted,
   onToggleItemStatus,
   isDrawerOpen,
@@ -319,6 +341,10 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                 const visibleFutureTodos = hasFutureMore && !isFutureExpanded ? futureTodos.slice(0, 2) : futureTodos;
                 const hiddenFutureCount = futureTodos.length - 2;
 
+                const itemType = enableItemTypes ? findItemType(itemTypes, item.type) : undefined;
+                const itemTemplate = enableItemTypes ? findItemTemplate(itemType, item.template) : undefined;
+                const templateStatus = enableItemTypes && itemTemplate ? checkTemplateStatus(item, itemTemplate) : null;
+
                 return (
                   <tr
                     key={item.id}
@@ -329,35 +355,57 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                     {/* Row Header: Item Title */}
                     <td className="row-header-td" onClick={() => onSelectItem(item)}>
                       <div className={`item-row-header-content ${isItemDone ? 'item-status-done' : ''}`}>
-                        <input
-                          type="checkbox"
-                          checked={isItemDone}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            onToggleItemStatus(item);
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                          className="item-row-checkbox"
-                          title={isItemDone ? '未完了に戻す' : 'アクションを完了にする'}
-                        />
-                        <span
-                          className={`item-title-text ${isItemDone ? 'line-through' : ''}`}
-                          title={item.title}
-                        >
-                          {item.title}
-                        </span>
-                        <button
-                          className="delete-item-btn"
-                          title="ノート削除"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (confirm(`ノート「${item.title}」を削除しますか？`)) {
-                              onDeleteItem(item);
-                            }
-                          }}
-                        >
-                          <Trash2 size={12} />
-                        </button>
+                        <div className="item-row-main-bar">
+                          <input
+                            type="checkbox"
+                            checked={isItemDone}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              onToggleItemStatus(item);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="item-row-checkbox"
+                            title={isItemDone ? '未完了に戻す' : 'アクションを完了にする'}
+                          />
+                          {enableItemTypes && itemType && (
+                            <TypeBadge itemType={itemType} size="sm" />
+                          )}
+                          <span
+                            className={`item-title-text ${isItemDone ? 'line-through' : ''}`}
+                            title={item.title}
+                          >
+                            {item.title}
+                          </span>
+                          <button
+                            className="delete-item-btn"
+                            title="ノート削除"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (confirm(`ノート「${item.title}」を削除しますか？`)) {
+                                onDeleteItem(item);
+                              }
+                            }}
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+
+                        {/* Template Validation Warning in Header */}
+                        {templateStatus && !templateStatus.isComplete && !isItemDone && (
+                          <div className="item-row-template-warning-bar" title="テンプレートチェック警告">
+                            <AlertTriangle size={11} className="warning-icon" />
+                            {templateStatus.missingTodos.length > 0 && (
+                              <span className="warning-badge missing-todos-badge">
+                                不足TODO: {templateStatus.missingTodos.length}件
+                              </span>
+                            )}
+                            {templateStatus.missingDueTodos.length > 0 && (
+                              <span className="warning-badge missing-due-badge">
+                                期日未設定: {templateStatus.missingDueTodos.length}件
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </td>
 

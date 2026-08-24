@@ -1,5 +1,18 @@
 import React from 'react';
-import { ArrowLeft, Plus, Calendar, RefreshCw, Layers, ChevronDown, ChevronLeft, ChevronRight, CheckSquare, Eye, EyeOff } from 'lucide-react';
+import {
+  ArrowLeft,
+  Plus,
+  Calendar,
+  RefreshCw,
+  Layers,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  CheckSquare,
+  Eye,
+  EyeOff,
+  Settings,
+} from 'lucide-react';
 import { CollectionData } from '../types';
 
 interface HeaderNavProps {
@@ -9,6 +22,7 @@ interface HeaderNavProps {
   startDate: Date;
   showCompletedItems?: boolean;
   completedItemsCount?: number;
+  enableItemTypes?: boolean;
   onToggleShowCompleted?: () => void;
   onBackToCollections: () => void;
   onSelectAgenda: () => void;
@@ -17,6 +31,7 @@ interface HeaderNavProps {
   onNavigateDate: (days: number) => void;
   onResetToToday: () => void;
   onOpenCreateItemModal: () => void;
+  onOpenTemplateSettings?: () => void;
   onRefresh: () => void;
 }
 
@@ -27,6 +42,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   startDate,
   showCompletedItems = false,
   completedItemsCount = 0,
+  enableItemTypes = true,
   onToggleShowCompleted,
   onBackToCollections,
   onSelectAgenda,
@@ -35,6 +51,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   onNavigateDate,
   onResetToToday,
   onOpenCreateItemModal,
+  onOpenTemplateSettings,
   onRefresh,
 }) => {
   const formatDateRangeHeader = (start: Date) => {
@@ -158,6 +175,16 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
         <button className="icon-btn" onClick={onRefresh} title="データ更新">
           <RefreshCw size={16} />
         </button>
+
+        {enableItemTypes && onOpenTemplateSettings && (
+          <button
+            className="icon-btn"
+            onClick={onOpenTemplateSettings}
+            title="タイプ & テンプレート設定"
+          >
+            <Settings size={16} />
+          </button>
+        )}
 
         {viewMode === 'calendar' && (
           <button className="nav-btn primary-btn" onClick={onOpenCreateItemModal}>

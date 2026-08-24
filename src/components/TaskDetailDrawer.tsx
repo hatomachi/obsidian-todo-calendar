@@ -19,11 +19,15 @@ import {
   Layers,
 } from 'lucide-react';
 import { ItemData, TodoItem } from '../types';
+import { ItemType, TemplateTodoDef } from '../features/item-types/types';
+import { findItemTemplate, findItemType } from '../features/item-types/templateUtils';
+import { TemplateAlertBanner } from '../features/item-types/TemplateAlertBanner';
+import { TypeBadge } from '../features/item-types/TypeBadge';
 
 const UNGROUPED_LABEL = '未分類';
 
 const formatDueDate = (dateStr: string): string => {
-  if (!dateStr) return '日付なし';
+  if (!dateStr) return '日付未設定';
   const parts = dateStr.split('-');
   if (parts.length === 3) {
     const currentYear = new Date().getFullYear().toString();
@@ -40,6 +44,8 @@ interface TaskDetailDrawerProps {
   item: ItemData | null;
   selectedTodoId: string | null;
   isOpen: boolean;
+  enableItemTypes?: boolean;
+  itemTypes?: ItemType[];
   onClose: () => void;
   onUpdateItem: (item: ItemData) => void;
   onDeleteItem: (item: ItemData) => void;
@@ -49,6 +55,8 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
   item,
   selectedTodoId,
   isOpen,
+  enableItemTypes = true,
+  itemTypes = [],
   onClose,
   onUpdateItem,
   onDeleteItem,
@@ -121,10 +129,78 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     return result;
   }, [localItem, existingGroups]);
 
+  // Calculate item's selected type and template
+  const currentItemType = useMemo(() => {
+    if (!enableItemTypes || !localItem?.type) return undefined;
+    return findItemType(itemTypes, localItem.type);
+  }, [enableItemTypes, localItem?.type, itemTypes]);
+
+  const currentItemTemplate = useMemo(() => {
+    if (!currentItemType) return undefined;
+    return findItemTemplate(currentItemType, localItem?.template);
+  }, [currentItemType, localItem?.template]);
+
   if (!isOpen || !localItem) return null;
 
   const handleTitleChange = (newTitle: string) => {
     const updated = { ...localItem, title: newTitle };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+
+  const handleTypeChange = (typeId: string) => {
+    const nextType = findItemType(itemTypes, typeId);
+    const defaultTpl = nextType?.templates[0];
+    const updated: ItemData = {
+      ...localItem,
+      type: typeId ? typeId : undefined,
+      template: defaultTpl ? defaultTpl.name : undefined,
+    };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+
+  const handleTemplateChange = (tplName: string) => {
+    const updated: ItemData = {
+      ...localItem,
+      template: tplName ? tplName : undefined,
+    };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+
+  const handleAddMissingTodo = (missing: TemplateTodoDef) => {
+    const newTodo: TodoItem = {
+      id: `todo-${Date.now()}`,
+      title: missing.title,
+      due: '', // empty date for template todos initially
+      status: 'todo',
+      description: '',
+      group: missing.group || '',
+    };
+    const updated = {
+      ...localItem,
+      todos: [...localItem.todos, newTodo],
+    };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+
+  const handleAddAllMissingTodos = (missingList: TemplateTodoDef[]) => {
+    const now = Date.now();
+    const newTodos: TodoItem[] = missingList.map((missing, idx) => ({
+      id: `todo-${now}-${idx}`,
+      title: missing.title,
+      due: '',
+      status: 'todo',
+      description: '',
+      group: missing.group || '',
+    }));
+
+    const updated = {
+      ...localItem,
+      todos: [...localItem.todos, ...newTodos],
+    };
     setLocalItem(updated);
     onUpdateItem(updated);
   };
@@ -328,14 +404,14 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
             onChange={(e) => handleUpdateTodo(todo.id, { title: e.target.value })}
           />
 
-          <div className="due-date-wrapper" title={`期日: ${todo.due || '未設定'}`}>
+          <div className="due-date-wrapper" title={`期日: ${todo.due || '未設定（警告対象）'}`}>
             <input
               type="date"
               className="due-date-input-overlay"
               value={todo.due || ''}
               onChange={(e) => handleUpdateTodo(todo.id, { due: e.target.value })}
             />
-            <div className="due-date-badge">
+            <div className={`due-date-badge ${!todo.due || todo.due.trim() === '' ? 'empty-due-badge' : ''}`}>
               <Calendar size={12} className="due-date-icon" />
               <span>{formatDueDate(todo.due)}</span>
             </div>
@@ -439,6 +515,56 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           <X size={18} />
         </button>
       </div>
+
+      {/* Item Type & Template Selector Section */}
+      {enableItemTypes && itemTypes.length > 0 && (
+        <div className="drawer-type-selector-bar">
+          <div className="type-selector-group">
+            <Tag size={13} className="selector-icon" />
+            <span className="selector-label">タイプ:</span>
+            <select
+              className="type-dropdown-select"
+              value={localItem.type || ''}
+              onChange={(e) => handleTypeChange(e.target.value)}
+            >
+              <option value="">(タイプ指定なし)</option>
+              {itemTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {currentItemType && currentItemType.templates.length > 0 && (
+            <div className="type-selector-group">
+              <Layers size={13} className="selector-icon" />
+              <span className="selector-label">テンプレ:</span>
+              <select
+                className="type-dropdown-select"
+                value={localItem.template || currentItemType.templates[0]?.name || ''}
+                onChange={(e) => handleTemplateChange(e.target.value)}
+              >
+                {currentItemType.templates.map((tpl) => (
+                  <option key={tpl.id} value={tpl.name}>
+                    {tpl.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Template Validation Alert Banner */}
+      {enableItemTypes && currentItemTemplate && (
+        <TemplateAlertBanner
+          item={localItem}
+          template={currentItemTemplate}
+          onAddMissingTodo={handleAddMissingTodo}
+          onAddAllMissingTodos={handleAddAllMissingTodos}
+        />
+      )}
 
       <div className="drawer-body">
         {/* Item Description (Memo) Section */}

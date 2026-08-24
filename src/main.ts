@@ -1,16 +1,19 @@
-import { ItemView, Plugin, WorkspaceLeaf } from 'obsidian';
+import { App, ItemView, Plugin, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { VIEW_TYPE_TODO_CALENDAR } from './constants';
 import { AppView } from './components/AppView';
 import { StorageManager } from './storage';
+import { DEFAULT_SETTINGS, PluginSettings } from './types';
 import './styles.css';
 
 export class TodoCalendarView extends ItemView {
   private root: Root | null = null;
+  private plugin: TodoCalendarPlugin;
 
-  constructor(leaf: WorkspaceLeaf) {
+  constructor(leaf: WorkspaceLeaf, plugin: TodoCalendarPlugin) {
     super(leaf);
+    this.plugin = plugin;
   }
 
   getViewType(): string {
@@ -32,7 +35,15 @@ export class TodoCalendarView extends ItemView {
 
     this.root = createRoot(container);
     this.root.render(
-      React.createElement(React.StrictMode, null, React.createElement(AppView, { app: this.app }))
+      React.createElement(
+        React.StrictMode,
+        null,
+        React.createElement(AppView, {
+          app: this.app,
+          plugin: this.plugin,
+          settings: this.plugin.settings,
+        })
+      )
     );
   }
 
@@ -44,15 +55,50 @@ export class TodoCalendarView extends ItemView {
   }
 }
 
+export class TodoCalendarSettingTab extends PluginSettingTab {
+  plugin: TodoCalendarPlugin;
+
+  constructor(app: App, plugin: TodoCalendarPlugin) {
+    super(app, plugin);
+    this.plugin = plugin;
+  }
+
+  display(): void {
+    const { containerEl } = this;
+    containerEl.empty();
+
+    containerEl.createEl('h2', { text: 'TODO カレンダー 設定' });
+
+    new Setting(containerEl)
+      .setName('タイプ & テンプレート機能の有効化')
+      .setDesc(
+        'アクションにタイプ（リリース、見積等）を付与し、テンプレートTODOの自動セットや抜け漏れ・期日未設定の警告機能を利用可能にします。プライベート用途等で不要な場合はOFFにしてください。'
+      )
+      .addToggle((toggle) =>
+        toggle.setValue(this.plugin.settings.enableItemTypes).onChange(async (value) => {
+          this.plugin.settings.enableItemTypes = value;
+          await this.plugin.saveSettings();
+        })
+      );
+  }
+}
+
 export default class TodoCalendarPlugin extends Plugin {
+  settings: PluginSettings = DEFAULT_SETTINGS;
+  private settingsListeners: Array<(settings: PluginSettings) => void> = [];
+
   async onload(): Promise<void> {
     console.log('Loading TODO Calendar Matrix Plugin...');
+    await this.loadSettings();
 
     // Register view
     this.registerView(
       VIEW_TYPE_TODO_CALENDAR,
-      (leaf: WorkspaceLeaf) => new TodoCalendarView(leaf)
+      (leaf: WorkspaceLeaf) => new TodoCalendarView(leaf, this)
     );
+
+    // Add settings tab
+    this.addSettingTab(new TodoCalendarSettingTab(this.app, this));
 
     // Add ribbon icon
     this.addRibbonIcon('calendar', 'TODO カレンダーを開く', () => {
@@ -165,7 +211,30 @@ export default class TodoCalendarPlugin extends Plugin {
     }
   }
 
+  async loadSettings(): Promise<void> {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
+
+  async saveSettings(): Promise<void> {
+    await this.saveData(this.settings);
+    this.notifySettingsChange();
+  }
+
+  onSettingsChange(listener: (settings: PluginSettings) => void): () => void {
+    this.settingsListeners.push(listener);
+    return () => {
+      this.settingsListeners = this.settingsListeners.filter((l) => l !== listener);
+    };
+  }
+
+  private notifySettingsChange(): void {
+    for (const listener of this.settingsListeners) {
+      listener(this.settings);
+    }
+  }
+
   onunload(): void {
     console.log('Unloading TODO Calendar Matrix Plugin...');
+    this.settingsListeners = [];
   }
 }

@@ -198,6 +198,8 @@ export class StorageManager {
           collectionId,
           filePath: file.path,
           title: frontmatter.title || 'Untitled Item',
+          type: frontmatter.type,
+          template: frontmatter.template,
           status: frontmatter.status === 'done' ? 'done' : 'todo',
           description: frontmatter.description || '',
           createdAt: frontmatter.created_at || new Date(file.stat.ctime).toISOString(),
@@ -212,7 +214,14 @@ export class StorageManager {
   /**
    * Create a new item in a collection
    */
-  async createItem(collectionId: string, title: string, description = ''): Promise<ItemData> {
+  async createItem(
+    collectionId: string,
+    title: string,
+    description = '',
+    type?: string,
+    template?: string,
+    initialTodos: TodoItem[] = []
+  ): Promise<ItemData> {
     await this.ensureDirectoriesExist();
 
     const itemFolderPath = `${ITEMS_DIR}/${collectionId}`;
@@ -224,9 +233,7 @@ export class StorageManager {
     const filePath = `${itemFolderPath}/${id}.md`;
     const createdAt = new Date().toISOString();
 
-    const initialTodos: TodoItem[] = [];
-
-    const frontmatter = {
+    const frontmatter: Record<string, any> = {
       id,
       collection_id: collectionId,
       title: title.trim() || '新規アイテム',
@@ -236,6 +243,9 @@ export class StorageManager {
       todos: initialTodos,
     };
 
+    if (type) frontmatter.type = type;
+    if (template) frontmatter.template = template;
+
     const content = this.formatMarkdownWithFrontmatter(frontmatter, `# ${title}\n`);
     await this.app.vault.create(filePath, content);
 
@@ -244,6 +254,8 @@ export class StorageManager {
       collectionId,
       filePath,
       title: frontmatter.title,
+      type,
+      template,
       status: 'todo',
       description: frontmatter.description,
       createdAt,
@@ -266,7 +278,7 @@ export class StorageManager {
     const bodyMatch = content.match(/^---\r?\n[\s\S]*?\r?\n---([\s\S]*)$/);
     const bodyContent = bodyMatch ? bodyMatch[1] : '';
 
-    const frontmatter = {
+    const frontmatter: Record<string, any> = {
       id: item.id,
       collection_id: item.collectionId,
       title: item.title,
@@ -282,6 +294,9 @@ export class StorageManager {
         ...(t.group ? { group: t.group } : {}),
       })),
     };
+
+    if (item.type) frontmatter.type = item.type;
+    if (item.template) frontmatter.template = item.template;
 
     const newContent = this.formatMarkdownWithFrontmatter(frontmatter, bodyContent);
     await this.app.vault.modify(file, newContent);

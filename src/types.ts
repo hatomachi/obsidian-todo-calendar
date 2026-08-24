@@ -14,6 +14,8 @@ export interface ItemData {
   collectionId: string;
   filePath: string;
   title: string;
+  type?: string;
+  template?: string;
   status?: TodoStatus;
   description?: string;
   createdAt: string;
@@ -35,4 +37,12 @@ export interface AgendaTodoItem {
   item: ItemData;
   collection: CollectionData;
 }
+
+export interface PluginSettings {
+  enableItemTypes: boolean;
+}
+
+export const DEFAULT_SETTINGS: PluginSettings = {
+  enableItemTypes: true,
+};
 

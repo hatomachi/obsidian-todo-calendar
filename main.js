@@ -1094,7 +1094,7 @@ var require_react_development = __commonJS({
           }
           return dispatcher.useContext(Context);
         }
-        function useState5(initialState) {
+        function useState6(initialState) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useState(initialState);
         }
@@ -1897,7 +1897,7 @@ var require_react_development = __commonJS({
         exports.useMemo = useMemo2;
         exports.useReducer = useReducer;
         exports.useRef = useRef;
-        exports.useState = useState5;
+        exports.useState = useState6;
         exports.useSyncExternalStore = useSyncExternalStore;
         exports.useTransition = useTransition;
         exports.version = ReactVersion;
@@ -2393,9 +2393,9 @@ var require_react_dom_development = __commonJS({
         if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
           __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
         }
-        var React7 = require_react();
+        var React8 = require_react();
         var Scheduler = require_scheduler();
-        var ReactSharedInternals = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+        var ReactSharedInternals = React8.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
         var suppressWarning = false;
         function setSuppressWarning(newSuppressWarning) {
           {
@@ -4002,7 +4002,7 @@ var require_react_dom_development = __commonJS({
           {
             if (props.value == null) {
               if (typeof props.children === "object" && props.children !== null) {
-                React7.Children.forEach(props.children, function(child) {
+                React8.Children.forEach(props.children, function(child) {
                   if (child == null) {
                     return;
                   }
@@ -23598,7 +23598,7 @@ var require_react_jsx_runtime_development = __commonJS({
     if (true) {
       (function() {
         "use strict";
-        var React7 = require_react();
+        var React8 = require_react();
         var REACT_ELEMENT_TYPE = Symbol.for("react.element");
         var REACT_PORTAL_TYPE = Symbol.for("react.portal");
         var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
@@ -23624,7 +23624,7 @@ var require_react_jsx_runtime_development = __commonJS({
           }
           return null;
         }
-        var ReactSharedInternals = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+        var ReactSharedInternals = React8.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
         function error(format) {
           {
             {
@@ -24474,11 +24474,11 @@ var require_react_jsx_runtime_development = __commonJS({
             return jsxWithValidation(type, props, key, false);
           }
         }
-        var jsx7 = jsxWithValidationDynamic;
-        var jsxs7 = jsxWithValidationStatic;
+        var jsx10 = jsxWithValidationDynamic;
+        var jsxs10 = jsxWithValidationStatic;
         exports.Fragment = REACT_FRAGMENT_TYPE;
-        exports.jsx = jsx7;
-        exports.jsxs = jsxs7;
+        exports.jsx = jsx10;
+        exports.jsxs = jsxs10;
       })();
     }
   }
@@ -24499,12 +24499,13 @@ var require_jsx_runtime = __commonJS({
 // src/main.ts
 var main_exports = {};
 __export(main_exports, {
+  TodoCalendarSettingTab: () => TodoCalendarSettingTab,
   TodoCalendarView: () => TodoCalendarView,
   default: () => TodoCalendarPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian2 = require("obsidian");
-var import_react8 = __toESM(require_react());
+var import_obsidian3 = require("obsidian");
+var import_react9 = __toESM(require_react());
 var import_client = __toESM(require_client());
 
 // src/constants.ts
@@ -24514,7 +24515,7 @@ var COLLECTIONS_DIR = `${ROOT_DATA_DIR}/collections`;
 var ITEMS_DIR = `${ROOT_DATA_DIR}/items`;
 
 // src/components/AppView.tsx
-var import_react7 = __toESM(require_react());
+var import_react8 = __toESM(require_react());
 
 // src/storage.ts
 var import_obsidian = require("obsidian");
@@ -24685,6 +24686,8 @@ ${bodyContent}`;
           collectionId,
           filePath: file.path,
           title: frontmatter.title || "Untitled Item",
+          type: frontmatter.type,
+          template: frontmatter.template,
           status: frontmatter.status === "done" ? "done" : "todo",
           description: frontmatter.description || "",
           createdAt: frontmatter.created_at || new Date(file.stat.ctime).toISOString(),
@@ -24697,7 +24700,7 @@ ${bodyContent}`;
   /**
    * Create a new item in a collection
    */
-  async createItem(collectionId, title, description = "") {
+  async createItem(collectionId, title, description = "", type, template, initialTodos = []) {
     await this.ensureDirectoriesExist();
     const itemFolderPath = `${ITEMS_DIR}/${collectionId}`;
     if (!await this.app.vault.adapter.exists(itemFolderPath)) {
@@ -24706,7 +24709,6 @@ ${bodyContent}`;
     const id = this.generateUniqueId();
     const filePath = `${itemFolderPath}/${id}.md`;
     const createdAt = (/* @__PURE__ */ new Date()).toISOString();
-    const initialTodos = [];
     const frontmatter = {
       id,
       collection_id: collectionId,
@@ -24716,6 +24718,8 @@ ${bodyContent}`;
       created_at: createdAt,
       todos: initialTodos
     };
+    if (type) frontmatter.type = type;
+    if (template) frontmatter.template = template;
     const content = this.formatMarkdownWithFrontmatter(frontmatter, `# ${title}
 `);
     await this.app.vault.create(filePath, content);
@@ -24724,6 +24728,8 @@ ${bodyContent}`;
       collectionId,
       filePath,
       title: frontmatter.title,
+      type,
+      template,
       status: "todo",
       description: frontmatter.description,
       createdAt,
@@ -24758,6 +24764,8 @@ ${bodyContent}`;
         ...t.group ? { group: t.group } : {}
       }))
     };
+    if (item.type) frontmatter.type = item.type;
+    if (item.template) frontmatter.template = item.template;
     const newContent = this.formatMarkdownWithFrontmatter(frontmatter, bodyContent);
     await this.app.vault.modify(file, newContent);
   }
@@ -24790,6 +24798,11 @@ ${bodyContent}`;
     }
     return agendaItems;
   }
+};
+
+// src/types.ts
+var DEFAULT_SETTINGS = {
+  enableItemTypes: true
 };
 
 // node_modules/lucide-react/dist/esm/createLucideIcon.js
@@ -24876,6 +24889,25 @@ var ArrowUpDown = createLucideIcon("ArrowUpDown", [
   ["path", { d: "M17 20V4", key: "1ejh1v" }],
   ["path", { d: "m3 8 4-4 4 4", key: "11wl7u" }],
   ["path", { d: "M7 4v16", key: "1glfcx" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/bookmark.js
+var Bookmark = createLucideIcon("Bookmark", [
+  ["path", { d: "m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z", key: "1fy3hk" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/calculator.js
+var Calculator = createLucideIcon("Calculator", [
+  ["rect", { width: "16", height: "20", x: "4", y: "2", rx: "2", key: "1nb95v" }],
+  ["line", { x1: "8", x2: "16", y1: "6", y2: "6", key: "x4nwl0" }],
+  ["line", { x1: "16", x2: "16", y1: "14", y2: "18", key: "wjye3r" }],
+  ["path", { d: "M16 10h.01", key: "1m94wz" }],
+  ["path", { d: "M12 10h.01", key: "1nrarc" }],
+  ["path", { d: "M8 10h.01", key: "19clt8" }],
+  ["path", { d: "M12 14h.01", key: "1etili" }],
+  ["path", { d: "M8 14h.01", key: "6423bh" }],
+  ["path", { d: "M12 18h.01", key: "mhygvu" }],
+  ["path", { d: "M8 18h.01", key: "lrp35t" }]
 ]);
 
 // node_modules/lucide-react/dist/esm/icons/calendar.js
@@ -25066,10 +25098,53 @@ var RefreshCw = createLucideIcon("RefreshCw", [
   ["path", { d: "M8 16H3v5", key: "1cv678" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/rocket.js
+var Rocket = createLucideIcon("Rocket", [
+  [
+    "path",
+    {
+      d: "M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z",
+      key: "m3kijz"
+    }
+  ],
+  [
+    "path",
+    {
+      d: "m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z",
+      key: "1fmvmk"
+    }
+  ],
+  ["path", { d: "M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0", key: "1f8sc4" }],
+  ["path", { d: "M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5", key: "qeys4" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/search.js
 var Search = createLucideIcon("Search", [
   ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }],
   ["path", { d: "m21 21-4.3-4.3", key: "1qie3q" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/settings.js
+var Settings = createLucideIcon("Settings", [
+  [
+    "path",
+    {
+      d: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z",
+      key: "1qme2f"
+    }
+  ],
+  ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/shield.js
+var Shield = createLucideIcon("Shield", [
+  [
+    "path",
+    {
+      d: "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z",
+      key: "oel41y"
+    }
+  ]
 ]);
 
 // node_modules/lucide-react/dist/esm/icons/square-check-big.js
@@ -25099,10 +25174,34 @@ var Trash2 = createLucideIcon("Trash2", [
   ["line", { x1: "14", x2: "14", y1: "11", y2: "17", key: "xtxkd" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/triangle-alert.js
+var TriangleAlert = createLucideIcon("TriangleAlert", [
+  [
+    "path",
+    {
+      d: "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3",
+      key: "wmoenq"
+    }
+  ],
+  ["path", { d: "M12 9v4", key: "juzpu7" }],
+  ["path", { d: "M12 17h.01", key: "p32p05" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/x.js
 var X = createLucideIcon("X", [
   ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
   ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/zap.js
+var Zap = createLucideIcon("Zap", [
+  [
+    "path",
+    {
+      d: "M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z",
+      key: "1xq2db"
+    }
+  ]
 ]);
 
 // src/components/HeaderNav.tsx
@@ -25114,6 +25213,7 @@ var HeaderNav = ({
   startDate,
   showCompletedItems = false,
   completedItemsCount = 0,
+  enableItemTypes = true,
   onToggleShowCompleted,
   onBackToCollections,
   onSelectAgenda,
@@ -25122,6 +25222,7 @@ var HeaderNav = ({
   onNavigateDate,
   onResetToToday,
   onOpenCreateItemModal,
+  onOpenTemplateSettings,
   onRefresh
 }) => {
   const formatDateRangeHeader = (start) => {
@@ -25235,6 +25336,15 @@ var HeaderNav = ({
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "icon-btn", onClick: onRefresh, title: "\u30C7\u30FC\u30BF\u66F4\u65B0", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { size: 16 }) }),
+      enableItemTypes && onOpenTemplateSettings && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "button",
+        {
+          className: "icon-btn",
+          onClick: onOpenTemplateSettings,
+          title: "\u30BF\u30A4\u30D7 & \u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u8A2D\u5B9A",
+          children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Settings, { size: 16 })
+        }
+      ),
       viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { className: "nav-btn primary-btn", onClick: onOpenCreateItemModal, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { size: 16 }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "\u65B0\u898F\u30A2\u30A4\u30C6\u30E0" })
@@ -25454,8 +25564,173 @@ function isJapaneseHoliday(date) {
   return false;
 }
 
-// src/components/CalendarMatrixView.tsx
+// src/features/item-types/templateUtils.ts
+function isTitleMatch(todoTitle, templateTitle) {
+  const normTodo = todoTitle.trim().toLowerCase();
+  const normTpl = templateTitle.trim().toLowerCase();
+  if (!normTodo || !normTpl) return false;
+  return normTodo.startsWith(normTpl) || normTodo.includes(normTpl);
+}
+function checkTemplateStatus(item, template) {
+  if (!template || !template.todos || template.todos.length === 0) {
+    return {
+      hasTemplate: false,
+      missingTodos: [],
+      missingDueTodos: [],
+      matchedTodosCount: 0,
+      totalTemplateTodosCount: 0,
+      isComplete: true
+    };
+  }
+  const missingTodos = [];
+  const missingDueTodos = [];
+  let matchedTodosCount = 0;
+  for (const tplTodo of template.todos) {
+    const matchedTodo = item.todos.find((t) => isTitleMatch(t.title, tplTodo.title));
+    if (!matchedTodo) {
+      missingTodos.push(tplTodo);
+    } else {
+      matchedTodosCount++;
+      if (!matchedTodo.due || matchedTodo.due.trim() === "") {
+        missingDueTodos.push(matchedTodo);
+      }
+    }
+  }
+  const isComplete = missingTodos.length === 0 && missingDueTodos.length === 0;
+  return {
+    hasTemplate: true,
+    missingTodos,
+    missingDueTodos,
+    matchedTodosCount,
+    totalTemplateTodosCount: template.todos.length,
+    isComplete
+  };
+}
+function findItemType(types, typeIdOrName) {
+  if (!typeIdOrName) return void 0;
+  return types.find((t) => t.id === typeIdOrName || t.name === typeIdOrName);
+}
+function findItemTemplate(itemType, templateIdOrName) {
+  if (!itemType || !templateIdOrName) return void 0;
+  return itemType.templates.find((tpl) => tpl.id === templateIdOrName || tpl.name === templateIdOrName) || itemType.templates[0];
+}
+function getDefaultItemTypes() {
+  return [
+    {
+      id: "release",
+      name: "\u30EA\u30EA\u30FC\u30B9",
+      icon: "rocket",
+      color: "blue",
+      templates: [
+        {
+          id: "rel_standard",
+          name: "\u901A\u5E38\u30EA\u30EA\u30FC\u30B9",
+          todos: [
+            { title: "\u30EA\u30EA\u30FC\u30B9\u8A08\u753B\u7B56\u5B9A", group: "\u8A08\u753B" },
+            { title: "\u90E8\u5185\u4E8B\u524D\u30EC\u30D3\u30E5\u30FC", group: "\u5BE9\u67FB" },
+            { title: "\u672C\u756A\u30EA\u30EA\u30FC\u30B9\u7533\u8ACB \uFF06 \u90E8\u4E00\u89A7\u8D77\u7968", group: "\u7533\u8ACB" },
+            { title: "\u672C\u756A\u4F5C\u696D", group: "\u5F53\u65E5" },
+            { title: "\u4E8B\u5F8C\u52D5\u4F5C\u78BA\u8A8D\u30FB\u5B8C\u4E86\u5831\u544A", group: "\u5F53\u65E5" }
+          ]
+        },
+        {
+          id: "rel_emergency",
+          name: "\u7DCA\u6025\u30D1\u30C3\u30C1\u30EA\u30EA\u30FC\u30B9",
+          todos: [
+            { title: "\u7DCA\u6025\u30EA\u30EA\u30FC\u30B9\u7533\u8ACB", group: "\u7533\u8ACB" },
+            { title: "\u30D1\u30C3\u30C1\u9069\u7528\u4F5C\u696D", group: "\u5F53\u65E5" },
+            { title: "\u4E8B\u5F8C\u691C\u8A3C\u30FB\u5831\u544A", group: "\u5F53\u65E5" }
+          ]
+        }
+      ]
+    },
+    {
+      id: "estimate",
+      name: "\u898B\u7A4D",
+      icon: "calculator",
+      color: "green",
+      templates: [
+        {
+          id: "est_standard",
+          name: "\u6A19\u6E96\u898B\u7A4D",
+          todos: [
+            { title: "\u5DE5\u6570\u7B97\u51FA\u30FB\u898B\u7A4D\u30C9\u30E9\u30D5\u30C8\u4F5C\u6210", group: "\u4F5C\u6210" },
+            { title: "\u30B0\u30EB\u30FC\u30D7\u30EC\u30D3\u30E5\u30FC", group: "\u5BE9\u67FB" },
+            { title: "\u90E8\u5185\u30EC\u30D3\u30E5\u30FC", group: "\u5BE9\u67FB" },
+            { title: "\u9867\u5BA2\u30FB\u95A2\u9023\u90E8\u7F72\u63D0\u51FA", group: "\u63D0\u51FA" }
+          ]
+        }
+      ]
+    },
+    {
+      id: "incident",
+      name: "\u969C\u5BB3\u5BFE\u5FDC",
+      icon: "alert-triangle",
+      color: "red",
+      templates: [
+        {
+          id: "inc_standard",
+          name: "\u969C\u5BB3\u5BFE\u5FDC\u30FB\u5831\u544A",
+          todos: [
+            { title: "\u521D\u52D5\u8ABF\u67FB\u30FB\u66AB\u5B9A\u5FA9\u65E7\u5BFE\u5FDC", group: "\u521D\u52D5" },
+            { title: "\u95A2\u4FC2\u8005\u3078\u306E\u901F\u5831\u9023\u7D61", group: "\u5831\u544A" },
+            { title: "\u6052\u4E45\u5BFE\u7B56\u691C\u8A0E\u30FB\u4FEE\u6B63", group: "\u5BFE\u7B56" },
+            { title: "\u969C\u5BB3\u5831\u544A\u66F8\u4F5C\u6210\u30FB\u90E8\u5185\u30EC\u30D3\u30E5\u30FC", group: "\u5831\u544A" }
+          ]
+        }
+      ]
+    }
+  ];
+}
+
+// src/features/item-types/TypeBadge.tsx
 var import_jsx_runtime3 = __toESM(require_jsx_runtime());
+var renderTypeIcon = (iconName, size = 12) => {
+  switch (iconName) {
+    case "rocket":
+      return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Rocket, { size });
+    case "calculator":
+      return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Calculator, { size });
+    case "alert-triangle":
+      return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(TriangleAlert, { size });
+    case "check-square":
+      return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(SquareCheckBig, { size });
+    case "zap":
+      return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Zap, { size });
+    case "shield":
+      return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Shield, { size });
+    case "bookmark":
+      return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Bookmark, { size });
+    default:
+      return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Tag, { size });
+  }
+};
+var TypeBadge = ({
+  itemType,
+  customLabel,
+  size = "sm",
+  onClick
+}) => {
+  if (!itemType && !customLabel) return null;
+  const label = customLabel || itemType?.name || "";
+  const color = itemType?.color || "blue";
+  const icon = itemType?.icon || "tag";
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+    "span",
+    {
+      className: `item-type-badge badge-color-${color} badge-size-${size} ${onClick ? "clickable" : ""}`,
+      onClick,
+      title: `\u30BF\u30A4\u30D7: ${label}`,
+      children: [
+        renderTypeIcon(icon, size === "sm" ? 11 : 13),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "type-badge-text", children: label })
+      ]
+    }
+  );
+};
+
+// src/components/CalendarMatrixView.tsx
+var import_jsx_runtime4 = __toESM(require_jsx_runtime());
 var formatDateStr = (date) => {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -25477,6 +25752,8 @@ var CalendarMatrixView = ({
   startDate,
   selectedItemId,
   showCompletedItems = false,
+  enableItemTypes = true,
+  itemTypes = [],
   onToggleShowCompleted,
   onToggleItemStatus,
   isDrawerOpen,
@@ -25631,10 +25908,10 @@ var CalendarMatrixView = ({
   };
   const completedCount = items.filter((it) => it.status === "done").length;
   const visibleItems = showCompletedItems ? items : items.filter((it) => it.status !== "done");
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "calendar-matrix-container", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "table-scroll-wrapper", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("table", { className: "matrix-table", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("thead", { onClick: handleHeaderClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "row-header-th", children: "\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item)" }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "past-header-th", children: "\u904E\u53BB\u306E\u672A\u5B8C\u4E86" }),
+  return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "calendar-matrix-container", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "table-scroll-wrapper", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("table", { className: "matrix-table", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("thead", { onClick: handleHeaderClick, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("tr", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "row-header-th", children: "\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item)" }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "past-header-th", children: "\u904E\u53BB\u306E\u672A\u5B8C\u4E86" }),
       days.map((day) => {
         let colClass = "weekday-col";
         if (day.isToday) {
@@ -25645,33 +25922,33 @@ var CalendarMatrixView = ({
         let dayTypeClass = "";
         if (day.isSunday || day.isHoliday) dayTypeClass = "text-sun-holiday";
         else if (day.isSaturday) dayTypeClass = "text-sat";
-        return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+        return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
           "th",
           {
             className: `day-header-th ${colClass}`,
             children: [
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: `day-title ${dayTypeClass}`, children: day.dayLabel }),
-              day.isToday && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "today-badge", children: "Today" })
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: `day-title ${dayTypeClass}`, children: day.dayLabel }),
+              day.isToday && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "today-badge", children: "Today" })
             ]
           },
           day.dateStr
         );
       }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "future-header-th", children: "\u672A\u6765" })
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "future-header-th", children: "\u672A\u6765" })
     ] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tbody", { children: items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { colSpan: 10, className: "empty-matrix-td", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "empty-matrix-state", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { children: "\u3053\u306E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u306B\u306F\u307E\u3060\u30A2\u30A4\u30C6\u30E0\u304C\u3042\u308A\u307E\u305B\u3093\u3002" }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("button", { className: "nav-btn primary-btn", onClick: onOpenCreateItemModal, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Plus, { size: 16 }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\u65B0\u898F\u30A2\u30A4\u30C6\u30E0\u3092\u4F5C\u6210" })
+    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tbody", { children: items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { colSpan: 10, className: "empty-matrix-td", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "empty-matrix-state", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { children: "\u3053\u306E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u306B\u306F\u307E\u3060\u30A2\u30A4\u30C6\u30E0\u304C\u3042\u308A\u307E\u305B\u3093\u3002" }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("button", { className: "nav-btn primary-btn", onClick: onOpenCreateItemModal, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Plus, { size: 16 }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u65B0\u898F\u30A2\u30A4\u30C6\u30E0\u3092\u4F5C\u6210" })
       ] })
-    ] }) }) }) : visibleItems.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { colSpan: 10, className: "empty-matrix-td", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "empty-matrix-state", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("p", { children: [
+    ] }) }) }) : visibleItems.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { colSpan: 10, className: "empty-matrix-td", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "empty-matrix-state", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("p", { children: [
         "\u3059\u3079\u3066\u306E\u30BF\u30B9\u30AF\u304C\u5B8C\u4E86\u3057\u3066\u3044\u307E\u3059\uFF08",
         completedCount,
         "\u4EF6\u306E\u5B8C\u4E86\u30BF\u30B9\u30AF\u304C\u975E\u8868\u793A\u4E2D\uFF09"
       ] }),
-      onToggleShowCompleted && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { className: "nav-btn secondary-btn", onClick: onToggleShowCompleted, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\u5B8C\u4E86\u3057\u305F\u30BF\u30B9\u30AF\u3092\u8868\u793A\u3059\u308B" }) })
+      onToggleShowCompleted && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { className: "nav-btn secondary-btn", onClick: onToggleShowCompleted, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u5B8C\u4E86\u3057\u305F\u30BF\u30B9\u30AF\u3092\u8868\u793A\u3059\u308B" }) })
     ] }) }) }) : visibleItems.map((item) => {
       const isSelected = item.id === selectedItemId;
       const isItemDone = item.status === "done";
@@ -25685,51 +25962,70 @@ var CalendarMatrixView = ({
       const hasFutureMore = futureTodos.length > 2;
       const visibleFutureTodos = hasFutureMore && !isFutureExpanded ? futureTodos.slice(0, 2) : futureTodos;
       const hiddenFutureCount = futureTodos.length - 2;
-      return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+      const itemType = enableItemTypes ? findItemType(itemTypes, item.type) : void 0;
+      const itemTemplate = enableItemTypes ? findItemTemplate(itemType, item.template) : void 0;
+      const templateStatus = enableItemTypes && itemTemplate ? checkTemplateStatus(item, itemTemplate) : null;
+      return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
         "tr",
         {
           className: `matrix-row ${isSelected ? "row-selected" : ""} ${isItemDone ? "item-row-done" : ""}`,
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "row-header-td", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: `item-row-header-content ${isItemDone ? "item-status-done" : ""}`, children: [
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-                "input",
-                {
-                  type: "checkbox",
-                  checked: isItemDone,
-                  onChange: (e) => {
-                    e.stopPropagation();
-                    onToggleItemStatus(item);
-                  },
-                  onClick: (e) => e.stopPropagation(),
-                  className: "item-row-checkbox",
-                  title: isItemDone ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u30A2\u30AF\u30B7\u30E7\u30F3\u3092\u5B8C\u4E86\u306B\u3059\u308B"
-                }
-              ),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-                "span",
-                {
-                  className: `item-title-text ${isItemDone ? "line-through" : ""}`,
-                  title: item.title,
-                  children: item.title
-                }
-              ),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-                "button",
-                {
-                  className: "delete-item-btn",
-                  title: "\u30CE\u30FC\u30C8\u524A\u9664",
-                  onClick: (e) => {
-                    e.stopPropagation();
-                    if (confirm(`\u30CE\u30FC\u30C8\u300C${item.title}\u300D\u3092\u524A\u9664\u3057\u307E\u3059\u304B\uFF1F`)) {
-                      onDeleteItem(item);
-                    }
-                  },
-                  children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Trash2, { size: 12 })
-                }
-              )
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { className: "row-header-td", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: `item-row-header-content ${isItemDone ? "item-status-done" : ""}`, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "item-row-main-bar", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                  "input",
+                  {
+                    type: "checkbox",
+                    checked: isItemDone,
+                    onChange: (e) => {
+                      e.stopPropagation();
+                      onToggleItemStatus(item);
+                    },
+                    onClick: (e) => e.stopPropagation(),
+                    className: "item-row-checkbox",
+                    title: isItemDone ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u30A2\u30AF\u30B7\u30E7\u30F3\u3092\u5B8C\u4E86\u306B\u3059\u308B"
+                  }
+                ),
+                enableItemTypes && itemType && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(TypeBadge, { itemType, size: "sm" }),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                  "span",
+                  {
+                    className: `item-title-text ${isItemDone ? "line-through" : ""}`,
+                    title: item.title,
+                    children: item.title
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                  "button",
+                  {
+                    className: "delete-item-btn",
+                    title: "\u30CE\u30FC\u30C8\u524A\u9664",
+                    onClick: (e) => {
+                      e.stopPropagation();
+                      if (confirm(`\u30CE\u30FC\u30C8\u300C${item.title}\u300D\u3092\u524A\u9664\u3057\u307E\u3059\u304B\uFF1F`)) {
+                        onDeleteItem(item);
+                      }
+                    },
+                    children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Trash2, { size: 12 })
+                  }
+                )
+              ] }),
+              templateStatus && !templateStatus.isComplete && !isItemDone && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "item-row-template-warning-bar", title: "\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u30C1\u30A7\u30C3\u30AF\u8B66\u544A", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(TriangleAlert, { size: 11, className: "warning-icon" }),
+                templateStatus.missingTodos.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "warning-badge missing-todos-badge", children: [
+                  "\u4E0D\u8DB3TODO: ",
+                  templateStatus.missingTodos.length,
+                  "\u4EF6"
+                ] }),
+                templateStatus.missingDueTodos.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "warning-badge missing-due-badge", children: [
+                  "\u671F\u65E5\u672A\u8A2D\u5B9A: ",
+                  templateStatus.missingDueTodos.length,
+                  "\u4EF6"
+                ] })
+              ] })
             ] }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "matrix-cell past-col-cell", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "cell-todo-stack", children: [
-              visiblePastTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { className: "matrix-cell past-col-cell", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "cell-todo-stack", children: [
+              visiblePastTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
                 "div",
                 {
                   draggable: true,
@@ -25746,7 +26042,7 @@ ${todo.description || ""}`,
                     onSelectItem(item, todo.id);
                   },
                   children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                       "input",
                       {
                         type: "checkbox",
@@ -25760,13 +26056,13 @@ ${todo.description || ""}`,
                         title: "\u5B8C\u4E86\u306B\u3059\u308B"
                       }
                     ),
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "todo-pill-title", children: todo.title }),
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "todo-pill-date", children: formatShortDate(todo.due) })
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "todo-pill-title", children: todo.title }),
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "todo-pill-date", children: formatShortDate(todo.due) })
                   ]
                 },
                 todo.id
               )),
-              hasPastMore && !isPastExpanded && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+              hasPastMore && !isPastExpanded && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                 "button",
                 {
                   className: "stacked-more-pill past-stacked",
@@ -25775,18 +26071,18 @@ ${todo.description || ""}`,
                     togglePastExpand(item.id);
                   },
                   title: "\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u5168\u4EF6\u8868\u793A",
-                  children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "stacked-content", children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Layers, { size: 12, className: "stacked-icon" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { children: [
+                  children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "stacked-content", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Layers, { size: 12, className: "stacked-icon" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { children: [
                       "+",
                       hiddenPastCount,
                       "\u4EF6\u306E\u904E\u53BB\u30BF\u30B9\u30AF"
                     ] }),
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronDown, { size: 12, className: "stacked-arrow" })
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ChevronDown, { size: 12, className: "stacked-arrow" })
                   ] })
                 }
               ),
-              hasPastMore && isPastExpanded && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+              hasPastMore && isPastExpanded && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
                 "button",
                 {
                   className: "collapse-pill",
@@ -25796,8 +26092,8 @@ ${todo.description || ""}`,
                   },
                   title: "\u6298\u308A\u305F\u305F\u3080",
                   children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronUp, { size: 12 }),
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\u305F\u305F\u3080" })
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ChevronUp, { size: 12 }),
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u305F\u305F\u3080" })
                   ]
                 }
               )
@@ -25807,7 +26103,7 @@ ${todo.description || ""}`,
               let cellBgClass = day.isToday ? "today-col-cell" : day.isNonWorkingDay ? "holiday-cell" : "weekday-cell";
               const isDragOverThisCell = dragOverCell?.itemId === item.id && dragOverCell?.dateStr === day.dateStr;
               const isAddingHere = addingTodoCell?.itemId === item.id && addingTodoCell?.dateStr === day.dateStr;
-              return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+              return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                 "td",
                 {
                   className: `matrix-cell ${cellBgClass} ${isDragOverThisCell ? "drag-over-cell" : ""}`,
@@ -25818,8 +26114,8 @@ ${todo.description || ""}`,
                     if (isDraggingRef.current) return;
                     onSelectItem(item);
                   },
-                  children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "cell-todo-stack", children: [
-                    cellTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+                  children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "cell-todo-stack", children: [
+                    cellTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
                       "div",
                       {
                         draggable: true,
@@ -25835,7 +26131,7 @@ ${todo.description || ""}`,
                           onSelectItem(item, todo.id);
                         },
                         children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                             "input",
                             {
                               type: "checkbox",
@@ -25849,12 +26145,12 @@ ${todo.description || ""}`,
                               title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
                             }
                           ),
-                          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `todo-pill-title ${todo.status === "done" ? "line-through" : ""}`, children: todo.title })
+                          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: `todo-pill-title ${todo.status === "done" ? "line-through" : ""}`, children: todo.title })
                         ]
                       },
                       todo.id
                     )),
-                    isAddingHere ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "inline-todo-input-wrapper", onClick: (e) => e.stopPropagation(), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                    isAddingHere ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "inline-todo-input-wrapper", onClick: (e) => e.stopPropagation(), children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                       "input",
                       {
                         type: "text",
@@ -25866,7 +26162,7 @@ ${todo.description || ""}`,
                         onBlur: () => handleSaveInlineTodo(item, day.dateStr),
                         autoFocus: true
                       }
-                    ) }) : /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+                    ) }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
                       "div",
                       {
                         className: "cell-add-prompt",
@@ -25876,8 +26172,8 @@ ${todo.description || ""}`,
                         },
                         title: "TODO\u3092\u8FFD\u52A0",
                         children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Plus, { size: 11 }),
-                          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "TODO\u3092\u8FFD\u52A0" })
+                          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Plus, { size: 11 }),
+                          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "TODO\u3092\u8FFD\u52A0" })
                         ]
                       }
                     )
@@ -25886,8 +26182,8 @@ ${todo.description || ""}`,
                 day.dateStr
               );
             }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "matrix-cell future-col-cell", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "cell-todo-stack", children: [
-              visibleFutureTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { className: "matrix-cell future-col-cell", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "cell-todo-stack", children: [
+              visibleFutureTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
                 "div",
                 {
                   draggable: true,
@@ -25904,7 +26200,7 @@ ${todo.description || ""}`,
                     onSelectItem(item, todo.id);
                   },
                   children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                       "input",
                       {
                         type: "checkbox",
@@ -25918,13 +26214,13 @@ ${todo.description || ""}`,
                         title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
                       }
                     ),
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `todo-pill-title ${todo.status === "done" ? "line-through" : ""}`, children: todo.title }),
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "todo-pill-date", children: formatShortDate(todo.due) })
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: `todo-pill-title ${todo.status === "done" ? "line-through" : ""}`, children: todo.title }),
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "todo-pill-date", children: formatShortDate(todo.due) })
                   ]
                 },
                 todo.id
               )),
-              hasFutureMore && !isFutureExpanded && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+              hasFutureMore && !isFutureExpanded && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                 "button",
                 {
                   className: "stacked-more-pill future-stacked",
@@ -25933,18 +26229,18 @@ ${todo.description || ""}`,
                     toggleFutureExpand(item.id);
                   },
                   title: "\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u5168\u4EF6\u8868\u793A",
-                  children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "stacked-content", children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Layers, { size: 12, className: "stacked-icon" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { children: [
+                  children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "stacked-content", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Layers, { size: 12, className: "stacked-icon" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { children: [
                       "+",
                       hiddenFutureCount,
                       "\u4EF6\u306E\u672A\u6765\u30BF\u30B9\u30AF"
                     ] }),
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronDown, { size: 12, className: "stacked-arrow" })
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ChevronDown, { size: 12, className: "stacked-arrow" })
                   ] })
                 }
               ),
-              hasFutureMore && isFutureExpanded && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+              hasFutureMore && isFutureExpanded && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
                 "button",
                 {
                   className: "collapse-pill",
@@ -25954,8 +26250,8 @@ ${todo.description || ""}`,
                   },
                   title: "\u6298\u308A\u305F\u305F\u3080",
                   children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronUp, { size: 12 }),
-                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\u305F\u305F\u3080" })
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ChevronUp, { size: 12 }),
+                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u305F\u305F\u3080" })
                   ]
                 }
               )
@@ -25970,10 +26266,119 @@ ${todo.description || ""}`,
 
 // src/components/TaskDetailDrawer.tsx
 var import_react5 = __toESM(require_react());
-var import_jsx_runtime4 = __toESM(require_jsx_runtime());
+
+// src/features/item-types/TemplateAlertBanner.tsx
+var import_jsx_runtime5 = __toESM(require_jsx_runtime());
+var TemplateAlertBanner = ({
+  item,
+  template,
+  onAddMissingTodo,
+  onAddAllMissingTodos
+}) => {
+  if (!template) return null;
+  const result = checkTemplateStatus(item, template);
+  if (result.isComplete) {
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "template-alert-banner complete", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "banner-header", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(CircleCheck, { size: 15, className: "banner-icon-success" }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { className: "banner-title", children: [
+        "\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8TODO\u5145\u8DB3\u4E2D (",
+        result.matchedTodosCount,
+        "/",
+        result.totalTemplateTodosCount,
+        ")"
+      ] })
+    ] }) });
+  }
+  const hasMissingTodos = result.missingTodos.length > 0;
+  const hasMissingDue = result.missingDueTodos.length > 0;
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "template-alert-banner warning", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "banner-header", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(TriangleAlert, { size: 15, className: "banner-icon-warning" }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { className: "banner-title", children: [
+        "\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u30C1\u30A7\u30C3\u30AF (",
+        result.matchedTodosCount,
+        "/",
+        result.totalTemplateTodosCount,
+        " \u5145\u8DB3)"
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "banner-body", children: [
+      hasMissingDue && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "banner-issue-group", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "issue-label", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Calendar, { size: 13 }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { children: [
+            "\u671F\u65E5\u672A\u8A2D\u5B9A (",
+            result.missingDueTodos.length,
+            "\u4EF6):"
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("ul", { className: "issue-list", children: result.missingDueTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("li", { className: "issue-item", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { className: "issue-todo-name", children: [
+            "\u300C",
+            todo.title || "\u7121\u984C\u306E\u30BF\u30B9\u30AF",
+            "\u300D"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "issue-hint", children: "\u306E\u65E5\u4ED8\u304C\u6C7A\u307E\u3063\u3066\u3044\u307E\u305B\u3093" })
+        ] }, todo.id)) })
+      ] }),
+      hasMissingTodos && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "banner-issue-group", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "issue-label", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(CircleAlert, { size: 13 }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { children: [
+            "\u4E0D\u8DB3\u3057\u3066\u3044\u308BTODO (",
+            result.missingTodos.length,
+            "\u4EF6):"
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("ul", { className: "issue-list", children: result.missingTodos.map((missing, idx) => /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("li", { className: "issue-item flex-between", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { className: "issue-todo-name", children: [
+            "\u300C",
+            missing.title,
+            "\u300D",
+            missing.group && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { className: "issue-group-tag", children: [
+              "[",
+              missing.group,
+              "]"
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+            "button",
+            {
+              className: "subtle-btn-add-single",
+              onClick: () => onAddMissingTodo(missing),
+              title: "\u3053\u306ETODO\u3092\u8FFD\u52A0",
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Plus, { size: 11 }),
+                /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { children: "\u8FFD\u52A0" })
+              ]
+            }
+          )
+        ] }, idx)) }),
+        result.missingTodos.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "banner-actions", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+          "button",
+          {
+            className: "nav-btn primary-btn sm-btn add-all-missing-btn",
+            onClick: () => onAddAllMissingTodos(result.missingTodos),
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Plus, { size: 13 }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { children: [
+                "\u4E0D\u8DB3TODO\u3092\u3059\u3079\u3066\u88DC\u5B8C (",
+                result.missingTodos.length,
+                "\u4EF6)"
+              ] })
+            ]
+          }
+        ) })
+      ] })
+    ] })
+  ] });
+};
+
+// src/components/TaskDetailDrawer.tsx
+var import_jsx_runtime6 = __toESM(require_jsx_runtime());
 var UNGROUPED_LABEL = "\u672A\u5206\u985E";
 var formatDueDate = (dateStr) => {
-  if (!dateStr) return "\u65E5\u4ED8\u306A\u3057";
+  if (!dateStr) return "\u65E5\u4ED8\u672A\u8A2D\u5B9A";
   const parts = dateStr.split("-");
   if (parts.length === 3) {
     const currentYear = (/* @__PURE__ */ new Date()).getFullYear().toString();
@@ -25989,6 +26394,8 @@ var TaskDetailDrawer = ({
   item,
   selectedTodoId,
   isOpen,
+  enableItemTypes = true,
+  itemTypes = [],
   onClose,
   onUpdateItem,
   onDeleteItem
@@ -26042,9 +26449,70 @@ var TaskDetailDrawer = ({
     }
     return result;
   }, [localItem, existingGroups]);
+  const currentItemType = (0, import_react5.useMemo)(() => {
+    if (!enableItemTypes || !localItem?.type) return void 0;
+    return findItemType(itemTypes, localItem.type);
+  }, [enableItemTypes, localItem?.type, itemTypes]);
+  const currentItemTemplate = (0, import_react5.useMemo)(() => {
+    if (!currentItemType) return void 0;
+    return findItemTemplate(currentItemType, localItem?.template);
+  }, [currentItemType, localItem?.template]);
   if (!isOpen || !localItem) return null;
   const handleTitleChange = (newTitle) => {
     const updated = { ...localItem, title: newTitle };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+  const handleTypeChange = (typeId) => {
+    const nextType = findItemType(itemTypes, typeId);
+    const defaultTpl = nextType?.templates[0];
+    const updated = {
+      ...localItem,
+      type: typeId ? typeId : void 0,
+      template: defaultTpl ? defaultTpl.name : void 0
+    };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+  const handleTemplateChange = (tplName) => {
+    const updated = {
+      ...localItem,
+      template: tplName ? tplName : void 0
+    };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+  const handleAddMissingTodo = (missing) => {
+    const newTodo = {
+      id: `todo-${Date.now()}`,
+      title: missing.title,
+      due: "",
+      // empty date for template todos initially
+      status: "todo",
+      description: "",
+      group: missing.group || ""
+    };
+    const updated = {
+      ...localItem,
+      todos: [...localItem.todos, newTodo]
+    };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+  const handleAddAllMissingTodos = (missingList) => {
+    const now = Date.now();
+    const newTodos = missingList.map((missing, idx) => ({
+      id: `todo-${now}-${idx}`,
+      title: missing.title,
+      due: "",
+      status: "todo",
+      description: "",
+      group: missing.group || ""
+    }));
+    const updated = {
+      ...localItem,
+      todos: [...localItem.todos, ...newTodos]
+    };
     setLocalItem(updated);
     onUpdateItem(updated);
   };
@@ -26183,7 +26651,7 @@ var TaskDetailDrawer = ({
     const hasDesc = !!todo.description?.trim();
     const isDragging = draggedIndex === originalIndex;
     const isDragOver = dragOverIndex === originalIndex;
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
       "div",
       {
         draggable: true,
@@ -26193,9 +26661,9 @@ var TaskDetailDrawer = ({
         onDragEnd: handleDragEnd,
         className: `todo-form-card ${isFocused ? "todo-focused" : ""} ${isDragging ? "dragging" : ""} ${isDragOver ? "drag-over" : ""}`,
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "todo-card-row", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "drag-handle", title: "\u30C9\u30E9\u30C3\u30B0\u3057\u3066\u4E26\u3079\u66FF\u3048", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(GripVertical, { size: 14 }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-card-row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "drag-handle", title: "\u30C9\u30E9\u30C3\u30B0\u3057\u3066\u4E26\u3079\u66FF\u3048", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(GripVertical, { size: 14 }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               "input",
               {
                 type: "checkbox",
@@ -26205,7 +26673,7 @@ var TaskDetailDrawer = ({
                 title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
               }
             ),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               "input",
               {
                 type: "text",
@@ -26216,8 +26684,8 @@ var TaskDetailDrawer = ({
                 onChange: (e) => handleUpdateTodo(todo.id, { title: e.target.value })
               }
             ),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "due-date-wrapper", title: `\u671F\u65E5: ${todo.due || "\u672A\u8A2D\u5B9A"}`, children: [
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "due-date-wrapper", title: `\u671F\u65E5: ${todo.due || "\u672A\u8A2D\u5B9A\uFF08\u8B66\u544A\u5BFE\u8C61\uFF09"}`, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
                 "input",
                 {
                   type: "date",
@@ -26226,44 +26694,44 @@ var TaskDetailDrawer = ({
                   onChange: (e) => handleUpdateTodo(todo.id, { due: e.target.value })
                 }
               ),
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "due-date-badge", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Calendar, { size: 12, className: "due-date-icon" }),
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: formatDueDate(todo.due) })
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: `due-date-badge ${!todo.due || todo.due.trim() === "" ? "empty-due-badge" : ""}`, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Calendar, { size: 12, className: "due-date-icon" }),
+                /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: formatDueDate(todo.due) })
               ] })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               "button",
               {
                 className: `icon-btn toggle-desc-btn ${isEditingDesc ? "active" : ""} ${hasDesc || !!todo.group?.trim() ? "has-desc" : ""}`,
                 onClick: () => toggleToggleEditDesc(todo.id),
                 title: isEditingDesc ? "\u8A73\u7D30\u7DE8\u96C6\u3092\u9589\u3058\u308B" : "\u30B0\u30EB\u30FC\u30D7\u30FB\u8A73\u7D30\u30E1\u30E2\u3092\u7DE8\u96C6",
-                children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Pencil, { size: 13 })
+                children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Pencil, { size: 13 })
               }
             ),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               "button",
               {
                 className: "icon-btn duplicate-todo-btn",
                 onClick: () => handleDuplicateTodo(todo.id),
                 title: "TODO\u3092\u8907\u88FD",
-                children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Copy, { size: 13 })
+                children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Copy, { size: 13 })
               }
             ),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               "button",
               {
                 className: "icon-btn delete-todo-btn",
                 onClick: () => handleDeleteTodo(todo.id),
                 title: "TODO\u524A\u9664",
-                children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Trash2, { size: 13 })
+                children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Trash2, { size: 13 })
               }
             )
           ] }),
-          isEditingDesc ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "todo-card-desc-editor", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "editor-group-bar", title: "\u30B0\u30EB\u30FC\u30D7\u3092\u8A2D\u5B9A\u30FB\u5909\u66F4", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Tag, { size: 13, className: "editor-group-icon" }),
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "editor-group-label", children: "\u30B0\u30EB\u30FC\u30D7:" }),
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+          isEditingDesc ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-card-desc-editor", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "editor-group-bar", title: "\u30B0\u30EB\u30FC\u30D7\u3092\u8A2D\u5B9A\u30FB\u5909\u66F4", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Tag, { size: 13, className: "editor-group-icon" }),
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "editor-group-label", children: "\u30B0\u30EB\u30FC\u30D7:" }),
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
                 "input",
                 {
                   type: "text",
@@ -26275,9 +26743,9 @@ var TaskDetailDrawer = ({
                 }
               )
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "textarea-wrapper", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(AlignLeft, { size: 13, className: "textarea-icon" }),
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "textarea-wrapper", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(AlignLeft, { size: 13, className: "textarea-icon" }),
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
                 "textarea",
                 {
                   className: "todo-desc-textarea",
@@ -26289,15 +26757,15 @@ var TaskDetailDrawer = ({
                 }
               )
             ] })
-          ] }) : hasDesc ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+          ] }) : hasDesc ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
             "div",
             {
               className: "todo-desc-preview",
               onClick: () => toggleToggleEditDesc(todo.id),
               title: "\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u8A73\u7D30\u30FB\u30B0\u30EB\u30FC\u30D7\u3092\u7DE8\u96C6",
               children: [
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(AlignLeft, { size: 12, className: "desc-preview-icon" }),
-                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "desc-preview-text", children: todo.description })
+                /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(AlignLeft, { size: 12, className: "desc-preview-icon" }),
+                /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "desc-preview-text", children: todo.description })
               ]
             }
           ) : null
@@ -26306,11 +26774,11 @@ var TaskDetailDrawer = ({
       todo.id
     );
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "detail-drawer", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("datalist", { id: "existing-groups-list", children: existingGroups.map((g) => /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("option", { value: g }, g)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "drawer-header", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "header-title-section", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "detail-drawer", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("datalist", { id: "existing-groups-list", children: existingGroups.map((g) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("option", { value: g }, g)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "drawer-header", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "header-title-section", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
           "input",
           {
             type: "checkbox",
@@ -26320,7 +26788,7 @@ var TaskDetailDrawer = ({
             title: localItem.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u30A2\u30AF\u30B7\u30E7\u30F3\u3092\u5B8C\u4E86\u306B\u3059\u308B"
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
           "input",
           {
             type: "text",
@@ -26331,12 +26799,52 @@ var TaskDetailDrawer = ({
           }
         )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { className: "icon-btn close-drawer-btn", onClick: onClose, title: "\u9589\u3058\u308B", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(X, { size: 18 }) })
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("button", { className: "icon-btn close-drawer-btn", onClick: onClose, title: "\u9589\u3058\u308B", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(X, { size: 18 }) })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "drawer-body", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "compact-item-desc-section", children: isEditingItemDesc ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "compact-item-desc-bar editing", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(AlignLeft, { size: 13, className: "desc-icon" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+    enableItemTypes && itemTypes.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "drawer-type-selector-bar", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "type-selector-group", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Tag, { size: 13, className: "selector-icon" }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "selector-label", children: "\u30BF\u30A4\u30D7:" }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
+          "select",
+          {
+            className: "type-dropdown-select",
+            value: localItem.type || "",
+            onChange: (e) => handleTypeChange(e.target.value),
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("option", { value: "", children: "(\u30BF\u30A4\u30D7\u6307\u5B9A\u306A\u3057)" }),
+              itemTypes.map((type) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("option", { value: type.id, children: type.name }, type.id))
+            ]
+          }
+        )
+      ] }),
+      currentItemType && currentItemType.templates.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "type-selector-group", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Layers, { size: 13, className: "selector-icon" }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "selector-label", children: "\u30C6\u30F3\u30D7\u30EC:" }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+          "select",
+          {
+            className: "type-dropdown-select",
+            value: localItem.template || currentItemType.templates[0]?.name || "",
+            onChange: (e) => handleTemplateChange(e.target.value),
+            children: currentItemType.templates.map((tpl) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("option", { value: tpl.name, children: tpl.name }, tpl.id))
+          }
+        )
+      ] })
+    ] }),
+    enableItemTypes && currentItemTemplate && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+      TemplateAlertBanner,
+      {
+        item: localItem,
+        template: currentItemTemplate,
+        onAddMissingTodo: handleAddMissingTodo,
+        onAddAllMissingTodos: handleAddAllMissingTodos
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "drawer-body", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "compact-item-desc-section", children: isEditingItemDesc ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "compact-item-desc-bar editing", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(AlignLeft, { size: 13, className: "desc-icon" }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
           "textarea",
           {
             className: "compact-desc-textarea",
@@ -26352,25 +26860,25 @@ var TaskDetailDrawer = ({
             autoFocus: true
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
           "button",
           {
             className: "icon-btn save-memo-btn",
             onClick: () => setIsEditingItemDesc(false),
             title: "\u5B8C\u4E86",
-            children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Check, { size: 13 })
+            children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Check, { size: 13 })
           }
         )
-      ] }) : localItem.description && localItem.description.trim() ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+      ] }) : localItem.description && localItem.description.trim() ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
         "div",
         {
           className: "compact-item-desc-bar has-content",
           onClick: () => setIsEditingItemDesc(true),
           title: "\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u30E1\u30E2\u3092\u7DE8\u96C6",
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(AlignLeft, { size: 13, className: "desc-icon" }),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "desc-text", children: localItem.description }),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(AlignLeft, { size: 13, className: "desc-icon" }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "desc-text", children: localItem.description }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               "button",
               {
                 className: "icon-btn edit-memo-btn",
@@ -26379,77 +26887,77 @@ var TaskDetailDrawer = ({
                   setIsEditingItemDesc(true);
                 },
                 title: "\u30E1\u30E2\u3092\u7DE8\u96C6",
-                children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Pencil, { size: 12 })
+                children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Pencil, { size: 12 })
               }
             )
           ]
         }
-      ) : /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "compact-item-desc-bar empty", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+      ) : /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "compact-item-desc-bar empty", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
         "button",
         {
           className: "subtle-memo-btn",
           onClick: () => setIsEditingItemDesc(true),
           title: "\u30E1\u30E2\u3092\u5165\u529B",
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Pencil, { size: 12 }),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u30E1\u30E2\u3092\u8FFD\u52A0..." })
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Pencil, { size: 12 }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: "\u30E1\u30E2\u3092\u8FFD\u52A0..." })
           ]
         }
       ) }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "section-title-bar", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("h4", { className: "section-title", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "section-title-bar", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("h4", { className: "section-title", children: [
           "TODO \u30BF\u30B9\u30AF\u4E00\u89A7 (",
           localItem.todos.length,
           ")"
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "section-actions", children: [
-          localItem.todos.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(import_jsx_runtime4.Fragment, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "section-actions", children: [
+          localItem.todos.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
               "button",
               {
                 className: `nav-btn secondary-btn sm-btn ${isGroupedView ? "active-toggle" : ""}`,
                 onClick: () => setIsGroupedView(!isGroupedView),
                 title: isGroupedView ? "\u30D5\u30E9\u30C3\u30C8\u8868\u793A\u306B\u5207\u66FF" : "\u30B0\u30EB\u30FC\u30D7\u8868\u793A\u306B\u5207\u66FF",
                 children: [
-                  isGroupedView ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Layers, { size: 13 }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(List, { size: 13 }),
-                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: isGroupedView ? "\u30B0\u30EB\u30FC\u30D7\u8868\u793A" : "\u30EA\u30B9\u30C8\u8868\u793A" })
+                  isGroupedView ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Layers, { size: 13 }) : /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(List, { size: 13 }),
+                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: isGroupedView ? "\u30B0\u30EB\u30FC\u30D7\u8868\u793A" : "\u30EA\u30B9\u30C8\u8868\u793A" })
                 ]
               }
             ),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
               "button",
               {
                 className: "nav-btn secondary-btn sm-btn",
                 onClick: handleSortByDueDate,
                 title: "\u671F\u65E5\u306E\u6607\u9806\u3067\u4E26\u3079\u66FF\u3048",
                 children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ArrowUpDown, { size: 13 }),
-                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u671F\u65E5\u9806" })
+                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ArrowUpDown, { size: 13 }),
+                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: "\u671F\u65E5\u9806" })
                 ]
               }
             ),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
               "button",
               {
                 className: "nav-btn secondary-btn sm-btn",
                 onClick: handleToggleExpandAll,
                 title: "\u3059\u3079\u3066\u306E\u8A73\u7D30\u8AAC\u660E\u3092\u958B\u9589",
                 children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ChevronsUpDown, { size: 13 }),
-                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u5168\u958B\u9589" })
+                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ChevronsUpDown, { size: 13 }),
+                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: "\u5168\u958B\u9589" })
                 ]
               }
             )
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("button", { className: "nav-btn primary-btn sm-btn", onClick: () => handleAddTodo(), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Plus, { size: 14 }),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "TODO\u3092\u8FFD\u52A0" })
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("button", { className: "nav-btn primary-btn sm-btn", onClick: () => handleAddTodo(), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Plus, { size: 14 }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: "TODO\u3092\u8FFD\u52A0" })
           ] })
         ] })
       ] }),
-      showAddGroupInput ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "add-group-inline-bar", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Tag, { size: 13, className: "add-group-icon" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+      showAddGroupInput ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "add-group-inline-bar", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Tag, { size: 13, className: "add-group-icon" }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
           "input",
           {
             type: "text",
@@ -26464,54 +26972,54 @@ var TaskDetailDrawer = ({
             autoFocus: true
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { className: "icon-btn", onClick: handleAddGroupSubmit, title: "\u30B0\u30EB\u30FC\u30D7\u8FFD\u52A0", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Check, { size: 13 }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { className: "icon-btn", onClick: () => setShowAddGroupInput(false), title: "\u30AD\u30E3\u30F3\u30BB\u30EB", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(X, { size: 13 }) })
-      ] }) : isGroupedView && localItem.todos.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "add-group-btn-container", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("button", { className: "icon-btn", onClick: handleAddGroupSubmit, title: "\u30B0\u30EB\u30FC\u30D7\u8FFD\u52A0", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Check, { size: 13 }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("button", { className: "icon-btn", onClick: () => setShowAddGroupInput(false), title: "\u30AD\u30E3\u30F3\u30BB\u30EB", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(X, { size: 13 }) })
+      ] }) : isGroupedView && localItem.todos.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "add-group-btn-container", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
         "button",
         {
           className: "subtle-add-group-btn",
           onClick: () => setShowAddGroupInput(true),
           title: "\u65B0\u3057\u3044\u30B0\u30EB\u30FC\u30D7\u3092\u8FFD\u52A0\u3057\u3066\u30BF\u30B9\u30AF\u3092\u4F5C\u6210",
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Plus, { size: 12 }),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u65B0\u3057\u3044\u30B0\u30EB\u30FC\u30D7\u3092\u8FFD\u52A0..." })
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Plus, { size: 12 }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: "\u65B0\u3057\u3044\u30B0\u30EB\u30FC\u30D7\u3092\u8FFD\u52A0..." })
           ]
         }
       ) }) : null,
-      localItem.todos.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "empty-todos", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { children: "\u3053\u306E\u30CE\u30FC\u30C8\u306B\u306FTODO\u304C\u307E\u3060\u3042\u308A\u307E\u305B\u3093\u3002\u300CTODO\u3092\u8FFD\u52A0\u300D\u30DC\u30BF\u30F3\u3092\u62BC\u3057\u3066\u767B\u9332\u3057\u3066\u304F\u3060\u3055\u3044\u3002" }) }) : isGroupedView ? (
+      localItem.todos.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "empty-todos", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: "\u3053\u306E\u30CE\u30FC\u30C8\u306B\u306FTODO\u304C\u307E\u3060\u3042\u308A\u307E\u305B\u3093\u3002\u300CTODO\u3092\u8FFD\u52A0\u300D\u30DC\u30BF\u30F3\u3092\u62BC\u3057\u3066\u767B\u9332\u3057\u3066\u304F\u3060\u3055\u3044\u3002" }) }) : isGroupedView ? (
         /* Grouped View Mode */
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "grouped-todo-container", children: groupedTodos.map(({ groupName, todos: groupTodos }) => {
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "grouped-todo-container", children: groupedTodos.map(({ groupName, todos: groupTodos }) => {
           const isCollapsed = !!collapsedGroups[groupName];
           const isUngrouped = groupName === UNGROUPED_LABEL;
-          return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "todo-group-section", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+          return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-group-section", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
               "div",
               {
                 className: `group-section-header ${isUngrouped ? "ungrouped-header" : ""}`,
                 onClick: () => handleToggleGroupCollapse(groupName),
                 children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "group-header-left", children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { className: "icon-btn collapse-toggle-btn", children: isCollapsed ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ChevronRight, { size: 14 }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ChevronDown, { size: 14 }) }),
-                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Tag, { size: 13, className: "group-header-tag-icon" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "group-header-title", children: groupName }),
-                    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "group-count-badge", children: groupTodos.length })
+                  /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "group-header-left", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("button", { className: "icon-btn collapse-toggle-btn", children: isCollapsed ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ChevronRight, { size: 14 }) : /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ChevronDown, { size: 14 }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Tag, { size: 13, className: "group-header-tag-icon" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "group-header-title", children: groupName }),
+                    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "group-count-badge", children: groupTodos.length })
                   ] }),
-                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "group-header-actions", onClick: (e) => e.stopPropagation(), children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "group-header-actions", onClick: (e) => e.stopPropagation(), children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
                     "button",
                     {
                       className: "subtle-icon-btn group-add-btn",
                       onClick: () => handleAddTodo(isUngrouped ? "" : groupName),
                       title: `"${groupName}" \u306BTODO\u3092\u8FFD\u52A0`,
                       children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Plus, { size: 13 }),
-                        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u8FFD\u52A0" })
+                        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Plus, { size: 13 }),
+                        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: "\u8FFD\u52A0" })
                       ]
                     }
                   ) })
                 ]
               }
             ),
-            !isCollapsed && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "group-section-body", children: groupTodos.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "empty-group-hint", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u30BF\u30B9\u30AF\u306F\u3042\u308A\u307E\u305B\u3093\u3002\u300C\u8FFD\u52A0\u300D\u30DC\u30BF\u30F3\u3067\u3053\u306E\u30B0\u30EB\u30FC\u30D7\u306B\u767B\u9332\u3067\u304D\u307E\u3059\u3002" }) }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "todo-form-list", children: groupTodos.map((todo) => {
+            !isCollapsed && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "group-section-body", children: groupTodos.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "empty-group-hint", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: "\u30BF\u30B9\u30AF\u306F\u3042\u308A\u307E\u305B\u3093\u3002\u300C\u8FFD\u52A0\u300D\u30DC\u30BF\u30F3\u3067\u3053\u306E\u30B0\u30EB\u30FC\u30D7\u306B\u767B\u9332\u3067\u304D\u307E\u3059\u3002" }) }) : /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "todo-form-list", children: groupTodos.map((todo) => {
               const originalIndex = localItem.todos.findIndex((t) => t.id === todo.id);
               return renderTodoCard(todo, originalIndex);
             }) }) })
@@ -26519,10 +27027,10 @@ var TaskDetailDrawer = ({
         }) })
       ) : (
         /* Flat View Mode */
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "todo-form-list", children: localItem.todos.map((todo, index) => renderTodoCard(todo, index)) })
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "todo-form-list", children: localItem.todos.map((todo, index) => renderTodoCard(todo, index)) })
       )
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "drawer-footer", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "file-path-info", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "drawer-footer", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("span", { className: "file-path-info", children: [
       "Path: ",
       localItem.filePath
     ] }) })
@@ -26531,7 +27039,7 @@ var TaskDetailDrawer = ({
 
 // src/components/AgendaView.tsx
 var import_react6 = __toESM(require_react());
-var import_jsx_runtime5 = __toESM(require_jsx_runtime());
+var import_jsx_runtime7 = __toESM(require_jsx_runtime());
 var formatDateStr2 = (date) => {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -26588,40 +27096,40 @@ var AgendaView = ({
     return a.collection.title.localeCompare(b.collection.title);
   });
   upcoming.sort((a, b) => a.todo.due > b.todo.due ? 1 : -1);
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-container", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-header", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-title-group", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h2", { children: "\u{1F4C5} \u4ECA\u65E5\u306E\u30A2\u30B8\u30A7\u30F3\u30C0 (Today's Agenda)" }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "todo-cal-agenda-date", children: todayStr })
+  return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-container", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-header", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-title-group", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("h2", { children: "\u{1F4C5} \u4ECA\u65E5\u306E\u30A2\u30B8\u30A7\u30F3\u30C0 (Today's Agenda)" }),
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "todo-cal-agenda-date", children: todayStr })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-filter-group", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Filter, { size: 16 }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-filter-group", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Filter, { size: 16 }),
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(
           "select",
           {
             value: selectedCollectionId || "",
             onChange: (e) => onSelectCollectionFilter(e.target.value || null),
             className: "todo-cal-agenda-filter-select",
             children: [
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("option", { value: "", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("option", { value: "", children: [
                 "\u3059\u3079\u3066\u306E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3 (\u5168 ",
                 collections.length,
                 " \u4EF6)"
               ] }),
-              collections.map((col) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("option", { value: col.id, children: col.title }, col.id))
+              collections.map((col) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("option", { value: col.id, children: col.title }, col.id))
             ]
           }
         )
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-content", children: [
-      overdue.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-section overdue-section", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-section-header", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(CircleAlert, { className: "icon overdue-icon", size: 18 }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h3", { children: "\u671F\u9650\u5207\u308C (Overdue)" }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "count-badge overdue-badge", children: overdue.length })
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-content", children: [
+      overdue.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-section overdue-section", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-section-header", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(CircleAlert, { className: "icon overdue-icon", size: 18 }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("h3", { children: "\u671F\u9650\u5207\u308C (Overdue)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "count-badge overdue-badge", children: overdue.length })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-agenda-list", children: overdue.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "todo-cal-agenda-list", children: overdue.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
           AgendaCard,
           {
             entry,
@@ -26633,13 +27141,13 @@ var AgendaView = ({
           entry.todo.id
         )) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-section today-section", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-section-header", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Calendar, { className: "icon today-icon", size: 18 }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h3", { children: "\u4ECA\u65E5 (Today)" }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "count-badge today-badge", children: todayList.length })
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-section today-section", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-section-header", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Calendar, { className: "icon today-icon", size: 18 }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("h3", { children: "\u4ECA\u65E5 (Today)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "count-badge today-badge", children: todayList.length })
         ] }),
-        todayList.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-agenda-empty", children: "\u{1F389} \u672C\u65E5\u306E\u30BF\u30B9\u30AF\u306F\u3042\u308A\u307E\u305B\u3093\uFF01\u7D20\u6674\u3089\u3057\u30441\u65E5\u3092\u3002" }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-agenda-list", children: todayList.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        todayList.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "todo-cal-agenda-empty", children: "\u{1F389} \u672C\u65E5\u306E\u30BF\u30B9\u30AF\u306F\u3042\u308A\u307E\u305B\u3093\uFF01\u7D20\u6674\u3089\u3057\u30441\u65E5\u3092\u3002" }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "todo-cal-agenda-list", children: todayList.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
           AgendaCard,
           {
             entry,
@@ -26651,21 +27159,21 @@ var AgendaView = ({
           entry.todo.id
         )) })
       ] }),
-      upcoming.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-section upcoming-section", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+      upcoming.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-section upcoming-section", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(
           "div",
           {
             className: "todo-cal-agenda-section-header collapsible",
             onClick: () => setShowUpcoming(!showUpcoming),
             children: [
-              showUpcoming ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronDown, { size: 18 }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronRight, { size: 18 }),
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Clock, { className: "icon upcoming-icon", size: 18 }),
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h3", { children: "\u8FD1\u65E5\u4E2D (Upcoming)" }),
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "count-badge upcoming-badge", children: upcoming.length })
+              showUpcoming ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(ChevronDown, { size: 18 }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(ChevronRight, { size: 18 }),
+              /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Clock, { className: "icon upcoming-icon", size: 18 }),
+              /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("h3", { children: "\u8FD1\u65E5\u4E2D (Upcoming)" }),
+              /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "count-badge upcoming-badge", children: upcoming.length })
             ]
           }
         ),
-        showUpcoming && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-agenda-list", children: upcoming.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        showUpcoming && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "todo-cal-agenda-list", children: upcoming.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
           AgendaCard,
           {
             entry,
@@ -26677,20 +27185,20 @@ var AgendaView = ({
           entry.todo.id
         )) })
       ] }),
-      noDueList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-section nodue-section", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+      noDueList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-section nodue-section", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(
           "div",
           {
             className: "todo-cal-agenda-section-header collapsible",
             onClick: () => setShowNoDue(!showNoDue),
             children: [
-              showNoDue ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronDown, { size: 18 }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronRight, { size: 18 }),
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h3", { children: "\u671F\u65E5\u672A\u8A2D\u5B9A" }),
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "count-badge nodue-badge", children: noDueList.length })
+              showNoDue ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(ChevronDown, { size: 18 }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(ChevronRight, { size: 18 }),
+              /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("h3", { children: "\u671F\u65E5\u672A\u8A2D\u5B9A" }),
+              /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "count-badge nodue-badge", children: noDueList.length })
             ]
           }
         ),
-        showNoDue && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-agenda-list", children: noDueList.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        showNoDue && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "todo-cal-agenda-list", children: noDueList.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
           AgendaCard,
           {
             entry,
@@ -26715,8 +27223,8 @@ var AgendaCard = ({
   const { todo, item, collection } = entry;
   const isDone = todo.status === "done";
   const relativeDate = getRelativeDateLabel(todo.due, todayStr);
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: `todo-cal-agenda-card ${isDone ? "is-done" : ""}`, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: `todo-cal-agenda-card ${isDone ? "is-done" : ""}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
       "button",
       {
         className: "todo-cal-agenda-checkbox",
@@ -26725,19 +27233,19 @@ var AgendaCard = ({
           onQuickToggleTodoStatus(item, todo.id);
         },
         title: isDone ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B",
-        children: isDone ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(CircleCheck, { className: "icon-done", size: 18 }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Circle, { className: "icon-todo", size: 18 })
+        children: isDone ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(CircleCheck, { className: "icon-done", size: 18 }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Circle, { className: "icon-todo", size: 18 })
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(
       "div",
       {
         className: "todo-cal-agenda-card-body",
         onClick: () => onSelectItem(item, todo.id),
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-agenda-card-title", children: todo.title }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "todo-cal-agenda-card-sub", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "item-title", children: item.title }),
-            todo.due && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { className: "due-tag", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "todo-cal-agenda-card-title", children: todo.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-card-sub", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "item-title", children: item.title }),
+            todo.due && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("span", { className: "due-tag", children: [
               todo.due,
               " (",
               relativeDate,
@@ -26747,7 +27255,7 @@ var AgendaCard = ({
         ]
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "todo-cal-agenda-card-actions", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "todo-cal-agenda-card-actions", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(
       "button",
       {
         className: "todo-cal-collection-badge",
@@ -26760,48 +27268,484 @@ var AgendaCard = ({
         },
         title: `${collection.title} \u30AB\u30EC\u30F3\u30C0\u30FC\u3078\u79FB\u52D5`,
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { children: collection.title }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ExternalLink, { size: 12, className: "badge-icon" })
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { children: collection.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(ExternalLink, { size: 12, className: "badge-icon" })
         ]
       }
     ) })
   ] });
 };
 
+// src/features/item-types/templateStorage.ts
+var import_obsidian2 = require("obsidian");
+var TEMPLATES_FILE_PATH = `${ROOT_DATA_DIR}/templates.json`;
+var TemplateStorage = class {
+  constructor(app) {
+    this.app = app;
+  }
+  /**
+   * Load template definitions from _todo-calendar/templates.json.
+   * If file does not exist, creates it with default seed templates.
+   */
+  async loadTemplates() {
+    try {
+      const adapter = this.app.vault.adapter;
+      const file = this.app.vault.getAbstractFileByPath(TEMPLATES_FILE_PATH);
+      if (file instanceof import_obsidian2.TFile) {
+        const content = await this.app.vault.read(file);
+        const data = JSON.parse(content);
+        if (data && Array.isArray(data.types)) {
+          return data.types;
+        }
+      }
+      const defaults = getDefaultItemTypes();
+      await this.saveTemplates(defaults);
+      return defaults;
+    } catch (e) {
+      console.error("Failed to load templates.json, using defaults:", e);
+      return getDefaultItemTypes();
+    }
+  }
+  /**
+   * Save template definitions to _todo-calendar/templates.json
+   */
+  async saveTemplates(types) {
+    try {
+      const adapter = this.app.vault.adapter;
+      if (!await adapter.exists(ROOT_DATA_DIR)) {
+        await this.app.vault.createFolder(ROOT_DATA_DIR);
+      }
+      const content = JSON.stringify({ types }, null, 2);
+      const file = this.app.vault.getAbstractFileByPath(TEMPLATES_FILE_PATH);
+      if (file instanceof import_obsidian2.TFile) {
+        await this.app.vault.modify(file, content);
+      } else {
+        await this.app.vault.create(TEMPLATES_FILE_PATH, content);
+      }
+    } catch (e) {
+      console.error("Failed to save templates.json:", e);
+    }
+  }
+};
+
+// src/features/item-types/TemplateSettingsModal.tsx
+var import_react7 = __toESM(require_react());
+var import_jsx_runtime8 = __toESM(require_jsx_runtime());
+var AVAILABLE_COLORS = ["blue", "green", "purple", "orange", "red", "cyan"];
+var AVAILABLE_ICONS = ["rocket", "calculator", "alert-triangle", "check-square", "zap", "shield", "bookmark", "tag"];
+var TemplateSettingsModal = ({
+  isOpen,
+  types,
+  onClose,
+  onSave
+}) => {
+  const [localTypes, setLocalTypes] = (0, import_react7.useState)(() => JSON.parse(JSON.stringify(types)));
+  const [selectedTypeId, setSelectedTypeId] = (0, import_react7.useState)(types[0]?.id || "");
+  const [selectedTemplateId, setSelectedTemplateId] = (0, import_react7.useState)(
+    types[0]?.templates[0]?.id || ""
+  );
+  const [newTodoTitle, setNewTodoTitle] = (0, import_react7.useState)("");
+  const [newTodoGroup, setNewTodoGroup] = (0, import_react7.useState)("");
+  if (!isOpen) return null;
+  const currentType = localTypes.find((t) => t.id === selectedTypeId) || localTypes[0];
+  const currentTemplate = currentType?.templates.find((tpl) => tpl.id === selectedTemplateId) || currentType?.templates[0];
+  const handleAddType = () => {
+    const newTypeId = `type_${Date.now()}`;
+    const newTemplateId = `tpl_${Date.now()}`;
+    const newType = {
+      id: newTypeId,
+      name: "\u65B0\u898F\u30BF\u30A4\u30D7",
+      icon: "tag",
+      color: "blue",
+      templates: [
+        {
+          id: newTemplateId,
+          name: "\u901A\u5E38\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8",
+          todos: [{ title: "\u65B0\u898F\u30BF\u30B9\u30AF", group: "\u4E00\u822C" }]
+        }
+      ]
+    };
+    setLocalTypes((prev) => [...prev, newType]);
+    setSelectedTypeId(newTypeId);
+    setSelectedTemplateId(newTemplateId);
+  };
+  const handleDeleteType = (typeId) => {
+    if (localTypes.length <= 1) {
+      alert("\u6700\u4F4E1\u3064\u306E\u30BF\u30A4\u30D7\u304C\u5FC5\u8981\u3067\u3059\u3002");
+      return;
+    }
+    if (!confirm("\u3053\u306E\u30BF\u30A4\u30D7\u3068\u95A2\u9023\u3059\u308B\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u3092\u524A\u9664\u3057\u307E\u3059\u304B\uFF1F")) return;
+    const filtered = localTypes.filter((t) => t.id !== typeId);
+    setLocalTypes(filtered);
+    setSelectedTypeId(filtered[0]?.id || "");
+    setSelectedTemplateId(filtered[0]?.templates[0]?.id || "");
+  };
+  const handleUpdateType = (fields) => {
+    if (!currentType) return;
+    setLocalTypes(
+      (prev) => prev.map((t) => t.id === currentType.id ? { ...t, ...fields } : t)
+    );
+  };
+  const handleAddTemplate = () => {
+    if (!currentType) return;
+    const newTemplateId = `tpl_${Date.now()}`;
+    const newTpl = {
+      id: newTemplateId,
+      name: "\u65B0\u898F\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8",
+      todos: [{ title: "\u30BF\u30B9\u30AF1", group: "" }]
+    };
+    const updated = {
+      ...currentType,
+      templates: [...currentType.templates, newTpl]
+    };
+    setLocalTypes((prev) => prev.map((t) => t.id === currentType.id ? updated : t));
+    setSelectedTemplateId(newTemplateId);
+  };
+  const handleDeleteTemplate = (tplId) => {
+    if (!currentType) return;
+    if (currentType.templates.length <= 1) {
+      alert("1\u3064\u306E\u30BF\u30A4\u30D7\u306B\u6700\u4F4E1\u3064\u306E\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u304C\u5FC5\u8981\u3067\u3059\u3002");
+      return;
+    }
+    if (!confirm("\u3053\u306E\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u3092\u524A\u9664\u3057\u307E\u3059\u304B\uFF1F")) return;
+    const filteredTpls = currentType.templates.filter((tpl) => tpl.id !== tplId);
+    const updated = { ...currentType, templates: filteredTpls };
+    setLocalTypes((prev) => prev.map((t) => t.id === currentType.id ? updated : t));
+    setSelectedTemplateId(filteredTpls[0]?.id || "");
+  };
+  const handleUpdateTemplateName = (name) => {
+    if (!currentType || !currentTemplate) return;
+    const updatedTpls = currentType.templates.map(
+      (tpl) => tpl.id === currentTemplate.id ? { ...tpl, name } : tpl
+    );
+    setLocalTypes(
+      (prev) => prev.map((t) => t.id === currentType.id ? { ...t, templates: updatedTpls } : t)
+    );
+  };
+  const handleAddTodoToTemplate = () => {
+    if (!currentType || !currentTemplate || !newTodoTitle.trim()) return;
+    const newTodoDef = {
+      title: newTodoTitle.trim(),
+      group: newTodoGroup.trim() || void 0
+    };
+    const updatedTpls = currentType.templates.map((tpl) => {
+      if (tpl.id === currentTemplate.id) {
+        return { ...tpl, todos: [...tpl.todos, newTodoDef] };
+      }
+      return tpl;
+    });
+    setLocalTypes(
+      (prev) => prev.map((t) => t.id === currentType.id ? { ...t, templates: updatedTpls } : t)
+    );
+    setNewTodoTitle("");
+    setNewTodoGroup("");
+  };
+  const handleDeleteTodoFromTemplate = (index) => {
+    if (!currentType || !currentTemplate) return;
+    const updatedTodos = currentTemplate.todos.filter((_, idx) => idx !== index);
+    const updatedTpls = currentType.templates.map(
+      (tpl) => tpl.id === currentTemplate.id ? { ...tpl, todos: updatedTodos } : tpl
+    );
+    setLocalTypes(
+      (prev) => prev.map((t) => t.id === currentType.id ? { ...t, templates: updatedTpls } : t)
+    );
+  };
+  const handleUpdateTodoInTemplate = (index, fields) => {
+    if (!currentType || !currentTemplate) return;
+    const updatedTodos = currentTemplate.todos.map(
+      (todo, idx) => idx === index ? { ...todo, ...fields } : todo
+    );
+    const updatedTpls = currentType.templates.map(
+      (tpl) => tpl.id === currentTemplate.id ? { ...tpl, todos: updatedTodos } : tpl
+    );
+    setLocalTypes(
+      (prev) => prev.map((t) => t.id === currentType.id ? { ...t, templates: updatedTpls } : t)
+    );
+  };
+  const handleSave = async () => {
+    await onSave(localTypes);
+    onClose();
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("div", { className: "todo-cal-modal-backdrop", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "todo-cal-modal-content template-settings-modal", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "modal-header", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("h3", { children: "\u2699\uFE0F \u30BF\u30A4\u30D7 & \u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u7BA1\u7406" }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("button", { className: "icon-btn", onClick: onClose, title: "\u9589\u3058\u308B", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(X, { size: 18 }) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "template-settings-body", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "settings-sidebar", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "sidebar-section-title", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("span", { children: "\u30BF\u30A4\u30D7\u4E00\u89A7" }),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("button", { className: "icon-btn-sm", onClick: handleAddType, title: "\u65B0\u898F\u30BF\u30A4\u30D7\u8FFD\u52A0", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Plus, { size: 14 }) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("div", { className: "types-list", children: localTypes.map((type) => /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(
+          "div",
+          {
+            className: `type-nav-item ${type.id === currentType?.id ? "active" : ""}`,
+            onClick: () => {
+              setSelectedTypeId(type.id);
+              setSelectedTemplateId(type.templates[0]?.id || "");
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("span", { className: `type-color-dot dot-${type.color || "blue"}` }),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("span", { className: "type-nav-name", children: type.name }),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("span", { className: "type-tpl-count", children: [
+                "(",
+                type.templates.length,
+                ")"
+              ] })
+            ]
+          },
+          type.id
+        )) })
+      ] }),
+      currentType && /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "settings-editor-pane", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "editor-card", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "card-header-row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("h4", { children: "\u30BF\u30A4\u30D7\u8A2D\u5B9A" }),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+              "button",
+              {
+                className: "icon-btn danger-btn",
+                onClick: () => handleDeleteType(currentType.id),
+                title: "\u3053\u306E\u30BF\u30A4\u30D7\u3092\u524A\u9664",
+                children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Trash2, { size: 14 })
+              }
+            )
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "form-row-compact", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "form-group flex-2", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("label", { children: "\u30BF\u30A4\u30D7\u540D" }),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+                "input",
+                {
+                  type: "text",
+                  className: "todo-cal-form-input",
+                  value: currentType.name,
+                  onChange: (e) => handleUpdateType({ name: e.target.value }),
+                  placeholder: "\u4F8B: \u30EA\u30EA\u30FC\u30B9"
+                }
+              )
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "form-group flex-1", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("label", { children: "\u30A2\u30A4\u30B3\u30F3" }),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+                "select",
+                {
+                  className: "todo-cal-form-input",
+                  value: currentType.icon || "tag",
+                  onChange: (e) => handleUpdateType({ icon: e.target.value }),
+                  children: AVAILABLE_ICONS.map((ic) => /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("option", { value: ic, children: ic }, ic))
+                }
+              )
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "form-group flex-1", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("label", { children: "\u30AB\u30E9\u30FC" }),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+                "select",
+                {
+                  className: "todo-cal-form-input",
+                  value: currentType.color || "blue",
+                  onChange: (e) => handleUpdateType({ color: e.target.value }),
+                  children: AVAILABLE_COLORS.map((col) => /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("option", { value: col, children: col }, col))
+                }
+              )
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "editor-card", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "card-header-row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "template-tab-bar", children: [
+              currentType.templates.map((tpl) => /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+                "button",
+                {
+                  className: `template-tab-btn ${tpl.id === currentTemplate?.id ? "active" : ""}`,
+                  onClick: () => setSelectedTemplateId(tpl.id),
+                  children: tpl.name
+                },
+                tpl.id
+              )),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(
+                "button",
+                {
+                  className: "template-tab-add-btn",
+                  onClick: handleAddTemplate,
+                  title: "\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u8FFD\u52A0",
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Plus, { size: 13 }),
+                    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("span", { children: "\u8FFD\u52A0" })
+                  ]
+                }
+              )
+            ] }),
+            currentTemplate && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+              "button",
+              {
+                className: "icon-btn danger-btn",
+                onClick: () => handleDeleteTemplate(currentTemplate.id),
+                title: "\u3053\u306E\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u3092\u524A\u9664",
+                children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Trash2, { size: 13 })
+              }
+            )
+          ] }),
+          currentTemplate && /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "template-content-editor", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "form-group", style: { marginBottom: "12px" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("label", { children: "\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u540D" }),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+                "input",
+                {
+                  type: "text",
+                  className: "todo-cal-form-input",
+                  value: currentTemplate.name,
+                  onChange: (e) => handleUpdateTemplateName(e.target.value),
+                  placeholder: "\u4F8B: \u901A\u5E38\u30EA\u30EA\u30FC\u30B9\uFF08\u6A19\u6E96\u5BE9\u67FB\uFF09"
+                }
+              )
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("label", { style: { fontSize: "12px", fontWeight: 600, color: "var(--text-muted)" }, children: [
+              "TODO\u30BF\u30B9\u30AF\u9805\u76EE\u5B9A\u7FA9 (",
+              currentTemplate.todos.length,
+              "\u4EF6)"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("div", { className: "template-todos-list", children: currentTemplate.todos.map((todo, idx) => /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "tpl-todo-item-row", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+                "input",
+                {
+                  type: "text",
+                  className: "tpl-todo-title-input",
+                  value: todo.title,
+                  onChange: (e) => handleUpdateTodoInTemplate(idx, { title: e.target.value }),
+                  placeholder: "TODO\u30BF\u30A4\u30C8\u30EB..."
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+                "input",
+                {
+                  type: "text",
+                  className: "tpl-todo-group-input",
+                  value: todo.group || "",
+                  onChange: (e) => handleUpdateTodoInTemplate(idx, { group: e.target.value }),
+                  placeholder: "\u30B0\u30EB\u30FC\u30D7(\u4EFB\u610F)",
+                  title: "\u30B0\u30EB\u30FC\u30D7\u540D"
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+                "button",
+                {
+                  className: "icon-btn danger-btn",
+                  onClick: () => handleDeleteTodoFromTemplate(idx),
+                  title: "\u524A\u9664",
+                  children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Trash2, { size: 13 })
+                }
+              )
+            ] }, idx)) }),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "add-tpl-todo-row", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+                "input",
+                {
+                  type: "text",
+                  className: "tpl-todo-title-input",
+                  value: newTodoTitle,
+                  onChange: (e) => setNewTodoTitle(e.target.value),
+                  placeholder: "\uFF0B \u65B0\u3057\u3044TODO\u30BF\u30B9\u30AF\u540D\u3092\u5165\u529B...",
+                  onKeyDown: (e) => {
+                    if (e.key === "Enter") handleAddTodoToTemplate();
+                  }
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+                "input",
+                {
+                  type: "text",
+                  className: "tpl-todo-group-input",
+                  value: newTodoGroup,
+                  onChange: (e) => setNewTodoGroup(e.target.value),
+                  placeholder: "\u30B0\u30EB\u30FC\u30D7(\u4EFB\u610F)",
+                  onKeyDown: (e) => {
+                    if (e.key === "Enter") handleAddTodoToTemplate();
+                  }
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(
+                "button",
+                {
+                  type: "button",
+                  className: "nav-btn primary-btn sm-btn",
+                  onClick: handleAddTodoToTemplate,
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Plus, { size: 13 }),
+                    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("span", { children: "\u8FFD\u52A0" })
+                  ]
+                }
+              )
+            ] })
+          ] })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "todo-cal-modal-actions", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("button", { type: "button", className: "nav-btn secondary-btn", onClick: onClose, children: "\u30AD\u30E3\u30F3\u30BB\u30EB" }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("button", { type: "button", className: "nav-btn primary-btn", onClick: handleSave, children: "\u4FDD\u5B58" })
+    ] })
+  ] }) });
+};
+
 // src/components/AppView.tsx
-var import_jsx_runtime6 = __toESM(require_jsx_runtime());
-var AppView = ({ app }) => {
-  const [storage] = (0, import_react7.useState)(() => new StorageManager(app));
-  const [viewMode, setViewMode] = (0, import_react7.useState)("collections");
-  const [collections, setCollections] = (0, import_react7.useState)([]);
-  const [selectedCollection, setSelectedCollection] = (0, import_react7.useState)(null);
-  const [items, setItems] = (0, import_react7.useState)([]);
-  const [agendaItems, setAgendaItems] = (0, import_react7.useState)([]);
-  const [selectedCollectionFilterId, setSelectedCollectionFilterId] = (0, import_react7.useState)(null);
-  const [selectedItem, setSelectedItem] = (0, import_react7.useState)(null);
-  const [selectedTodoId, setSelectedTodoId] = (0, import_react7.useState)(null);
-  const [isDrawerOpen, setIsDrawerOpen] = (0, import_react7.useState)(false);
-  const [startDate, setStartDate] = (0, import_react7.useState)(() => /* @__PURE__ */ new Date());
-  const [showCompletedItems, setShowCompletedItems] = (0, import_react7.useState)(false);
-  const [isCreateItemModalOpen, setIsCreateItemModalOpen] = (0, import_react7.useState)(false);
-  const [newItemTitle, setNewItemTitle] = (0, import_react7.useState)("");
-  const [newItemDescription, setNewItemDescription] = (0, import_react7.useState)("");
-  const loadCollections = (0, import_react7.useCallback)(async () => {
+var import_jsx_runtime9 = __toESM(require_jsx_runtime());
+var AppView = ({ app, plugin, settings }) => {
+  const [storage] = (0, import_react8.useState)(() => new StorageManager(app));
+  const [templateStorage] = (0, import_react8.useState)(() => new TemplateStorage(app));
+  const [pluginSettings, setPluginSettings] = (0, import_react8.useState)(
+    () => settings || plugin?.settings || DEFAULT_SETTINGS
+  );
+  const [itemTypes, setItemTypes] = (0, import_react8.useState)([]);
+  const [isTemplateSettingsOpen, setIsTemplateSettingsOpen] = (0, import_react8.useState)(false);
+  const [viewMode, setViewMode] = (0, import_react8.useState)("collections");
+  const [collections, setCollections] = (0, import_react8.useState)([]);
+  const [selectedCollection, setSelectedCollection] = (0, import_react8.useState)(null);
+  const [items, setItems] = (0, import_react8.useState)([]);
+  const [agendaItems, setAgendaItems] = (0, import_react8.useState)([]);
+  const [selectedCollectionFilterId, setSelectedCollectionFilterId] = (0, import_react8.useState)(null);
+  const [selectedItem, setSelectedItem] = (0, import_react8.useState)(null);
+  const [selectedTodoId, setSelectedTodoId] = (0, import_react8.useState)(null);
+  const [isDrawerOpen, setIsDrawerOpen] = (0, import_react8.useState)(false);
+  const [startDate, setStartDate] = (0, import_react8.useState)(() => /* @__PURE__ */ new Date());
+  const [showCompletedItems, setShowCompletedItems] = (0, import_react8.useState)(false);
+  const [isCreateItemModalOpen, setIsCreateItemModalOpen] = (0, import_react8.useState)(false);
+  const [newItemTitle, setNewItemTitle] = (0, import_react8.useState)("");
+  const [newItemDescription, setNewItemDescription] = (0, import_react8.useState)("");
+  const [newItemType, setNewItemType] = (0, import_react8.useState)("");
+  const [newItemTemplate, setNewItemTemplate] = (0, import_react8.useState)("");
+  (0, import_react8.useEffect)(() => {
+    if (plugin) {
+      const unsubscribe = plugin.onSettingsChange((newSettings) => {
+        setPluginSettings(newSettings);
+      });
+      return unsubscribe;
+    }
+  }, [plugin]);
+  const loadTemplates = (0, import_react8.useCallback)(async () => {
+    const loaded = await templateStorage.loadTemplates();
+    setItemTypes(loaded);
+  }, [templateStorage]);
+  (0, import_react8.useEffect)(() => {
+    loadTemplates();
+  }, [loadTemplates]);
+  const loadCollections = (0, import_react8.useCallback)(async () => {
     const cols = await storage.getCollections();
     setCollections(cols);
   }, [storage]);
-  const loadItems = (0, import_react7.useCallback)(async (colId) => {
+  const loadItems = (0, import_react8.useCallback)(async (colId) => {
     const loadedItems = await storage.getItems(colId);
     setItems(loadedItems);
   }, [storage]);
-  const loadAgendaItems = (0, import_react7.useCallback)(async () => {
+  const loadAgendaItems = (0, import_react8.useCallback)(async () => {
     const loadedAgenda = await storage.getAllAgendaItems();
     setAgendaItems(loadedAgenda);
   }, [storage]);
-  (0, import_react7.useEffect)(() => {
+  (0, import_react8.useEffect)(() => {
     loadCollections();
   }, [loadCollections]);
-  const handleSelectCollection = (0, import_react7.useCallback)(
+  const handleSelectCollection = (0, import_react8.useCallback)(
     async (collection) => {
       setSelectedCollection(collection);
       await loadItems(collection.id);
@@ -26811,7 +27755,7 @@ var AppView = ({ app }) => {
     },
     [loadItems]
   );
-  const handleNavigateCollection = (0, import_react7.useCallback)(
+  const handleNavigateCollection = (0, import_react8.useCallback)(
     async (direction) => {
       if (collections.length <= 1 || !selectedCollection) return;
       const currentIndex = collections.findIndex((c) => c.id === selectedCollection.id);
@@ -26826,7 +27770,7 @@ var AppView = ({ app }) => {
     },
     [collections, selectedCollection, handleSelectCollection]
   );
-  (0, import_react7.useEffect)(() => {
+  (0, import_react8.useEffect)(() => {
     const handleKeyDown = (e) => {
       if (viewMode !== "calendar" || collections.length <= 1) return;
       if (isCreateItemModalOpen) return;
@@ -26885,13 +27829,49 @@ var AppView = ({ app }) => {
   const handleCreateItemSubmit = async (e) => {
     e.preventDefault();
     if (!selectedCollection || !newItemTitle.trim()) return;
-    const newItem = await storage.createItem(selectedCollection.id, newItemTitle, newItemDescription);
+    let initialTodos = [];
+    let selectedType = void 0;
+    let selectedTemplate = void 0;
+    if (pluginSettings.enableItemTypes && newItemType) {
+      selectedType = newItemType;
+      const typeObj = findItemType(itemTypes, newItemType);
+      if (typeObj) {
+        const templateObj = findItemTemplate(typeObj, newItemTemplate) || typeObj.templates[0];
+        if (templateObj) {
+          selectedTemplate = templateObj.name;
+          const now = Date.now();
+          initialTodos = (templateObj.todos || []).map((t, idx) => ({
+            id: `todo-${now}-${idx}`,
+            title: t.title,
+            due: "",
+            // empty due date initially
+            status: "todo",
+            description: "",
+            group: t.group || ""
+          }));
+        }
+      }
+    }
+    const newItem = await storage.createItem(
+      selectedCollection.id,
+      newItemTitle,
+      newItemDescription,
+      selectedType,
+      selectedTemplate,
+      initialTodos
+    );
     await loadItems(selectedCollection.id);
     setNewItemTitle("");
     setNewItemDescription("");
+    setNewItemType("");
+    setNewItemTemplate("");
     setIsCreateItemModalOpen(false);
     setSelectedItem(newItem);
     setIsDrawerOpen(true);
+  };
+  const handleSaveTemplates = async (newTypes) => {
+    await templateStorage.saveTemplates(newTypes);
+    setItemTypes(newTypes);
   };
   const handleUpdateItem = async (updatedItem) => {
     setItems((prev) => prev.map((it) => it.id === updatedItem.id ? updatedItem : it));
@@ -26950,8 +27930,9 @@ var AppView = ({ app }) => {
     setSelectedItem(null);
     setSelectedTodoId(null);
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-calendar-app", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+  const selectedNewTypeObj = findItemType(itemTypes, newItemType);
+  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-calendar-app", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
       HeaderNav,
       {
         viewMode,
@@ -26960,6 +27941,7 @@ var AppView = ({ app }) => {
         startDate,
         showCompletedItems,
         completedItemsCount: items.filter((it) => it.status === "done").length,
+        enableItemTypes: pluginSettings.enableItemTypes,
         onToggleShowCompleted: () => setShowCompletedItems((prev) => !prev),
         onBackToCollections: handleBackToCollections,
         onSelectAgenda: handleSelectAgenda,
@@ -26968,12 +27950,13 @@ var AppView = ({ app }) => {
         onNavigateDate: handleNavigateDate,
         onResetToToday: handleResetToToday,
         onOpenCreateItemModal: () => setIsCreateItemModalOpen(true),
+        onOpenTemplateSettings: () => setIsTemplateSettingsOpen(true),
         onRefresh: handleRefresh
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "app-main-layout", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "main-content-pane", children: [
-        viewMode === "collections" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "app-main-layout", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "main-content-pane", children: [
+        viewMode === "collections" && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
           CollectionsGrid,
           {
             collections,
@@ -26982,13 +27965,15 @@ var AppView = ({ app }) => {
             onDeleteCollection: handleDeleteCollection
           }
         ),
-        viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
           CalendarMatrixView,
           {
             items,
             startDate,
             selectedItemId: selectedItem?.id || null,
             showCompletedItems,
+            enableItemTypes: pluginSettings.enableItemTypes,
+            itemTypes,
             onToggleShowCompleted: () => setShowCompletedItems((prev) => !prev),
             onToggleItemStatus: handleToggleItemStatus,
             isDrawerOpen,
@@ -27000,7 +27985,7 @@ var AppView = ({ app }) => {
             onUpdateItem: handleUpdateItem
           }
         ),
-        viewMode === "agenda" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        viewMode === "agenda" && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
           AgendaView,
           {
             agendaItems,
@@ -27013,29 +27998,31 @@ var AppView = ({ app }) => {
           }
         )
       ] }),
-      (viewMode === "calendar" || viewMode === "agenda") && isDrawerOpen && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+      (viewMode === "calendar" || viewMode === "agenda") && isDrawerOpen && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
         TaskDetailDrawer,
         {
           item: selectedItem,
           selectedTodoId,
           isOpen: isDrawerOpen,
+          enableItemTypes: pluginSettings.enableItemTypes,
+          itemTypes,
           onClose: handleCloseDrawer,
           onUpdateItem: handleUpdateItem,
           onDeleteItem: handleDeleteItem
         }
       )
     ] }),
-    isCreateItemModalOpen && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "todo-cal-modal-backdrop", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-cal-modal-content", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("h3", { children: "\u65B0\u898F\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item) \u306E\u4F5C\u6210" }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("form", { onSubmit: handleCreateItemSubmit, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-cal-form-group", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("label", { children: "\u30CE\u30FC\u30C8\u30BF\u30A4\u30C8\u30EB *" }),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+    isCreateItemModalOpen && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "todo-cal-modal-backdrop", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-cal-modal-content", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("h3", { children: "\u65B0\u898F\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item) \u306E\u4F5C\u6210" }),
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("form", { onSubmit: handleCreateItemSubmit, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("label", { children: "\u30CE\u30FC\u30C8\u30BF\u30A4\u30C8\u30EB *" }),
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
             "input",
             {
               type: "text",
               className: "todo-cal-form-input",
-              placeholder: "\u4F8B: UI\u30C7\u30B6\u30A4\u30F3 \uFF06 \u4ED5\u69D8\u7B56\u5B9A",
+              placeholder: "\u4F8B: 2026\u5E749\u6708\u5B9A\u671F\u30EA\u30EA\u30FC\u30B9",
               value: newItemTitle,
               onChange: (e) => setNewItemTitle(e.target.value),
               autoFocus: true,
@@ -27043,9 +28030,49 @@ var AppView = ({ app }) => {
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-cal-form-group", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("label", { children: "\u30E1\u30E2 / \u8A73\u7D30\u8AAC\u660E (\u4EFB\u610F)" }),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        pluginSettings.enableItemTypes && itemTypes.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("label", { children: "\u30BF\u30A4\u30D7 (\u4EFB\u610F\u30FB\u30C6\u30F3\u30D7\u30ECTODO\u3092\u81EA\u52D5\u30BB\u30C3\u30C8)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "create-type-selection-row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(
+              "select",
+              {
+                className: "todo-cal-form-input flex-1",
+                value: newItemType,
+                onChange: (e) => {
+                  setNewItemType(e.target.value);
+                  const tObj = findItemType(itemTypes, e.target.value);
+                  setNewItemTemplate(tObj?.templates[0]?.name || "");
+                },
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("option", { value: "", children: "(\u6307\u5B9A\u306A\u3057 - \u7A7A\u306E\u30A2\u30A4\u30C6\u30E0)" }),
+                  itemTypes.map((type) => /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("option", { value: type.id, children: type.name }, type.id))
+                ]
+              }
+            ),
+            selectedNewTypeObj && selectedNewTypeObj.templates.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+              "select",
+              {
+                className: "todo-cal-form-input flex-1",
+                value: newItemTemplate || selectedNewTypeObj.templates[0]?.name || "",
+                onChange: (e) => setNewItemTemplate(e.target.value),
+                children: selectedNewTypeObj.templates.map((tpl) => /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("option", { value: tpl.name, children: [
+                  tpl.name,
+                  " (",
+                  tpl.todos.length,
+                  "\u30BF\u30B9\u30AF)"
+                ] }, tpl.id))
+              }
+            )
+          ] }),
+          selectedNewTypeObj && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "create-template-hint", children: [
+            "\u{1F4A1} \u9078\u629E\u3055\u308C\u305F\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u306ETODO\uFF08",
+            (findItemTemplate(selectedNewTypeObj, newItemTemplate) || selectedNewTypeObj.templates[0])?.todos.length,
+            "\u4EF6\uFF09\u304C\u65E5\u4ED8\u306A\u3057\u3067\u81EA\u52D5\u4F5C\u6210\u3055\u308C\u307E\u3059\u3002"
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("label", { children: "\u30E1\u30E2 / \u8A73\u7D30\u8AAC\u660E (\u4EFB\u610F)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
             "textarea",
             {
               className: "todo-cal-form-input",
@@ -27056,8 +28083,8 @@ var AppView = ({ app }) => {
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-cal-modal-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-cal-modal-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
             "button",
             {
               type: "button",
@@ -27066,18 +28093,28 @@ var AppView = ({ app }) => {
               children: "\u30AD\u30E3\u30F3\u30BB\u30EB"
             }
           ),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("button", { type: "submit", className: "nav-btn primary-btn", children: "\u4F5C\u6210" })
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("button", { type: "submit", className: "nav-btn primary-btn", children: "\u4F5C\u6210" })
         ] })
       ] })
-    ] }) })
+    ] }) }),
+    isTemplateSettingsOpen && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+      TemplateSettingsModal,
+      {
+        isOpen: isTemplateSettingsOpen,
+        types: itemTypes,
+        onClose: () => setIsTemplateSettingsOpen(false),
+        onSave: handleSaveTemplates
+      }
+    )
   ] });
 };
 
 // src/main.ts
-var TodoCalendarView = class extends import_obsidian2.ItemView {
-  constructor(leaf) {
+var TodoCalendarView = class extends import_obsidian3.ItemView {
+  constructor(leaf, plugin) {
     super(leaf);
     this.root = null;
+    this.plugin = plugin;
   }
   getViewType() {
     return VIEW_TYPE_TODO_CALENDAR;
@@ -27094,7 +28131,15 @@ var TodoCalendarView = class extends import_obsidian2.ItemView {
     container.addClass("todo-calendar-view-container");
     this.root = (0, import_client.createRoot)(container);
     this.root.render(
-      import_react8.default.createElement(import_react8.default.StrictMode, null, import_react8.default.createElement(AppView, { app: this.app }))
+      import_react9.default.createElement(
+        import_react9.default.StrictMode,
+        null,
+        import_react9.default.createElement(AppView, {
+          app: this.app,
+          plugin: this.plugin,
+          settings: this.plugin.settings
+        })
+      )
     );
   }
   async onClose() {
@@ -27104,13 +28149,39 @@ var TodoCalendarView = class extends import_obsidian2.ItemView {
     }
   }
 };
-var TodoCalendarPlugin = class extends import_obsidian2.Plugin {
+var TodoCalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
+  constructor(app, plugin) {
+    super(app, plugin);
+    this.plugin = plugin;
+  }
+  display() {
+    const { containerEl } = this;
+    containerEl.empty();
+    containerEl.createEl("h2", { text: "TODO \u30AB\u30EC\u30F3\u30C0\u30FC \u8A2D\u5B9A" });
+    new import_obsidian3.Setting(containerEl).setName("\u30BF\u30A4\u30D7 & \u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u6A5F\u80FD\u306E\u6709\u52B9\u5316").setDesc(
+      "\u30A2\u30AF\u30B7\u30E7\u30F3\u306B\u30BF\u30A4\u30D7\uFF08\u30EA\u30EA\u30FC\u30B9\u3001\u898B\u7A4D\u7B49\uFF09\u3092\u4ED8\u4E0E\u3057\u3001\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8TODO\u306E\u81EA\u52D5\u30BB\u30C3\u30C8\u3084\u629C\u3051\u6F0F\u308C\u30FB\u671F\u65E5\u672A\u8A2D\u5B9A\u306E\u8B66\u544A\u6A5F\u80FD\u3092\u5229\u7528\u53EF\u80FD\u306B\u3057\u307E\u3059\u3002\u30D7\u30E9\u30A4\u30D9\u30FC\u30C8\u7528\u9014\u7B49\u3067\u4E0D\u8981\u306A\u5834\u5408\u306FOFF\u306B\u3057\u3066\u304F\u3060\u3055\u3044\u3002"
+    ).addToggle(
+      (toggle) => toggle.setValue(this.plugin.settings.enableItemTypes).onChange(async (value) => {
+        this.plugin.settings.enableItemTypes = value;
+        await this.plugin.saveSettings();
+      })
+    );
+  }
+};
+var TodoCalendarPlugin = class extends import_obsidian3.Plugin {
+  constructor() {
+    super(...arguments);
+    this.settings = DEFAULT_SETTINGS;
+    this.settingsListeners = [];
+  }
   async onload() {
     console.log("Loading TODO Calendar Matrix Plugin...");
+    await this.loadSettings();
     this.registerView(
       VIEW_TYPE_TODO_CALENDAR,
-      (leaf) => new TodoCalendarView(leaf)
+      (leaf) => new TodoCalendarView(leaf, this)
     );
+    this.addSettingTab(new TodoCalendarSettingTab(this.app, this));
     this.addRibbonIcon("calendar", "TODO \u30AB\u30EC\u30F3\u30C0\u30FC\u3092\u958B\u304F", () => {
       this.activateView();
     });
@@ -27205,8 +28276,27 @@ var TodoCalendarPlugin = class extends import_obsidian2.Plugin {
       await storage.updateItem(item2);
     }
   }
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
+  async saveSettings() {
+    await this.saveData(this.settings);
+    this.notifySettingsChange();
+  }
+  onSettingsChange(listener) {
+    this.settingsListeners.push(listener);
+    return () => {
+      this.settingsListeners = this.settingsListeners.filter((l) => l !== listener);
+    };
+  }
+  notifySettingsChange() {
+    for (const listener of this.settingsListeners) {
+      listener(this.settings);
+    }
+  }
   onunload() {
     console.log("Unloading TODO Calendar Matrix Plugin...");
+    this.settingsListeners = [];
   }
 };
 /*! Bundled license information:
@@ -27309,6 +28399,22 @@ lucide-react/dist/esm/icons/align-left.js:
    *)
 
 lucide-react/dist/esm/icons/arrow-up-down.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/bookmark.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/calculator.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *
@@ -27508,7 +28614,31 @@ lucide-react/dist/esm/icons/refresh-cw.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
+lucide-react/dist/esm/icons/rocket.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
 lucide-react/dist/esm/icons/search.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/settings.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/shield.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *
@@ -27540,7 +28670,23 @@ lucide-react/dist/esm/icons/trash-2.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
+lucide-react/dist/esm/icons/triangle-alert.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
 lucide-react/dist/esm/icons/x.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/zap.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *
