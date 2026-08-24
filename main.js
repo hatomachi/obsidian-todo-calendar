@@ -25996,6 +25996,14 @@ var CalendarMatrixView = ({
     setAddingTodoCell(null);
     setInlineTodoTitle("");
   };
+  const handleAssignUnscheduledTodo = (item, todoId, dateStr) => {
+    const updatedTodos = item.todos.map(
+      (t) => t.id === todoId ? { ...t, due: dateStr } : t
+    );
+    onUpdateItem({ ...item, todos: updatedTodos });
+    setAddingTodoCell(null);
+    setInlineTodoTitle("");
+  };
   const handleInlineKeyDown = (e, item, dateStr) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -26067,6 +26075,9 @@ var CalendarMatrixView = ({
       const hasFutureMore = futureTodos.length > 2;
       const visibleFutureTodos = hasFutureMore && !isFutureExpanded ? futureTodos.slice(0, 2) : futureTodos;
       const hiddenFutureCount = futureTodos.length - 2;
+      const unscheduledTodos = item.todos.filter(
+        (t) => (!t.due || t.due.trim() === "") && t.status !== "done"
+      );
       const itemType = enableItemTypes ? findItemType(itemTypes, item.type) : void 0;
       const itemTemplate = enableItemTypes ? findItemTemplate(itemType, item.template) : void 0;
       const templateStatus = enableItemTypes && itemTemplate ? checkTemplateStatus(item, itemTemplate) : null;
@@ -26264,19 +26275,45 @@ ${todo.description || ""}`,
                       },
                       todo.id
                     )),
-                    isAddingHere ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "inline-todo-input-wrapper", onClick: (e) => e.stopPropagation(), children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-                      "input",
-                      {
-                        type: "text",
-                        className: "inline-todo-input",
-                        placeholder: "TODO\u3092\u5165\u529B...",
-                        value: inlineTodoTitle,
-                        onChange: (e) => setInlineTodoTitle(e.target.value),
-                        onKeyDown: (e) => handleInlineKeyDown(e, item, day.dateStr),
-                        onBlur: () => handleSaveInlineTodo(item, day.dateStr),
-                        autoFocus: true
-                      }
-                    ) }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+                    isAddingHere ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "inline-todo-input-wrapper", onClick: (e) => e.stopPropagation(), children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                        "input",
+                        {
+                          type: "text",
+                          className: "inline-todo-input",
+                          placeholder: "TODO\u3092\u5165\u529B...",
+                          value: inlineTodoTitle,
+                          onChange: (e) => setInlineTodoTitle(e.target.value),
+                          onKeyDown: (e) => handleInlineKeyDown(e, item, day.dateStr),
+                          onBlur: () => handleSaveInlineTodo(item, day.dateStr),
+                          autoFocus: true
+                        }
+                      ),
+                      unscheduledTodos.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "inline-unscheduled-list", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "inline-unscheduled-header", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Clock, { size: 10 }),
+                          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { children: [
+                            "\u672A\u8A2D\u5B9A\u306ETODO (",
+                            unscheduledTodos.length,
+                            ")"
+                          ] })
+                        ] }),
+                        unscheduledTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+                          "div",
+                          {
+                            className: "inline-unscheduled-item",
+                            onMouseDown: (e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleAssignUnscheduledTodo(item, todo.id, day.dateStr);
+                            },
+                            title: `\u300C${todo.title}\u300D\u306E\u671F\u65E5\u3092 ${day.dateStr} \u306B\u8A2D\u5B9A`,
+                            children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "unscheduled-item-title", children: todo.title })
+                          },
+                          todo.id
+                        ))
+                      ] })
+                    ] }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
                       "div",
                       {
                         className: "cell-add-prompt",

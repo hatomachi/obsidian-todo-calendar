@@ -826,6 +826,7 @@
 }
 
 .todo-calendar-app .inline-todo-input-wrapper {
+  position: relative;
   margin-top: 2px;
 }
 
@@ -840,6 +841,58 @@
   outline: none;
   box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.2);
   box-sizing: border-box;
+}
+
+.todo-calendar-app .inline-unscheduled-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  min-width: 180px;
+  max-height: 180px;
+  overflow-y: auto;
+  background-color: var(--background-secondary, #1e1e24);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15));
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  z-index: 50;
+  padding: 4px 0;
+}
+
+.todo-calendar-app .inline-unscheduled-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  user-select: none;
+}
+
+.todo-calendar-app .inline-unscheduled-item {
+  display: flex;
+  align-items: center;
+  padding: 5px 8px;
+  font-size: 11px;
+  color: var(--text-normal);
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+  user-select: none;
+}
+
+.todo-calendar-app .inline-unscheduled-item:hover {
+  background-color: var(--background-modifier-hover, rgba(255, 255, 255, 0.08));
+  color: var(--interactive-accent);
+}
+
+.todo-calendar-app .inline-unscheduled-item .unscheduled-item-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .todo-calendar-app .cell-add-prompt {

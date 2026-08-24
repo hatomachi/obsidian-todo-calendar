@@ -239,6 +239,15 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
     setInlineTodoTitle('');
   };
 
+  const handleAssignUnscheduledTodo = (item: ItemData, todoId: string, dateStr: string) => {
+    const updatedTodos = item.todos.map((t) =>
+      t.id === todoId ? { ...t, due: dateStr } : t
+    );
+    onUpdateItem({ ...item, todos: updatedTodos });
+    setAddingTodoCell(null);
+    setInlineTodoTitle('');
+  };
+
   const handleInlineKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
     item: ItemData,
@@ -350,6 +359,11 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                 const hasFutureMore = futureTodos.length > 2;
                 const visibleFutureTodos = hasFutureMore && !isFutureExpanded ? futureTodos.slice(0, 2) : futureTodos;
                 const hiddenFutureCount = futureTodos.length - 2;
+
+                // Unscheduled (no due date) incomplete todos
+                const unscheduledTodos = item.todos.filter(
+                  (t) => (!t.due || t.due.trim() === '') && t.status !== 'done'
+                );
 
                 const itemType = enableItemTypes ? findItemType(itemTypes, item.type) : undefined;
                 const itemTemplate = enableItemTypes ? findItemTemplate(itemType, item.template) : undefined;
@@ -566,6 +580,28 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                                   onBlur={() => handleSaveInlineTodo(item, day.dateStr)}
                                   autoFocus
                                 />
+                                {unscheduledTodos.length > 0 && (
+                                  <div className="inline-unscheduled-list">
+                                    <div className="inline-unscheduled-header">
+                                      <Clock size={10} />
+                                      <span>未設定のTODO ({unscheduledTodos.length})</span>
+                                    </div>
+                                    {unscheduledTodos.map((todo) => (
+                                      <div
+                                        key={todo.id}
+                                        className="inline-unscheduled-item"
+                                        onMouseDown={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          handleAssignUnscheduledTodo(item, todo.id, day.dateStr);
+                                        }}
+                                        title={`「${todo.title}」の期日を ${day.dateStr} に設定`}
+                                      >
+                                        <span className="unscheduled-item-title">{todo.title}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             ) : (
                               <div
