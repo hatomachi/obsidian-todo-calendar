@@ -24890,6 +24890,11 @@ var ChevronDown = createLucideIcon("ChevronDown", [
   ["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/chevron-left.js
+var ChevronLeft = createLucideIcon("ChevronLeft", [
+  ["path", { d: "m15 18-6-6 6-6", key: "1wnfg3" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/chevron-right.js
 var ChevronRight = createLucideIcon("ChevronRight", [
   ["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]
@@ -25074,6 +25079,7 @@ var HeaderNav = ({
   onBackToCollections,
   onSelectAgenda,
   onSelectCollection,
+  onNavigateCollection,
   onNavigateDate,
   onResetToToday,
   onOpenCreateItemModal,
@@ -25085,6 +25091,7 @@ var HeaderNav = ({
     const options = { month: "numeric", day: "numeric" };
     return `${start.toLocaleDateString("ja-JP", options)} - ${end.toLocaleDateString("ja-JP", options)}`;
   };
+  const currentCollectionIndex = selectedCollection ? collections.findIndex((c) => c.id === selectedCollection.id) : -1;
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "todo-cal-header", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "header-left", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
@@ -25113,23 +25120,57 @@ var HeaderNav = ({
       ),
       viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "breadcrumb-separator", children: "/" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "collection-select-badge", title: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u3092\u5207\u308A\u66FF\u3048", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Layers, { size: 16, className: "badge-icon" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "collection-stepper-container", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-            "select",
+            "button",
             {
-              className: "collection-select-dropdown",
-              value: selectedCollection?.id || "",
-              onChange: (e) => {
-                const targetCol = collections.find((c) => c.id === e.target.value);
-                if (targetCol) {
-                  onSelectCollection(targetCol);
-                }
-              },
-              children: collections.map((col) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: col.id, children: col.title }, col.id))
+              className: "collection-stepper-btn",
+              onClick: () => onNavigateCollection && onNavigateCollection(-1),
+              title: "\u524D\u306E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3 (\u2190 \u307E\u305F\u306F [ )",
+              disabled: collections.length <= 1,
+              children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { size: 16 })
             }
           ),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { size: 14, className: "dropdown-arrow-icon" })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "collection-select-badge", title: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u3092\u5207\u308A\u66FF\u3048", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Layers, { size: 16, className: "badge-icon" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "select",
+              {
+                className: "collection-select-dropdown",
+                value: selectedCollection?.id || "",
+                onChange: (e) => {
+                  const targetCol = collections.find((c) => c.id === e.target.value);
+                  if (targetCol) {
+                    onSelectCollection(targetCol);
+                  }
+                },
+                children: collections.map((col, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: col.id, children: [
+                  col.title,
+                  " (",
+                  idx + 1,
+                  "/",
+                  collections.length,
+                  ")"
+                ] }, col.id))
+              }
+            ),
+            collections.length > 1 && currentCollectionIndex !== -1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "collection-index-indicator", children: [
+              currentCollectionIndex + 1,
+              "/",
+              collections.length
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { size: 14, className: "dropdown-arrow-icon" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "button",
+            {
+              className: "collection-stepper-btn",
+              onClick: () => onNavigateCollection && onNavigateCollection(1),
+              title: "\u6B21\u306E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3 (\u2192 \u307E\u305F\u306F ] )",
+              disabled: collections.length <= 1,
+              children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { size: 16 })
+            }
+          )
         ] })
       ] })
     ] }),
@@ -26652,13 +26693,54 @@ var AppView = ({ app }) => {
   (0, import_react7.useEffect)(() => {
     loadCollections();
   }, [loadCollections]);
-  const handleSelectCollection = async (collection) => {
-    setSelectedCollection(collection);
-    await loadItems(collection.id);
-    setViewMode("calendar");
-    setIsDrawerOpen(false);
-    setSelectedItem(null);
-  };
+  const handleSelectCollection = (0, import_react7.useCallback)(
+    async (collection) => {
+      setSelectedCollection(collection);
+      await loadItems(collection.id);
+      setViewMode("calendar");
+      setIsDrawerOpen(false);
+      setSelectedItem(null);
+    },
+    [loadItems]
+  );
+  const handleNavigateCollection = (0, import_react7.useCallback)(
+    async (direction) => {
+      if (collections.length <= 1 || !selectedCollection) return;
+      const currentIndex = collections.findIndex((c) => c.id === selectedCollection.id);
+      if (currentIndex === -1) return;
+      let nextIndex = currentIndex + direction;
+      if (nextIndex < 0) {
+        nextIndex = collections.length - 1;
+      } else if (nextIndex >= collections.length) {
+        nextIndex = 0;
+      }
+      await handleSelectCollection(collections[nextIndex]);
+    },
+    [collections, selectedCollection, handleSelectCollection]
+  );
+  (0, import_react7.useEffect)(() => {
+    const handleKeyDown = (e) => {
+      if (viewMode !== "calendar" || collections.length <= 1) return;
+      if (isCreateItemModalOpen) return;
+      const target = e.target;
+      const tagName = target?.tagName?.toLowerCase();
+      const isContentEditable = target?.isContentEditable;
+      if (tagName === "input" || tagName === "textarea" || tagName === "select" || isContentEditable) {
+        return;
+      }
+      if (e.key === "ArrowLeft" || e.key === "[") {
+        e.preventDefault();
+        handleNavigateCollection(-1);
+      } else if (e.key === "ArrowRight" || e.key === "]") {
+        e.preventDefault();
+        handleNavigateCollection(1);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [viewMode, collections.length, isCreateItemModalOpen, handleNavigateCollection]);
   const handleSelectAgenda = async () => {
     await loadCollections();
     await loadAgendaItems();
@@ -26766,6 +26848,7 @@ var AppView = ({ app }) => {
         onBackToCollections: handleBackToCollections,
         onSelectAgenda: handleSelectAgenda,
         onSelectCollection: handleSelectCollection,
+        onNavigateCollection: handleNavigateCollection,
         onNavigateDate: handleNavigateDate,
         onResetToToday: handleResetToToday,
         onOpenCreateItemModal: () => setIsCreateItemModalOpen(true),
@@ -27131,6 +27214,14 @@ lucide-react/dist/esm/icons/check.js:
    *)
 
 lucide-react/dist/esm/icons/chevron-down.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/chevron-left.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *

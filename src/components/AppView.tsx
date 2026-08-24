@@ -55,13 +55,63 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
   }, [loadCollections]);
 
   // Handle select collection (to Calendar view)
-  const handleSelectCollection = async (collection: CollectionData) => {
-    setSelectedCollection(collection);
-    await loadItems(collection.id);
-    setViewMode('calendar');
-    setIsDrawerOpen(false);
-    setSelectedItem(null);
-  };
+  const handleSelectCollection = useCallback(
+    async (collection: CollectionData) => {
+      setSelectedCollection(collection);
+      await loadItems(collection.id);
+      setViewMode('calendar');
+      setIsDrawerOpen(false);
+      setSelectedItem(null);
+    },
+    [loadItems]
+  );
+
+  // Navigate collection by step (+1 or -1)
+  const handleNavigateCollection = useCallback(
+    async (direction: -1 | 1) => {
+      if (collections.length <= 1 || !selectedCollection) return;
+      const currentIndex = collections.findIndex((c) => c.id === selectedCollection.id);
+      if (currentIndex === -1) return;
+
+      let nextIndex = currentIndex + direction;
+      if (nextIndex < 0) {
+        nextIndex = collections.length - 1;
+      } else if (nextIndex >= collections.length) {
+        nextIndex = 0;
+      }
+
+      await handleSelectCollection(collections[nextIndex]);
+    },
+    [collections, selectedCollection, handleSelectCollection]
+  );
+
+  // Keyboard navigation for collections (ArrowLeft / ArrowRight / [ / ])
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (viewMode !== 'calendar' || collections.length <= 1) return;
+      if (isCreateItemModalOpen) return;
+
+      const target = e.target as HTMLElement | null;
+      const tagName = target?.tagName?.toLowerCase();
+      const isContentEditable = target?.isContentEditable;
+      if (tagName === 'input' || tagName === 'textarea' || tagName === 'select' || isContentEditable) {
+        return;
+      }
+
+      if (e.key === 'ArrowLeft' || e.key === '[') {
+        e.preventDefault();
+        handleNavigateCollection(-1);
+      } else if (e.key === 'ArrowRight' || e.key === ']') {
+        e.preventDefault();
+        handleNavigateCollection(1);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [viewMode, collections.length, isCreateItemModalOpen, handleNavigateCollection]);
 
   // Switch to Agenda view
   const handleSelectAgenda = async () => {
@@ -201,6 +251,7 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
         onBackToCollections={handleBackToCollections}
         onSelectAgenda={handleSelectAgenda}
         onSelectCollection={handleSelectCollection}
+        onNavigateCollection={handleNavigateCollection}
         onNavigateDate={handleNavigateDate}
         onResetToToday={handleResetToToday}
         onOpenCreateItemModal={() => setIsCreateItemModalOpen(true)}

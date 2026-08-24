@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Plus, Calendar, RefreshCw, Layers, ChevronDown, CheckSquare } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, RefreshCw, Layers, ChevronDown, ChevronLeft, ChevronRight, CheckSquare } from 'lucide-react';
 import { CollectionData } from '../types';
 
 interface HeaderNavProps {
@@ -10,6 +10,7 @@ interface HeaderNavProps {
   onBackToCollections: () => void;
   onSelectAgenda: () => void;
   onSelectCollection: (collection: CollectionData) => void;
+  onNavigateCollection?: (direction: -1 | 1) => void;
   onNavigateDate: (days: number) => void;
   onResetToToday: () => void;
   onOpenCreateItemModal: () => void;
@@ -24,6 +25,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   onBackToCollections,
   onSelectAgenda,
   onSelectCollection,
+  onNavigateCollection,
   onNavigateDate,
   onResetToToday,
   onOpenCreateItemModal,
@@ -35,6 +37,10 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
     const options: Intl.DateTimeFormatOptions = { month: 'numeric', day: 'numeric' };
     return `${start.toLocaleDateString('ja-JP', options)} - ${end.toLocaleDateString('ja-JP', options)}`;
   };
+
+  const currentCollectionIndex = selectedCollection
+    ? collections.findIndex((c) => c.id === selectedCollection.id)
+    : -1;
 
   return (
     <div className="todo-cal-header">
@@ -60,25 +66,50 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
         {viewMode === 'calendar' && (
           <>
             <span className="breadcrumb-separator">/</span>
-            <div className="collection-select-badge" title="コレクションを切り替え">
-              <Layers size={16} className="badge-icon" />
-              <select
-                className="collection-select-dropdown"
-                value={selectedCollection?.id || ''}
-                onChange={(e) => {
-                  const targetCol = collections.find((c) => c.id === e.target.value);
-                  if (targetCol) {
-                    onSelectCollection(targetCol);
-                  }
-                }}
+            <div className="collection-stepper-container">
+              <button
+                className="collection-stepper-btn"
+                onClick={() => onNavigateCollection && onNavigateCollection(-1)}
+                title="前のコレクション (← または [ )"
+                disabled={collections.length <= 1}
               >
-                {collections.map((col) => (
-                  <option key={col.id} value={col.id}>
-                    {col.title}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={14} className="dropdown-arrow-icon" />
+                <ChevronLeft size={16} />
+              </button>
+
+              <div className="collection-select-badge" title="コレクションを切り替え">
+                <Layers size={16} className="badge-icon" />
+                <select
+                  className="collection-select-dropdown"
+                  value={selectedCollection?.id || ''}
+                  onChange={(e) => {
+                    const targetCol = collections.find((c) => c.id === e.target.value);
+                    if (targetCol) {
+                      onSelectCollection(targetCol);
+                    }
+                  }}
+                >
+                  {collections.map((col, idx) => (
+                    <option key={col.id} value={col.id}>
+                      {col.title} ({idx + 1}/{collections.length})
+                    </option>
+                  ))}
+                </select>
+                {collections.length > 1 && currentCollectionIndex !== -1 && (
+                  <span className="collection-index-indicator">
+                    {currentCollectionIndex + 1}/{collections.length}
+                  </span>
+                )}
+                <ChevronDown size={14} className="dropdown-arrow-icon" />
+              </div>
+
+              <button
+                className="collection-stepper-btn"
+                onClick={() => onNavigateCollection && onNavigateCollection(1)}
+                title="次のコレクション (→ または ] )"
+                disabled={collections.length <= 1}
+              >
+                <ChevronRight size={16} />
+              </button>
             </div>
           </>
         )}

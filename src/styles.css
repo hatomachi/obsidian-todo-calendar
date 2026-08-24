@@ -53,6 +53,38 @@
   font-size: 14px;
 }
 
+.todo-calendar-app .collection-stepper-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.todo-calendar-app .collection-stepper-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  background-color: var(--background-primary-alt, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.todo-calendar-app .collection-stepper-btn:hover:not(:disabled) {
+  color: var(--text-normal);
+  border-color: var(--interactive-accent);
+  background-color: var(--background-modifier-hover, rgba(255, 255, 255, 0.1));
+  transform: translateY(-1px);
+}
+
+.todo-calendar-app .collection-stepper-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .todo-calendar-app .collection-title-badge,
 .todo-calendar-app .collection-select-badge {
   display: flex;
@@ -72,6 +104,19 @@
 .todo-calendar-app .collection-select-badge:hover {
   border-color: var(--interactive-accent);
   background-color: var(--background-modifier-hover, rgba(255, 255, 255, 0.08));
+}
+
+.todo-calendar-app .collection-index-indicator {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--interactive-accent);
+  background-color: rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.15);
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-left: 2px;
+  margin-right: 2px;
+  flex-shrink: 0;
+  line-height: 1.2;
 }
 
 .todo-calendar-app .collection-select-dropdown {
