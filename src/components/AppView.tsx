@@ -28,6 +28,7 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const [startDate, setStartDate] = useState<Date>(() => new Date());
+  const [showCompletedItems, setShowCompletedItems] = useState(false);
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false);
   const [newItemTitle, setNewItemTitle] = useState('');
   const [newItemDescription, setNewItemDescription] = useState('');
@@ -209,6 +210,13 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
     setIsDrawerOpen(true);
   };
 
+  // Quick toggle item status (todo / done)
+  const handleToggleItemStatus = async (item: ItemData) => {
+    const nextStatus: TodoStatus = item.status === 'done' ? 'todo' : 'done';
+    const updatedItem: ItemData = { ...item, status: nextStatus };
+    await handleUpdateItem(updatedItem);
+  };
+
   // Quick toggle todo status
   const handleQuickToggleTodoStatus = async (item: ItemData, todoId: string) => {
     const updatedTodos = item.todos.map((t) => {
@@ -248,6 +256,9 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
         collections={collections}
         selectedCollection={selectedCollection}
         startDate={startDate}
+        showCompletedItems={showCompletedItems}
+        completedItemsCount={items.filter((it) => it.status === 'done').length}
+        onToggleShowCompleted={() => setShowCompletedItems((prev) => !prev)}
         onBackToCollections={handleBackToCollections}
         onSelectAgenda={handleSelectAgenda}
         onSelectCollection={handleSelectCollection}
@@ -274,6 +285,9 @@ export const AppView: React.FC<AppViewProps> = ({ app }) => {
               items={items}
               startDate={startDate}
               selectedItemId={selectedItem?.id || null}
+              showCompletedItems={showCompletedItems}
+              onToggleShowCompleted={() => setShowCompletedItems((prev) => !prev)}
+              onToggleItemStatus={handleToggleItemStatus}
               isDrawerOpen={isDrawerOpen}
               onCloseDrawer={handleCloseDrawer}
               onSelectItem={handleSelectItem}

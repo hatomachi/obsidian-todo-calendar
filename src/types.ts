@@ -14,6 +14,7 @@ export interface ItemData {
   collectionId: string;
   filePath: string;
   title: string;
+  status?: TodoStatus;
   description?: string;
   createdAt: string;
   todos: TodoItem[];

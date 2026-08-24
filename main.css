@@ -162,6 +162,15 @@
   padding: 4px 10px;
   font-size: 12px;
 }
+.todo-calendar-app .toggle-completed-btn {
+  font-size: 12px;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+}
+.todo-calendar-app .toggle-completed-btn.active-toggle {
+  background-color: rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.15);
+  color: var(--interactive-accent);
+  border-color: rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.4);
+}
 .todo-calendar-app .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -441,6 +450,13 @@
 .todo-calendar-app .matrix-row.row-selected {
   background-color: rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.08);
 }
+.todo-calendar-app .matrix-row.item-row-done {
+  opacity: 0.65;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.todo-calendar-app .matrix-row.item-row-done:hover {
+  opacity: 0.9;
+}
 .todo-calendar-app .row-header-td {
   position: sticky;
   left: 0;
@@ -454,6 +470,19 @@
   align-items: flex-start;
   gap: 8px;
   justify-content: space-between;
+}
+.todo-calendar-app .item-row-checkbox {
+  width: 15px;
+  height: 15px;
+  margin: 2px 0 0 0;
+  border-radius: 4px;
+  accent-color: var(--interactive-accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.todo-calendar-app .item-row-header-content.item-status-done .item-title-text {
+  color: var(--text-muted);
+  text-decoration: line-through;
 }
 .todo-calendar-app .item-icon {
   color: var(--interactive-accent);
@@ -697,6 +726,14 @@
   gap: 8px;
   flex: 1;
 }
+.todo-calendar-app .item-drawer-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  accent-color: var(--interactive-accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
 .todo-calendar-app .item-drawer-icon {
   color: var(--interactive-accent);
   flex-shrink: 0;
@@ -711,6 +748,10 @@
   font-weight: 600;
   padding: 4px 6px;
   outline: none;
+}
+.todo-calendar-app .item-title-input.done-title {
+  color: var(--text-muted);
+  text-decoration: line-through;
 }
 .todo-calendar-app .item-title-input:hover,
 .todo-calendar-app .item-title-input:focus {

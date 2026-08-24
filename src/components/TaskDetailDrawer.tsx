@@ -129,6 +129,12 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     onUpdateItem(updated);
   };
 
+  const handleItemStatusChange = (newStatus: 'todo' | 'done') => {
+    const updated = { ...localItem, status: newStatus };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+
   const handleItemDescriptionChange = (newDesc: string) => {
     const updated = { ...localItem, description: newDesc };
     setLocalItem(updated);
@@ -414,10 +420,16 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
 
       <div className="drawer-header">
         <div className="header-title-section">
-          <FileText size={18} className="item-drawer-icon" />
+          <input
+            type="checkbox"
+            checked={localItem.status === 'done'}
+            onChange={(e) => handleItemStatusChange(e.target.checked ? 'done' : 'todo')}
+            className="item-drawer-checkbox"
+            title={localItem.status === 'done' ? '未完了に戻す' : 'アクションを完了にする'}
+          />
           <input
             type="text"
-            className="item-title-input"
+            className={`item-title-input ${localItem.status === 'done' ? 'done-title' : ''}`}
             value={localItem.title}
             onChange={(e) => handleTitleChange(e.target.value)}
             placeholder="アイテム名を入力..."

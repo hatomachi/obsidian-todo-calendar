@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Plus, Calendar, RefreshCw, Layers, ChevronDown, ChevronLeft, ChevronRight, CheckSquare } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, RefreshCw, Layers, ChevronDown, ChevronLeft, ChevronRight, CheckSquare, Eye, EyeOff } from 'lucide-react';
 import { CollectionData } from '../types';
 
 interface HeaderNavProps {
@@ -7,6 +7,9 @@ interface HeaderNavProps {
   collections: CollectionData[];
   selectedCollection: CollectionData | null;
   startDate: Date;
+  showCompletedItems?: boolean;
+  completedItemsCount?: number;
+  onToggleShowCompleted?: () => void;
   onBackToCollections: () => void;
   onSelectAgenda: () => void;
   onSelectCollection: (collection: CollectionData) => void;
@@ -22,6 +25,9 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   collections,
   selectedCollection,
   startDate,
+  showCompletedItems = false,
+  completedItemsCount = 0,
+  onToggleShowCompleted,
   onBackToCollections,
   onSelectAgenda,
   onSelectCollection,
@@ -117,19 +123,36 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 
       <div className="header-right">
         {viewMode === 'calendar' && (
-          <div className="date-controls">
-            <button className="nav-btn secondary-btn" onClick={() => onNavigateDate(-7)} title="前週">
-              &lt; 前週
-            </button>
-            <button className="nav-btn secondary-btn today-btn" onClick={onResetToToday}>
-              今日
-            </button>
-            <button className="nav-btn secondary-btn" onClick={() => onNavigateDate(7)} title="次週">
-              次週 &gt;
-            </button>
+          <>
+            {onToggleShowCompleted && (
+              <button
+                className={`nav-btn toggle-completed-btn ${showCompletedItems ? 'active-toggle' : 'secondary-btn'}`}
+                onClick={onToggleShowCompleted}
+                title={showCompletedItems ? '完了行を隠す' : '完了行を表示する'}
+              >
+                {showCompletedItems ? <EyeOff size={15} /> : <Eye size={15} />}
+                <span>
+                  {showCompletedItems
+                    ? '完了行を非表示'
+                    : `完了行を表示${completedItemsCount > 0 ? ` (${completedItemsCount})` : ''}`}
+                </span>
+              </button>
+            )}
 
-            <span className="date-range-label">{formatDateRangeHeader(startDate)}</span>
-          </div>
+            <div className="date-controls">
+              <button className="nav-btn secondary-btn" onClick={() => onNavigateDate(-7)} title="前週">
+                &lt; 前週
+              </button>
+              <button className="nav-btn secondary-btn today-btn" onClick={onResetToToday}>
+                今日
+              </button>
+              <button className="nav-btn secondary-btn" onClick={() => onNavigateDate(7)} title="次週">
+                次週 &gt;
+              </button>
+
+              <span className="date-range-label">{formatDateRangeHeader(startDate)}</span>
+            </div>
+          </>
         )}
 
         <button className="icon-btn" onClick={onRefresh} title="データ更新">

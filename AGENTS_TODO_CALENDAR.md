@@ -57,13 +57,14 @@ created_at: "2026-08-22T06:00:00.000Z"
 
 ### ② アイテム & TODO ファイル (`items/<collection_id>/<item_id>.md`)
 
-1つのアイテムファイル内に、そのアイテムに所属するTODOリストが Frontmatter の `todos` 配列として含まれます。
+1つのアイテムファイル内に、アイテム自体のステータスと、そのアイテムに所属するTODOリストが Frontmatter の `todos` 配列として含まれます。
 
 ```markdown
 ---
 id: "1724300010000_x1y2z"
 collection_id: "1724300000000_a1b2c"
 title: "アイテム名（例: タスクグループ / 機能単位 / 担当者など）"
+status: "todo"                  # "todo" または "done"（アイテム/アクション自体の完了状態）
 description: "アイテムの説明や追加メモ"
 created_at: "2026-08-22T06:00:00.000Z"
 todos:
@@ -126,16 +127,22 @@ todos:
 
 ## 5. AIエージェントの操作ガイドライン (Agent Operational Rules)
 
-AIエージェントがTODOの閲覧・更新・追加を行う場合、以下の手順を守ってください。
+AIエージェントがTODOやアイテムの閲覧・更新・追加を行う場合、以下の手順を守ってください。
 
-### ① TODOの更新・完了化 (Update / Complete TODO)
+### ① アイテム（アクション行）のステータス更新・完了化 (Update / Complete Item)
+1. `_todo-calendar/items/<collection_id>/<item_id>.md` を開きます。
+2. Frontmatter 内の `status` フィールドを `"done"` または `"todo"` に変更します。
+3. アクション全体が完了した場合は、必要に応じて配下の `todos` の `status` も `"done"` に更新します。
+4. 保存します。
+
+### ② TODOの更新・完了化 (Update / Complete TODO)
 1. `_todo-calendar/items/<collection_id>/` 配下の `.md` ファイルを検索・読み込みます。
 2. 対象の `todos` 配列内から、該当する TODO（`id` や `title` で特定）を見つけます。
 3. `status` を `"done"` または `"todo"` に変更します。
 4. 期日を変更する場合は `due` を `"YYYY-MM-DD"` 形式で更新します。
 5. YAML Frontmatter の他フィールドおよび Markdown Body を保持したまま保存します。
 
-### ② TODOの新規追加 (Add New TODO)
+### ③ TODOの新規追加 (Add New TODO)
 1. 挿入先の `collection_id` および `item_id` を特定します（アイテムが存在しない場合は、新規アイテムファイルを作成）。
 2. 対象の `items/<collection_id>/<item_id>.md` の Frontmatter `todos` 配列末尾に、新しい TODO オブジェクトを追加します：
    ```yaml
@@ -147,7 +154,7 @@ AIエージェントがTODOの閲覧・更新・追加を行う場合、以下�
    ```
 3. 保存します。
 
-### ③ TODOの移動 (Move TODO)
+### ④ TODOの移動 (Move TODO)
 - **期日変更**: 該当 TODO の `due` の値を変更。
 - **アイテム変更**: 旧アイテムファイルの `todos` から該当オブジェクトを削除し、新アイテムファイルの `todos` に追加。
 

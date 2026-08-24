@@ -7,6 +7,9 @@ interface CalendarMatrixViewProps {
   items: ItemData[];
   startDate: Date;
   selectedItemId: string | null;
+  showCompletedItems?: boolean;
+  onToggleShowCompleted?: () => void;
+  onToggleItemStatus: (item: ItemData) => void;
   isDrawerOpen?: boolean;
   onCloseDrawer?: () => void;
   onSelectItem: (item: ItemData, todoId?: string) => void;
@@ -38,6 +41,9 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
   items,
   startDate,
   selectedItemId,
+  showCompletedItems = false,
+  onToggleShowCompleted,
+  onToggleItemStatus,
   isDrawerOpen,
   onCloseDrawer,
   onSelectItem,
@@ -226,6 +232,9 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
     }
   };
 
+  const completedCount = items.filter((it) => it.status === 'done').length;
+  const visibleItems = showCompletedItems ? items : items.filter((it) => it.status !== 'done');
+
   return (
     <div className="calendar-matrix-container" onClick={handleContainerClick}>
       <div className="table-scroll-wrapper" onClick={handleContainerClick}>
@@ -272,9 +281,23 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                   </div>
                 </td>
               </tr>
+            ) : visibleItems.length === 0 ? (
+              <tr>
+                <td colSpan={10} className="empty-matrix-td">
+                  <div className="empty-matrix-state">
+                    <p>すべてのタスクが完了しています（{completedCount}件の完了タスクが非表示中）</p>
+                    {onToggleShowCompleted && (
+                      <button className="nav-btn secondary-btn" onClick={onToggleShowCompleted}>
+                        <span>完了したタスクを表示する</span>
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
             ) : (
-              items.map((item) => {
+              visibleItems.map((item) => {
                 const isSelected = item.id === selectedItemId;
+                const isItemDone = item.status === 'done';
 
                 // Past incomplete todos (due < minDateStr and status === 'todo')
                 const pastTodos = item.todos
@@ -297,12 +320,30 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                 const hiddenFutureCount = futureTodos.length - 2;
 
                 return (
-                  <tr key={item.id} className={`matrix-row ${isSelected ? 'row-selected' : ''}`}>
+                  <tr
+                    key={item.id}
+                    className={`matrix-row ${isSelected ? 'row-selected' : ''} ${
+                      isItemDone ? 'item-row-done' : ''
+                    }`}
+                  >
                     {/* Row Header: Item Title */}
                     <td className="row-header-td" onClick={() => onSelectItem(item)}>
-                      <div className="item-row-header-content">
-                        <FileText size={16} className="item-icon" />
-                        <span className="item-title-text" title={item.title}>
+                      <div className={`item-row-header-content ${isItemDone ? 'item-status-done' : ''}`}>
+                        <input
+                          type="checkbox"
+                          checked={isItemDone}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            onToggleItemStatus(item);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="item-row-checkbox"
+                          title={isItemDone ? '未完了に戻す' : 'アクションを完了にする'}
+                        />
+                        <span
+                          className={`item-title-text ${isItemDone ? 'line-through' : ''}`}
+                          title={item.title}
+                        >
                           {item.title}
                         </span>
                         <button

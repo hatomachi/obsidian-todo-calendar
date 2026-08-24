@@ -24685,6 +24685,7 @@ ${bodyContent}`;
           collectionId,
           filePath: file.path,
           title: frontmatter.title || "Untitled Item",
+          status: frontmatter.status === "done" ? "done" : "todo",
           description: frontmatter.description || "",
           createdAt: frontmatter.created_at || new Date(file.stat.ctime).toISOString(),
           todos
@@ -24710,6 +24711,7 @@ ${bodyContent}`;
       id,
       collection_id: collectionId,
       title: title.trim() || "\u65B0\u898F\u30A2\u30A4\u30C6\u30E0",
+      status: "todo",
       description: description.trim(),
       created_at: createdAt,
       todos: initialTodos
@@ -24722,6 +24724,7 @@ ${bodyContent}`;
       collectionId,
       filePath,
       title: frontmatter.title,
+      status: "todo",
       description: frontmatter.description,
       createdAt,
       todos: initialTodos
@@ -24743,6 +24746,7 @@ ${bodyContent}`;
       id: item.id,
       collection_id: item.collectionId,
       title: item.title,
+      status: item.status === "done" ? "done" : "todo",
       description: item.description || "",
       created_at: item.createdAt,
       todos: item.todos.map((t) => ({
@@ -24946,6 +24950,38 @@ var ExternalLink = createLucideIcon("ExternalLink", [
   ["path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6", key: "a6xqqp" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/eye-off.js
+var EyeOff = createLucideIcon("EyeOff", [
+  [
+    "path",
+    {
+      d: "M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49",
+      key: "ct8e1f"
+    }
+  ],
+  ["path", { d: "M14.084 14.158a3 3 0 0 1-4.242-4.242", key: "151rxh" }],
+  [
+    "path",
+    {
+      d: "M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143",
+      key: "13bj9a"
+    }
+  ],
+  ["path", { d: "m2 2 20 20", key: "1ooewy" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/eye.js
+var Eye = createLucideIcon("Eye", [
+  [
+    "path",
+    {
+      d: "M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0",
+      key: "1nclc0"
+    }
+  ],
+  ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/file-text.js
 var FileText = createLucideIcon("FileText", [
   ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
@@ -25076,6 +25112,9 @@ var HeaderNav = ({
   collections,
   selectedCollection,
   startDate,
+  showCompletedItems = false,
+  completedItemsCount = 0,
+  onToggleShowCompleted,
   onBackToCollections,
   onSelectAgenda,
   onSelectCollection,
@@ -25175,11 +25214,25 @@ var HeaderNav = ({
       ] })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "header-right", children: [
-      viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "date-controls", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "nav-btn secondary-btn", onClick: () => onNavigateDate(-7), title: "\u524D\u9031", children: "< \u524D\u9031" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "nav-btn secondary-btn today-btn", onClick: onResetToToday, children: "\u4ECA\u65E5" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "nav-btn secondary-btn", onClick: () => onNavigateDate(7), title: "\u6B21\u9031", children: "\u6B21\u9031 >" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "date-range-label", children: formatDateRangeHeader(startDate) })
+      viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        onToggleShowCompleted && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "button",
+          {
+            className: `nav-btn toggle-completed-btn ${showCompletedItems ? "active-toggle" : "secondary-btn"}`,
+            onClick: onToggleShowCompleted,
+            title: showCompletedItems ? "\u5B8C\u4E86\u884C\u3092\u96A0\u3059" : "\u5B8C\u4E86\u884C\u3092\u8868\u793A\u3059\u308B",
+            children: [
+              showCompletedItems ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { size: 15 }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { size: 15 }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: showCompletedItems ? "\u5B8C\u4E86\u884C\u3092\u975E\u8868\u793A" : `\u5B8C\u4E86\u884C\u3092\u8868\u793A${completedItemsCount > 0 ? ` (${completedItemsCount})` : ""}` })
+            ]
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "date-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "nav-btn secondary-btn", onClick: () => onNavigateDate(-7), title: "\u524D\u9031", children: "< \u524D\u9031" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "nav-btn secondary-btn today-btn", onClick: onResetToToday, children: "\u4ECA\u65E5" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "nav-btn secondary-btn", onClick: () => onNavigateDate(7), title: "\u6B21\u9031", children: "\u6B21\u9031 >" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "date-range-label", children: formatDateRangeHeader(startDate) })
+        ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "icon-btn", onClick: onRefresh, title: "\u30C7\u30FC\u30BF\u66F4\u65B0", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { size: 16 }) }),
       viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { className: "nav-btn primary-btn", onClick: onOpenCreateItemModal, children: [
@@ -25423,6 +25476,9 @@ var CalendarMatrixView = ({
   items,
   startDate,
   selectedItemId,
+  showCompletedItems = false,
+  onToggleShowCompleted,
+  onToggleItemStatus,
   isDrawerOpen,
   onCloseDrawer,
   onSelectItem,
@@ -25573,6 +25629,8 @@ var CalendarMatrixView = ({
       onCloseDrawer();
     }
   };
+  const completedCount = items.filter((it) => it.status === "done").length;
+  const visibleItems = showCompletedItems ? items : items.filter((it) => it.status !== "done");
   return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "calendar-matrix-container", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "table-scroll-wrapper", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("table", { className: "matrix-table", children: [
     /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("thead", { onClick: handleHeaderClick, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "row-header-th", children: "\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item)" }),
@@ -25607,8 +25665,16 @@ var CalendarMatrixView = ({
         /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Plus, { size: 16 }),
         /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\u65B0\u898F\u30A2\u30A4\u30C6\u30E0\u3092\u4F5C\u6210" })
       ] })
-    ] }) }) }) : items.map((item) => {
+    ] }) }) }) : visibleItems.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { colSpan: 10, className: "empty-matrix-td", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "empty-matrix-state", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("p", { children: [
+        "\u3059\u3079\u3066\u306E\u30BF\u30B9\u30AF\u304C\u5B8C\u4E86\u3057\u3066\u3044\u307E\u3059\uFF08",
+        completedCount,
+        "\u4EF6\u306E\u5B8C\u4E86\u30BF\u30B9\u30AF\u304C\u975E\u8868\u793A\u4E2D\uFF09"
+      ] }),
+      onToggleShowCompleted && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { className: "nav-btn secondary-btn", onClick: onToggleShowCompleted, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\u5B8C\u4E86\u3057\u305F\u30BF\u30B9\u30AF\u3092\u8868\u793A\u3059\u308B" }) })
+    ] }) }) }) : visibleItems.map((item) => {
       const isSelected = item.id === selectedItemId;
+      const isItemDone = item.status === "done";
       const pastTodos = item.todos.filter((t) => t.due && t.due < minDateStr && t.status === "todo").sort((a, b) => a.due.localeCompare(b.due));
       const isPastExpanded = !!expandedPastRows[item.id];
       const hasPastMore = pastTodos.length > 2;
@@ -25619,258 +25685,285 @@ var CalendarMatrixView = ({
       const hasFutureMore = futureTodos.length > 2;
       const visibleFutureTodos = hasFutureMore && !isFutureExpanded ? futureTodos.slice(0, 2) : futureTodos;
       const hiddenFutureCount = futureTodos.length - 2;
-      return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { className: `matrix-row ${isSelected ? "row-selected" : ""}`, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "row-header-td", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "item-row-header-content", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FileText, { size: 16, className: "item-icon" }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "item-title-text", title: item.title, children: item.title }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-            "button",
-            {
-              className: "delete-item-btn",
-              title: "\u30CE\u30FC\u30C8\u524A\u9664",
-              onClick: (e) => {
-                e.stopPropagation();
-                if (confirm(`\u30CE\u30FC\u30C8\u300C${item.title}\u300D\u3092\u524A\u9664\u3057\u307E\u3059\u304B\uFF1F`)) {
-                  onDeleteItem(item);
+      return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+        "tr",
+        {
+          className: `matrix-row ${isSelected ? "row-selected" : ""} ${isItemDone ? "item-row-done" : ""}`,
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "row-header-td", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: `item-row-header-content ${isItemDone ? "item-status-done" : ""}`, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                "input",
+                {
+                  type: "checkbox",
+                  checked: isItemDone,
+                  onChange: (e) => {
+                    e.stopPropagation();
+                    onToggleItemStatus(item);
+                  },
+                  onClick: (e) => e.stopPropagation(),
+                  className: "item-row-checkbox",
+                  title: isItemDone ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u30A2\u30AF\u30B7\u30E7\u30F3\u3092\u5B8C\u4E86\u306B\u3059\u308B"
                 }
-              },
-              children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Trash2, { size: 12 })
-            }
-          )
-        ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "matrix-cell past-col-cell", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "cell-todo-stack", children: [
-          visiblePastTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
-            "div",
-            {
-              draggable: true,
-              onDragStart: (e) => handleDragStart(e, item.id, todo.id),
-              onDragEnd: handleDragEnd,
-              className: "compact-todo-pill todo-pill-past-todo",
-              title: `${todo.title}
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                "span",
+                {
+                  className: `item-title-text ${isItemDone ? "line-through" : ""}`,
+                  title: item.title,
+                  children: item.title
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                "button",
+                {
+                  className: "delete-item-btn",
+                  title: "\u30CE\u30FC\u30C8\u524A\u9664",
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    if (confirm(`\u30CE\u30FC\u30C8\u300C${item.title}\u300D\u3092\u524A\u9664\u3057\u307E\u3059\u304B\uFF1F`)) {
+                      onDeleteItem(item);
+                    }
+                  },
+                  children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Trash2, { size: 12 })
+                }
+              )
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "matrix-cell past-col-cell", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "cell-todo-stack", children: [
+              visiblePastTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+                "div",
+                {
+                  draggable: true,
+                  onDragStart: (e) => handleDragStart(e, item.id, todo.id),
+                  onDragEnd: handleDragEnd,
+                  className: "compact-todo-pill todo-pill-past-todo",
+                  title: `${todo.title}
 \u671F\u65E5: ${todo.due}
 \u30B9\u30C6\u30FC\u30BF\u30B9: \u672A\u5B8C\u4E86
 ${todo.description || ""}`,
-              onClick: (e) => {
-                e.stopPropagation();
-                if (isDraggingRef.current) return;
-                onSelectItem(item, todo.id);
-              },
-              children: [
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-                  "input",
-                  {
-                    type: "checkbox",
-                    checked: false,
-                    onChange: (e) => {
-                      e.stopPropagation();
-                      onQuickToggleTodoStatus(item, todo.id);
-                    },
-                    onClick: (e) => e.stopPropagation(),
-                    className: "todo-pill-checkbox",
-                    title: "\u5B8C\u4E86\u306B\u3059\u308B"
-                  }
-                ),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "todo-pill-title", children: todo.title }),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "todo-pill-date", children: formatShortDate(todo.due) })
-              ]
-            },
-            todo.id
-          )),
-          hasPastMore && !isPastExpanded && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-            "button",
-            {
-              className: "stacked-more-pill past-stacked",
-              onClick: (e) => {
-                e.stopPropagation();
-                togglePastExpand(item.id);
-              },
-              title: "\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u5168\u4EF6\u8868\u793A",
-              children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "stacked-content", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Layers, { size: 12, className: "stacked-icon" }),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { children: [
-                  "+",
-                  hiddenPastCount,
-                  "\u4EF6\u306E\u904E\u53BB\u30BF\u30B9\u30AF"
-                ] }),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronDown, { size: 12, className: "stacked-arrow" })
-              ] })
-            }
-          ),
-          hasPastMore && isPastExpanded && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
-            "button",
-            {
-              className: "collapse-pill",
-              onClick: (e) => {
-                e.stopPropagation();
-                togglePastExpand(item.id);
-              },
-              title: "\u6298\u308A\u305F\u305F\u3080",
-              children: [
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronUp, { size: 12 }),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\u305F\u305F\u3080" })
-              ]
-            }
-          )
-        ] }) }),
-        days.map((day) => {
-          const cellTodos = item.todos.filter((t) => t.due === day.dateStr);
-          let cellBgClass = day.isToday ? "today-col-cell" : day.isNonWorkingDay ? "holiday-cell" : "weekday-cell";
-          const isDragOverThisCell = dragOverCell?.itemId === item.id && dragOverCell?.dateStr === day.dateStr;
-          const isAddingHere = addingTodoCell?.itemId === item.id && addingTodoCell?.dateStr === day.dateStr;
-          return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-            "td",
-            {
-              className: `matrix-cell ${cellBgClass} ${isDragOverThisCell ? "drag-over-cell" : ""}`,
-              onDragOver: (e) => handleDragOver(e, item.id, day.dateStr),
-              onDragLeave: (e) => handleDragLeave(e, item.id, day.dateStr),
-              onDrop: (e) => handleDrop(e, item, day.dateStr),
-              onClick: () => {
-                if (isDraggingRef.current) return;
-                onSelectItem(item);
-              },
-              children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "cell-todo-stack", children: [
-                cellTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
-                  "div",
-                  {
-                    draggable: true,
-                    onDragStart: (e) => handleDragStart(e, item.id, todo.id),
-                    onDragEnd: handleDragEnd,
-                    className: `compact-todo-pill status-${todo.status}`,
-                    title: `${todo.title}
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    if (isDraggingRef.current) return;
+                    onSelectItem(item, todo.id);
+                  },
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                      "input",
+                      {
+                        type: "checkbox",
+                        checked: false,
+                        onChange: (e) => {
+                          e.stopPropagation();
+                          onQuickToggleTodoStatus(item, todo.id);
+                        },
+                        onClick: (e) => e.stopPropagation(),
+                        className: "todo-pill-checkbox",
+                        title: "\u5B8C\u4E86\u306B\u3059\u308B"
+                      }
+                    ),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "todo-pill-title", children: todo.title }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "todo-pill-date", children: formatShortDate(todo.due) })
+                  ]
+                },
+                todo.id
+              )),
+              hasPastMore && !isPastExpanded && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                "button",
+                {
+                  className: "stacked-more-pill past-stacked",
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    togglePastExpand(item.id);
+                  },
+                  title: "\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u5168\u4EF6\u8868\u793A",
+                  children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "stacked-content", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Layers, { size: 12, className: "stacked-icon" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { children: [
+                      "+",
+                      hiddenPastCount,
+                      "\u4EF6\u306E\u904E\u53BB\u30BF\u30B9\u30AF"
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronDown, { size: 12, className: "stacked-arrow" })
+                  ] })
+                }
+              ),
+              hasPastMore && isPastExpanded && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+                "button",
+                {
+                  className: "collapse-pill",
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    togglePastExpand(item.id);
+                  },
+                  title: "\u6298\u308A\u305F\u305F\u3080",
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronUp, { size: 12 }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\u305F\u305F\u3080" })
+                  ]
+                }
+              )
+            ] }) }),
+            days.map((day) => {
+              const cellTodos = item.todos.filter((t) => t.due === day.dateStr);
+              let cellBgClass = day.isToday ? "today-col-cell" : day.isNonWorkingDay ? "holiday-cell" : "weekday-cell";
+              const isDragOverThisCell = dragOverCell?.itemId === item.id && dragOverCell?.dateStr === day.dateStr;
+              const isAddingHere = addingTodoCell?.itemId === item.id && addingTodoCell?.dateStr === day.dateStr;
+              return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                "td",
+                {
+                  className: `matrix-cell ${cellBgClass} ${isDragOverThisCell ? "drag-over-cell" : ""}`,
+                  onDragOver: (e) => handleDragOver(e, item.id, day.dateStr),
+                  onDragLeave: (e) => handleDragLeave(e, item.id, day.dateStr),
+                  onDrop: (e) => handleDrop(e, item, day.dateStr),
+                  onClick: () => {
+                    if (isDraggingRef.current) return;
+                    onSelectItem(item);
+                  },
+                  children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "cell-todo-stack", children: [
+                    cellTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+                      "div",
+                      {
+                        draggable: true,
+                        onDragStart: (e) => handleDragStart(e, item.id, todo.id),
+                        onDragEnd: handleDragEnd,
+                        className: `compact-todo-pill status-${todo.status}`,
+                        title: `${todo.title}
 \u30B9\u30C6\u30FC\u30BF\u30B9: ${todo.status === "done" ? "\u5B8C\u4E86" : "\u672A\u5B8C\u4E86"}
 ${todo.description || ""}`,
-                    onClick: (e) => {
-                      e.stopPropagation();
-                      if (isDraggingRef.current) return;
-                      onSelectItem(item, todo.id);
-                    },
-                    children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-                        "input",
-                        {
-                          type: "checkbox",
-                          checked: todo.status === "done",
-                          onChange: (e) => {
-                            e.stopPropagation();
-                            onQuickToggleTodoStatus(item, todo.id);
-                          },
-                          onClick: (e) => e.stopPropagation(),
-                          className: "todo-pill-checkbox",
-                          title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
-                        }
-                      ),
-                      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `todo-pill-title ${todo.status === "done" ? "line-through" : ""}`, children: todo.title })
-                    ]
-                  },
-                  todo.id
-                )),
-                isAddingHere ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "inline-todo-input-wrapper", onClick: (e) => e.stopPropagation(), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-                  "input",
-                  {
-                    type: "text",
-                    className: "inline-todo-input",
-                    placeholder: "TODO\u3092\u5165\u529B...",
-                    value: inlineTodoTitle,
-                    onChange: (e) => setInlineTodoTitle(e.target.value),
-                    onKeyDown: (e) => handleInlineKeyDown(e, item, day.dateStr),
-                    onBlur: () => handleSaveInlineTodo(item, day.dateStr),
-                    autoFocus: true
-                  }
-                ) }) : /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
-                  "div",
-                  {
-                    className: "cell-add-prompt",
-                    onClick: (e) => {
-                      e.stopPropagation();
-                      handleStartInlineAdd(item.id, day.dateStr);
-                    },
-                    title: "TODO\u3092\u8FFD\u52A0",
-                    children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Plus, { size: 11 }),
-                      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "TODO\u3092\u8FFD\u52A0" })
-                    ]
-                  }
-                )
-              ] })
-            },
-            day.dateStr
-          );
-        }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "matrix-cell future-col-cell", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "cell-todo-stack", children: [
-          visibleFutureTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
-            "div",
-            {
-              draggable: true,
-              onDragStart: (e) => handleDragStart(e, item.id, todo.id),
-              onDragEnd: handleDragEnd,
-              className: `compact-todo-pill status-${todo.status}`,
-              title: `${todo.title}
+                        onClick: (e) => {
+                          e.stopPropagation();
+                          if (isDraggingRef.current) return;
+                          onSelectItem(item, todo.id);
+                        },
+                        children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                            "input",
+                            {
+                              type: "checkbox",
+                              checked: todo.status === "done",
+                              onChange: (e) => {
+                                e.stopPropagation();
+                                onQuickToggleTodoStatus(item, todo.id);
+                              },
+                              onClick: (e) => e.stopPropagation(),
+                              className: "todo-pill-checkbox",
+                              title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
+                            }
+                          ),
+                          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `todo-pill-title ${todo.status === "done" ? "line-through" : ""}`, children: todo.title })
+                        ]
+                      },
+                      todo.id
+                    )),
+                    isAddingHere ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "inline-todo-input-wrapper", onClick: (e) => e.stopPropagation(), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                      "input",
+                      {
+                        type: "text",
+                        className: "inline-todo-input",
+                        placeholder: "TODO\u3092\u5165\u529B...",
+                        value: inlineTodoTitle,
+                        onChange: (e) => setInlineTodoTitle(e.target.value),
+                        onKeyDown: (e) => handleInlineKeyDown(e, item, day.dateStr),
+                        onBlur: () => handleSaveInlineTodo(item, day.dateStr),
+                        autoFocus: true
+                      }
+                    ) }) : /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+                      "div",
+                      {
+                        className: "cell-add-prompt",
+                        onClick: (e) => {
+                          e.stopPropagation();
+                          handleStartInlineAdd(item.id, day.dateStr);
+                        },
+                        title: "TODO\u3092\u8FFD\u52A0",
+                        children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Plus, { size: 11 }),
+                          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "TODO\u3092\u8FFD\u52A0" })
+                        ]
+                      }
+                    )
+                  ] })
+                },
+                day.dateStr
+              );
+            }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "matrix-cell future-col-cell", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "cell-todo-stack", children: [
+              visibleFutureTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+                "div",
+                {
+                  draggable: true,
+                  onDragStart: (e) => handleDragStart(e, item.id, todo.id),
+                  onDragEnd: handleDragEnd,
+                  className: `compact-todo-pill status-${todo.status}`,
+                  title: `${todo.title}
 \u671F\u65E5: ${todo.due}
 \u30B9\u30C6\u30FC\u30BF\u30B9: ${todo.status === "done" ? "\u5B8C\u4E86" : "\u672A\u5B8C\u4E86"}
 ${todo.description || ""}`,
-              onClick: (e) => {
-                e.stopPropagation();
-                if (isDraggingRef.current) return;
-                onSelectItem(item, todo.id);
-              },
-              children: [
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-                  "input",
-                  {
-                    type: "checkbox",
-                    checked: todo.status === "done",
-                    onChange: (e) => {
-                      e.stopPropagation();
-                      onQuickToggleTodoStatus(item, todo.id);
-                    },
-                    onClick: (e) => e.stopPropagation(),
-                    className: "todo-pill-checkbox",
-                    title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
-                  }
-                ),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `todo-pill-title ${todo.status === "done" ? "line-through" : ""}`, children: todo.title }),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "todo-pill-date", children: formatShortDate(todo.due) })
-              ]
-            },
-            todo.id
-          )),
-          hasFutureMore && !isFutureExpanded && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-            "button",
-            {
-              className: "stacked-more-pill future-stacked",
-              onClick: (e) => {
-                e.stopPropagation();
-                toggleFutureExpand(item.id);
-              },
-              title: "\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u5168\u4EF6\u8868\u793A",
-              children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "stacked-content", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Layers, { size: 12, className: "stacked-icon" }),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { children: [
-                  "+",
-                  hiddenFutureCount,
-                  "\u4EF6\u306E\u672A\u6765\u30BF\u30B9\u30AF"
-                ] }),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronDown, { size: 12, className: "stacked-arrow" })
-              ] })
-            }
-          ),
-          hasFutureMore && isFutureExpanded && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
-            "button",
-            {
-              className: "collapse-pill",
-              onClick: (e) => {
-                e.stopPropagation();
-                toggleFutureExpand(item.id);
-              },
-              title: "\u6298\u308A\u305F\u305F\u3080",
-              children: [
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronUp, { size: 12 }),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\u305F\u305F\u3080" })
-              ]
-            }
-          )
-        ] }) })
-      ] }, item.id);
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    if (isDraggingRef.current) return;
+                    onSelectItem(item, todo.id);
+                  },
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                      "input",
+                      {
+                        type: "checkbox",
+                        checked: todo.status === "done",
+                        onChange: (e) => {
+                          e.stopPropagation();
+                          onQuickToggleTodoStatus(item, todo.id);
+                        },
+                        onClick: (e) => e.stopPropagation(),
+                        className: "todo-pill-checkbox",
+                        title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
+                      }
+                    ),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `todo-pill-title ${todo.status === "done" ? "line-through" : ""}`, children: todo.title }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "todo-pill-date", children: formatShortDate(todo.due) })
+                  ]
+                },
+                todo.id
+              )),
+              hasFutureMore && !isFutureExpanded && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                "button",
+                {
+                  className: "stacked-more-pill future-stacked",
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    toggleFutureExpand(item.id);
+                  },
+                  title: "\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u5168\u4EF6\u8868\u793A",
+                  children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "stacked-content", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Layers, { size: 12, className: "stacked-icon" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { children: [
+                      "+",
+                      hiddenFutureCount,
+                      "\u4EF6\u306E\u672A\u6765\u30BF\u30B9\u30AF"
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronDown, { size: 12, className: "stacked-arrow" })
+                  ] })
+                }
+              ),
+              hasFutureMore && isFutureExpanded && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+                "button",
+                {
+                  className: "collapse-pill",
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    toggleFutureExpand(item.id);
+                  },
+                  title: "\u6298\u308A\u305F\u305F\u3080",
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronUp, { size: 12 }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\u305F\u305F\u3080" })
+                  ]
+                }
+              )
+            ] }) })
+          ]
+        },
+        item.id
+      );
     }) })
   ] }) }) });
 };
@@ -25952,6 +26045,11 @@ var TaskDetailDrawer = ({
   if (!isOpen || !localItem) return null;
   const handleTitleChange = (newTitle) => {
     const updated = { ...localItem, title: newTitle };
+    setLocalItem(updated);
+    onUpdateItem(updated);
+  };
+  const handleItemStatusChange = (newStatus) => {
+    const updated = { ...localItem, status: newStatus };
     setLocalItem(updated);
     onUpdateItem(updated);
   };
@@ -26212,12 +26310,21 @@ var TaskDetailDrawer = ({
     /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("datalist", { id: "existing-groups-list", children: existingGroups.map((g) => /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("option", { value: g }, g)) }),
     /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "drawer-header", children: [
       /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "header-title-section", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(FileText, { size: 18, className: "item-drawer-icon" }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+          "input",
+          {
+            type: "checkbox",
+            checked: localItem.status === "done",
+            onChange: (e) => handleItemStatusChange(e.target.checked ? "done" : "todo"),
+            className: "item-drawer-checkbox",
+            title: localItem.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u30A2\u30AF\u30B7\u30E7\u30F3\u3092\u5B8C\u4E86\u306B\u3059\u308B"
+          }
+        ),
         /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
           "input",
           {
             type: "text",
-            className: "item-title-input",
+            className: `item-title-input ${localItem.status === "done" ? "done-title" : ""}`,
             value: localItem.title,
             onChange: (e) => handleTitleChange(e.target.value),
             placeholder: "\u30A2\u30A4\u30C6\u30E0\u540D\u3092\u5165\u529B..."
@@ -26675,6 +26782,7 @@ var AppView = ({ app }) => {
   const [selectedTodoId, setSelectedTodoId] = (0, import_react7.useState)(null);
   const [isDrawerOpen, setIsDrawerOpen] = (0, import_react7.useState)(false);
   const [startDate, setStartDate] = (0, import_react7.useState)(() => /* @__PURE__ */ new Date());
+  const [showCompletedItems, setShowCompletedItems] = (0, import_react7.useState)(false);
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = (0, import_react7.useState)(false);
   const [newItemTitle, setNewItemTitle] = (0, import_react7.useState)("");
   const [newItemDescription, setNewItemDescription] = (0, import_react7.useState)("");
@@ -26813,6 +26921,11 @@ var AppView = ({ app }) => {
     setSelectedTodoId(todoId || null);
     setIsDrawerOpen(true);
   };
+  const handleToggleItemStatus = async (item) => {
+    const nextStatus = item.status === "done" ? "todo" : "done";
+    const updatedItem = { ...item, status: nextStatus };
+    await handleUpdateItem(updatedItem);
+  };
   const handleQuickToggleTodoStatus = async (item, todoId) => {
     const updatedTodos = item.todos.map((t) => {
       if (t.id === todoId) {
@@ -26845,6 +26958,9 @@ var AppView = ({ app }) => {
         collections,
         selectedCollection,
         startDate,
+        showCompletedItems,
+        completedItemsCount: items.filter((it) => it.status === "done").length,
+        onToggleShowCompleted: () => setShowCompletedItems((prev) => !prev),
         onBackToCollections: handleBackToCollections,
         onSelectAgenda: handleSelectAgenda,
         onSelectCollection: handleSelectCollection,
@@ -26872,6 +26988,9 @@ var AppView = ({ app }) => {
             items,
             startDate,
             selectedItemId: selectedItem?.id || null,
+            showCompletedItems,
+            onToggleShowCompleted: () => setShowCompletedItems((prev) => !prev),
+            onToggleItemStatus: handleToggleItemStatus,
             isDrawerOpen,
             onCloseDrawer: handleCloseDrawer,
             onSelectItem: handleSelectItem,
@@ -27294,6 +27413,22 @@ lucide-react/dist/esm/icons/copy.js:
    *)
 
 lucide-react/dist/esm/icons/external-link.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/eye-off.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/eye.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *
