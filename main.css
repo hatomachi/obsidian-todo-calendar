@@ -14,17 +14,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
+  padding: 10px 16px;
   background-color: var(--background-secondary);
   border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
-  gap: 12px;
+  gap: 10px;
   flex-shrink: 0;
+  overflow-x: auto;
+  min-height: 48px;
 }
 .todo-calendar-app .header-left,
 .todo-calendar-app .header-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.todo-calendar-app .create-item-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 .todo-calendar-app .app-branding {
   display: flex;
@@ -444,6 +453,29 @@
   left: 0;
   z-index: 30;
 }
+.todo-calendar-app .row-header-th-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.todo-calendar-app .row-header-add-item-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  border-radius: 4px;
+  background-color: var(--background-modifier-hover, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15));
+  color: var(--interactive-accent);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.todo-calendar-app .row-header-add-item-btn:hover {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent, #ffffff);
+  transform: translateY(-1px);
+}
 .todo-calendar-app .past-header-th {
   font-size: 13px;
   font-weight: 600;
@@ -792,6 +824,44 @@
   align-items: center;
   gap: 12px;
   color: var(--text-muted);
+}
+.todo-calendar-app .empty-matrix-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.todo-calendar-app .matrix-add-item-row {
+  background-color: var(--background-primary);
+  transition: background-color 0.15s ease;
+}
+.todo-calendar-app .matrix-add-item-row:hover {
+  background-color: var(--background-modifier-hover, rgba(255, 255, 255, 0.04));
+}
+.todo-calendar-app .matrix-add-item-td {
+  padding: 8px 12px;
+  text-align: left;
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+}
+.todo-calendar-app .matrix-add-item-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background-color: transparent;
+  border: 1px dashed var(--border-color, rgba(128, 128, 128, 0.4));
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: auto;
+}
+.todo-calendar-app .matrix-add-item-btn:hover {
+  background-color: rgba(var(--interactive-accent-rgb, 124, 58, 237), 0.1);
+  border-color: var(--interactive-accent);
+  color: var(--interactive-accent);
+  transform: translateY(-1px);
 }
 .todo-calendar-app .detail-drawer {
   position: absolute;

@@ -280,7 +280,11 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
         )}
 
         {isMatrixView && (
-          <button className="nav-btn primary-btn" onClick={onOpenCreateItemModal}>
+          <button
+            className="nav-btn primary-btn create-item-btn"
+            onClick={onOpenCreateItemModal}
+            title="新規アイテム (タスクノート) を作成"
+          >
             <Plus size={16} />
             <span>新規アイテム</span>
           </button>

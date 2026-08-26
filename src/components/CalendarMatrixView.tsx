@@ -278,7 +278,21 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
         <table className="matrix-table">
           <thead onClick={handleHeaderClick}>
             <tr>
-              <th className="row-header-th">タスクノート (Item)</th>
+              <th className="row-header-th">
+                <div className="row-header-th-content">
+                  <span>タスクノート (Item)</span>
+                  <button
+                    className="row-header-add-item-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenCreateItemModal();
+                    }}
+                    title="新規タスクノート (アイテム) を追加"
+                  >
+                    <Plus size={13} />
+                  </button>
+                </div>
+              </th>
               <th className="past-header-th">過去の未完了</th>
               {days.map((day) => {
                 let colClass = 'weekday-col';
@@ -327,16 +341,23 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                 <td colSpan={10} className="empty-matrix-td">
                   <div className="empty-matrix-state">
                     <p>すべてのタスクが完了しています（{completedCount}件の完了タスクが非表示中）</p>
-                    {onToggleShowCompleted && (
-                      <button className="nav-btn secondary-btn" onClick={onToggleShowCompleted}>
-                        <span>完了したタスクを表示する</span>
+                    <div className="empty-matrix-actions">
+                      {onToggleShowCompleted && (
+                        <button className="nav-btn secondary-btn" onClick={onToggleShowCompleted}>
+                          <span>完了したタスクを表示する</span>
+                        </button>
+                      )}
+                      <button className="nav-btn primary-btn" onClick={onOpenCreateItemModal}>
+                        <Plus size={16} />
+                        <span>新規アイテムを作成</span>
                       </button>
-                    )}
+                    </div>
                   </div>
                 </td>
               </tr>
             ) : (
-              visibleItems.map((item) => {
+              <>
+                {visibleItems.map((item) => {
                 const isSelected = item.id === selectedItemId;
                 const isItemDone = item.status === 'done';
 
@@ -690,8 +711,24 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                     </td>
                   </tr>
                 );
-              })
-            )}
+              })}
+              <tr className="matrix-add-item-row">
+                <td colSpan={10} className="matrix-add-item-td">
+                  <button
+                    className="matrix-add-item-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenCreateItemModal();
+                    }}
+                    title="新規タスクノート (アイテム) を追加"
+                  >
+                    <Plus size={14} />
+                    <span>新規アイテム (タスクノート) を追加</span>
+                  </button>
+                </td>
+              </tr>
+            </>
+          )}
           </tbody>
         </table>
       </div>
