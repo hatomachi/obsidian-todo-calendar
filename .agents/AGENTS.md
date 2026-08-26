@@ -15,6 +15,27 @@
 ### 補足
 - ビルド実行時（`npm run build`）に上記のコピー作業まで完了させること。
 
+## GitHubプッシュ＆Release自動更新ルール（重要）
+
+ユーザーから「pushして」と指示された際やリリースを行う際は、GitHub ActionsによるGitHub Releasesの自動ビルド・配布アセット作成（`push.tags: ["*"]`）が確実に実行されるよう、以下のステップを漏れなく実行してください。
+
+### 実行手順
+1. **バージョン番号の確認・更新**:
+   - `manifest.json` の `"version"`
+   - `package.json` の `"version"`
+   - 修正内容に応じて適切にインクリメント（例: `1.0.1` や `1.1.0`）する。
+2. **ビルドの実行**:
+   - `npm run build` を実行し、成果物（`main.js`, `manifest.json`, `styles.css` 等）を最新化する。
+3. **コミットの作成**:
+   - `git add .` -> `git commit -m "chore(release): bump version to <version>"`
+4. **Gitタグの作成**:
+   - `git tag <version>` （例: `git tag 1.1.0`）
+5. **プッシュの実行**:
+   - `git push origin main`
+   - `git push origin <version>` （または `git push origin main --tags`）
+
+※ タグがプッシュされることで、GitHub Actions (`.github/workflows/release.yml`) がトリガーされ、GitHub Releasesに必須ファイル（`main.js`, `manifest.json`, `styles.css`, zipアーカイブ）が自動公開されます。
+
 ## AIエージェント直接ファイル操作規約 (Vault Direct Markdown Edit)
 
 AIエージェントがプラグインを介さずにVault内のTODOデータを直接編集・追加・完了するための仕様・ルールは、以下にまとめられています。
