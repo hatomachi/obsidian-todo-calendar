@@ -257,17 +257,20 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
 
   // Create Collection
   const handleCreateCollection = async (title: string, description: string) => {
-    await storage.createCollection(title, description);
-    await loadCollections();
+    const newCol = await storage.createCollection(title, description);
+    setCollections((prev) => [newCol, ...prev]);
   };
 
   // Delete Collection
   const handleDeleteCollection = async (collectionId: string) => {
-    await storage.deleteCollection(collectionId);
-    await loadCollections();
-    if (viewMode === 'agenda') {
-      await loadAgendaItems();
+    setCollections((prev) => prev.filter((c) => c.id !== collectionId));
+    if (selectedCollection?.id === collectionId) {
+      setSelectedCollection(null);
+      setViewMode('collections');
     }
+    setItems((prev) => prev.filter((it) => it.collectionId !== collectionId));
+    setAgendaItems((prev) => prev.filter((a) => a.collection.id !== collectionId));
+    await storage.deleteCollection(collectionId);
   };
 
   // Open Create Item Modal
@@ -314,6 +317,13 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
       }
     }
 
+    setNewItemTitle('');
+    setNewItemDescription('');
+    setNewItemType('');
+    setNewItemTemplate('');
+    setNewItemCollectionId('');
+    setIsCreateItemModalOpen(false);
+
     const newItem = await storage.createItem(
       targetCollectionId,
       newItemTitle,
@@ -323,19 +333,29 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
       initialTodos
     );
 
-    if (viewMode === 'calendar' && selectedCollection) {
-      await loadItems(selectedCollection.id);
-    } else if (viewMode === 'type-calendar' && selectedType) {
-      const loaded = await storage.getItemsByType(selectedType.id);
-      setItems(loaded);
-    }
+    // Optimistic / Immediate State Update for items
+    setItems((prev) => {
+      if (prev.some((it) => it.id === newItem.id)) return prev;
+      return [newItem, ...prev];
+    });
 
-    setNewItemTitle('');
-    setNewItemDescription('');
-    setNewItemType('');
-    setNewItemTemplate('');
-    setNewItemCollectionId('');
-    setIsCreateItemModalOpen(false);
+    // Update collection itemCount
+    setCollections((prev) =>
+      prev.map((col) =>
+        col.id === targetCollectionId ? { ...col, itemCount: (col.itemCount || 0) + 1 } : col
+      )
+    );
+
+    // Update agenda items if in agenda view or when switched
+    const parentCol = collections.find((c) => c.id === targetCollectionId);
+    if (parentCol && initialTodos.length > 0) {
+      const newAgendaTodos: AgendaTodoItem[] = initialTodos.map((todo) => ({
+        todo,
+        item: newItem,
+        collection: parentCol,
+      }));
+      setAgendaItems((prev) => [...newAgendaTodos, ...prev]);
+    }
 
     // Open detail drawer for newly created item
     setSelectedItem(newItem);
@@ -355,30 +375,43 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
     if (selectedItem?.id === updatedItem.id) {
       setSelectedItem(updatedItem);
     }
-    // Save to Vault
-    await storage.updateItem(updatedItem);
 
-    if (viewMode === 'agenda') {
-      await loadAgendaItems();
-    }
+    // Update agenda items immediately
+    setAgendaItems((prev) => {
+      const otherAgenda = prev.filter((a) => a.item.id !== updatedItem.id);
+      const parentCol = collections.find((c) => c.id === updatedItem.collectionId);
+      if (!parentCol) return otherAgenda;
+      const updatedAgenda: AgendaTodoItem[] = updatedItem.todos.map((todo) => ({
+        todo,
+        item: updatedItem,
+        collection: parentCol,
+      }));
+      return [...otherAgenda, ...updatedAgenda];
+    });
+
+    // Save to Vault / GitHub / Local
+    await storage.updateItem(updatedItem);
   };
 
   // Delete Item
   const handleDeleteItem = async (item: ItemData) => {
-    await storage.deleteItem(item);
-    if (viewMode === 'calendar' && selectedCollection) {
-      await loadItems(selectedCollection.id);
-    } else if (viewMode === 'type-calendar' && selectedType) {
-      const loaded = await storage.getItemsByType(selectedType.id);
-      setItems(loaded);
-    }
+    // Immediate state updates (Optimistic UI Update)
+    setItems((prev) => prev.filter((it) => it.id !== item.id));
+    setAgendaItems((prev) => prev.filter((a) => a.item.id !== item.id));
+    setCollections((prev) =>
+      prev.map((col) =>
+        col.id === item.collectionId
+          ? { ...col, itemCount: Math.max(0, (col.itemCount || 1) - 1) }
+          : col
+      )
+    );
+
     if (selectedItem?.id === item.id) {
       setSelectedItem(null);
       setIsDrawerOpen(false);
     }
-    if (viewMode === 'agenda') {
-      await loadAgendaItems();
-    }
+
+    await storage.deleteItem(item);
   };
 
   // Select Item or Todo

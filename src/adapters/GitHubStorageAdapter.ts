@@ -34,6 +34,8 @@ export class GitHubStorageAdapter implements IStorageAdapter {
   private config: GitHubConfig;
   private fileShaCache = new Map<string, string>();
   private memoryCache: Record<string, FileCacheEntry> = {};
+  private knownFiles = new Map<string, { sha: string; size?: number }>();
+  private deletedPaths = new Set<string>();
 
   constructor(config: GitHubConfig) {
     this.config = config;
@@ -101,20 +103,47 @@ export class GitHubStorageAdapter implements IStorageAdapter {
         recursive: '1',
       });
 
-      const tree = (data.tree || []).filter((node) => node.path && node.type === 'blob') as {
+      const remoteNodes = (data.tree || []).filter((node) => node.path && node.type === 'blob') as {
         path: string;
         sha: string;
         size?: number;
       }[];
 
-      // Update SHA cache
-      for (const node of tree) {
-        this.fileShaCache.set(node.path, node.sha);
+      // Update SHA cache & knownFiles from remote
+      for (const node of remoteNodes) {
+        if (!this.deletedPaths.has(node.path)) {
+          this.fileShaCache.set(node.path, node.sha);
+          this.knownFiles.set(node.path, { sha: node.sha, size: node.size });
+        }
       }
 
-      return tree;
+      // Build merged tree list: remote nodes excluding deleted + locally created nodes not yet in remote
+      const resultMap = new Map<string, { path: string; sha: string; size?: number }>();
+
+      for (const node of remoteNodes) {
+        if (!this.deletedPaths.has(node.path)) {
+          resultMap.set(node.path, node);
+        }
+      }
+
+      // Include locally known files (e.g. freshly created items)
+      for (const [path, info] of this.knownFiles.entries()) {
+        if (!this.deletedPaths.has(path) && !resultMap.has(path)) {
+          resultMap.set(path, { path, sha: info.sha, size: info.size });
+        }
+      }
+
+      return Array.from(resultMap.values());
     } catch (e) {
       console.error('Failed to fetch git tree:', e);
+      // Fallback to locally known files if remote tree fetch fails
+      const fallbackList: { path: string; sha: string; size?: number }[] = [];
+      for (const [path, info] of this.knownFiles.entries()) {
+        if (!this.deletedPaths.has(path)) {
+          fallbackList.push({ path, sha: info.sha, size: info.size });
+        }
+      }
+      if (fallbackList.length > 0) return fallbackList;
       throw e;
     }
   }
@@ -195,10 +224,13 @@ export class GitHubStorageAdapter implements IStorageAdapter {
       sha: sha || undefined,
     });
 
-    if (data.content?.sha) {
-      this.fileShaCache.set(path, data.content.sha);
-      this.updateCacheEntry(path, data.content.sha, content);
-      return data.content.sha;
+    const newSha = data.content?.sha || sha || '';
+    if (newSha) {
+      this.fileShaCache.set(path, newSha);
+      this.updateCacheEntry(path, newSha, content);
+      this.knownFiles.set(path, { sha: newSha, size: content.length });
+      this.deletedPaths.delete(path);
+      return newSha;
     }
     return '';
   }
@@ -220,7 +252,13 @@ export class GitHubStorageAdapter implements IStorageAdapter {
           sha = data.sha;
         }
       } catch (e: any) {
-        if (e.status === 404) return;
+        if (e.status === 404) {
+          this.fileShaCache.delete(path);
+          this.deleteCacheEntry(path);
+          this.knownFiles.delete(path);
+          this.deletedPaths.add(path);
+          return;
+        }
         throw e;
       }
     }
@@ -236,6 +274,13 @@ export class GitHubStorageAdapter implements IStorageAdapter {
       });
       this.fileShaCache.delete(path);
       this.deleteCacheEntry(path);
+      this.knownFiles.delete(path);
+      this.deletedPaths.add(path);
+    } else {
+      this.fileShaCache.delete(path);
+      this.deleteCacheEntry(path);
+      this.knownFiles.delete(path);
+      this.deletedPaths.add(path);
     }
   }
 

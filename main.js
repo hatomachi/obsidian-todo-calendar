@@ -27567,10 +27567,28 @@ var TaskDetailDrawer = ({
         /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "todo-form-list", children: localItem.todos.map((todo, index) => renderTodoCard(todo, index)) })
       )
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "drawer-footer", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("span", { className: "file-path-info", children: [
-      "Path: ",
-      localItem.filePath
-    ] }) })
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "drawer-footer", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("span", { className: "file-path-info", children: [
+        "Path: ",
+        localItem.filePath
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
+        "button",
+        {
+          className: "drawer-delete-item-btn",
+          onClick: () => {
+            if (confirm(`\u30CE\u30FC\u30C8\u300C${localItem.title}\u300D\u3092\u524A\u9664\u3057\u307E\u3059\u304B\uFF1F`)) {
+              onDeleteItem(localItem);
+            }
+          },
+          title: "\u30CE\u30FC\u30C8\u3092\u524A\u9664",
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Trash2, { size: 13 }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: "\u30A2\u30A4\u30C6\u30E0\u3092\u524A\u9664" })
+          ]
+        }
+      )
+    ] })
   ] });
 };
 
@@ -28579,15 +28597,18 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
     }
   };
   const handleCreateCollection = async (title, description) => {
-    await storage.createCollection(title, description);
-    await loadCollections();
+    const newCol = await storage.createCollection(title, description);
+    setCollections((prev) => [newCol, ...prev]);
   };
   const handleDeleteCollection = async (collectionId) => {
-    await storage.deleteCollection(collectionId);
-    await loadCollections();
-    if (viewMode === "agenda") {
-      await loadAgendaItems();
+    setCollections((prev) => prev.filter((c) => c.id !== collectionId));
+    if (selectedCollection?.id === collectionId) {
+      setSelectedCollection(null);
+      setViewMode("collections");
     }
+    setItems((prev) => prev.filter((it) => it.collectionId !== collectionId));
+    setAgendaItems((prev) => prev.filter((a) => a.collection.id !== collectionId));
+    await storage.deleteCollection(collectionId);
   };
   const handleOpenCreateItemModal = () => {
     if (viewMode === "type-calendar" && selectedType) {
@@ -28628,6 +28649,12 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
         }
       }
     }
+    setNewItemTitle("");
+    setNewItemDescription("");
+    setNewItemType("");
+    setNewItemTemplate("");
+    setNewItemCollectionId("");
+    setIsCreateItemModalOpen(false);
     const newItem = await storage.createItem(
       targetCollectionId,
       newItemTitle,
@@ -28636,18 +28663,24 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
       selectedTemplateVal,
       initialTodos
     );
-    if (viewMode === "calendar" && selectedCollection) {
-      await loadItems(selectedCollection.id);
-    } else if (viewMode === "type-calendar" && selectedType) {
-      const loaded = await storage.getItemsByType(selectedType.id);
-      setItems(loaded);
+    setItems((prev) => {
+      if (prev.some((it) => it.id === newItem.id)) return prev;
+      return [newItem, ...prev];
+    });
+    setCollections(
+      (prev) => prev.map(
+        (col) => col.id === targetCollectionId ? { ...col, itemCount: (col.itemCount || 0) + 1 } : col
+      )
+    );
+    const parentCol = collections.find((c) => c.id === targetCollectionId);
+    if (parentCol && initialTodos.length > 0) {
+      const newAgendaTodos = initialTodos.map((todo) => ({
+        todo,
+        item: newItem,
+        collection: parentCol
+      }));
+      setAgendaItems((prev) => [...newAgendaTodos, ...prev]);
     }
-    setNewItemTitle("");
-    setNewItemDescription("");
-    setNewItemType("");
-    setNewItemTemplate("");
-    setNewItemCollectionId("");
-    setIsCreateItemModalOpen(false);
     setSelectedItem(newItem);
     setIsDrawerOpen(true);
   };
@@ -28660,26 +28693,32 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
     if (selectedItem?.id === updatedItem.id) {
       setSelectedItem(updatedItem);
     }
+    setAgendaItems((prev) => {
+      const otherAgenda = prev.filter((a) => a.item.id !== updatedItem.id);
+      const parentCol = collections.find((c) => c.id === updatedItem.collectionId);
+      if (!parentCol) return otherAgenda;
+      const updatedAgenda = updatedItem.todos.map((todo) => ({
+        todo,
+        item: updatedItem,
+        collection: parentCol
+      }));
+      return [...otherAgenda, ...updatedAgenda];
+    });
     await storage.updateItem(updatedItem);
-    if (viewMode === "agenda") {
-      await loadAgendaItems();
-    }
   };
   const handleDeleteItem = async (item) => {
-    await storage.deleteItem(item);
-    if (viewMode === "calendar" && selectedCollection) {
-      await loadItems(selectedCollection.id);
-    } else if (viewMode === "type-calendar" && selectedType) {
-      const loaded = await storage.getItemsByType(selectedType.id);
-      setItems(loaded);
-    }
+    setItems((prev) => prev.filter((it) => it.id !== item.id));
+    setAgendaItems((prev) => prev.filter((a) => a.item.id !== item.id));
+    setCollections(
+      (prev) => prev.map(
+        (col) => col.id === item.collectionId ? { ...col, itemCount: Math.max(0, (col.itemCount || 1) - 1) } : col
+      )
+    );
     if (selectedItem?.id === item.id) {
       setSelectedItem(null);
       setIsDrawerOpen(false);
     }
-    if (viewMode === "agenda") {
-      await loadAgendaItems();
-    }
+    await storage.deleteItem(item);
   };
   const handleSelectItem = (item, todoId) => {
     setSelectedItem(item);

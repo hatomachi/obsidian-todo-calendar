@@ -772,6 +772,18 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
 
       <div className="drawer-footer">
         <span className="file-path-info">Path: {localItem.filePath}</span>
+        <button
+          className="drawer-delete-item-btn"
+          onClick={() => {
+            if (confirm(`ノート「${localItem.title}」を削除しますか？`)) {
+              onDeleteItem(localItem);
+            }
+          }}
+          title="ノートを削除"
+        >
+          <Trash2 size={13} />
+          <span>アイテムを削除</span>
+        </button>
       </div>
     </div>
   );
