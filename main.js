@@ -28747,7 +28747,7 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
       }
     ),
     /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "app-main-layout", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "main-content-pane", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: `main-content-pane mode-${viewMode}`, children: [
         viewMode === "collections" && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
           CollectionsGrid,
           {

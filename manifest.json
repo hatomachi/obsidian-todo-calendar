@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-todo-calendar",
 	"name": "TODO Calendar Matrix",
-	"version": "1.3.2",
+	"version": "1.3.3",
 	"minAppVersion": "0.15.0",
 	"description": "Manage TODOs in a 7-day calendar matrix view with NotebookLM-style collections.",
 	"author": "Antigravity",

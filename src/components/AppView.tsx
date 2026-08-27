@@ -460,7 +460,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
       />
 
       <div className="app-main-layout">
-        <div className="main-content-pane">
+        <div className={`main-content-pane mode-${viewMode}`}>
           {viewMode === 'collections' && (
             <CollectionsGrid
               collections={collections}
