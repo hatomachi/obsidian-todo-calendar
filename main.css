@@ -2325,3 +2325,80 @@
   background-color: var(--background-primary);
   border-color: var(--interactive-accent);
 }
+.todo-calendar-app .matrix-table.compact-3days {
+  min-width: 620px !important;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.todo-calendar-app .matrix-table.compact-3days th,
+.todo-calendar-app .matrix-table.compact-3days td {
+  padding: 6px 8px;
+}
+.todo-calendar-app .matrix-table.compact-3days .row-header-th,
+.todo-calendar-app .matrix-table.compact-3days .row-header-td {
+  width: 110px !important;
+  min-width: 110px !important;
+  max-width: 110px !important;
+  position: sticky !important;
+  left: 0 !important;
+  z-index: 15 !important;
+  background-color: var(--background-secondary) !important;
+  border-right: 2px solid var(--border-color, rgba(128, 128, 128, 0.35)) !important;
+}
+.todo-calendar-app .matrix-table.compact-3days .row-header-th {
+  z-index: 30 !important;
+  font-size: 11px;
+}
+.todo-calendar-app .matrix-table.compact-3days .past-header-th,
+.todo-calendar-app .matrix-table.compact-3days .past-col-cell {
+  width: 125px !important;
+  min-width: 125px !important;
+}
+.todo-calendar-app .matrix-table.compact-3days .day-header-th,
+.todo-calendar-app .matrix-table.compact-3days .weekday-col,
+.todo-calendar-app .matrix-table.compact-3days .today-col,
+.todo-calendar-app .matrix-table.compact-3days .holiday-col {
+  width: 130px !important;
+  min-width: 130px !important;
+}
+.todo-calendar-app .matrix-table.compact-3days .day-title {
+  font-size: 12px;
+  font-weight: 600;
+}
+.todo-calendar-app .matrix-table.compact-3days .item-row-main-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.todo-calendar-app .matrix-table.compact-3days .item-title-text {
+  font-size: 11.5px;
+  line-height: 1.3;
+  word-break: break-word;
+  white-space: normal;
+}
+.todo-calendar-app .matrix-table.compact-3days .compact-todo-pill {
+  padding: 6px 8px;
+  margin-bottom: 5px;
+  border-radius: 6px;
+  font-size: 12px;
+  background-color: var(--background-primary);
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.todo-calendar-app .matrix-table.compact-3days .todo-pill-title {
+  font-size: 12px;
+  line-height: 1.35;
+  word-break: break-word;
+  white-space: normal;
+}
+.todo-calendar-app .matrix-table.compact-3days .todo-pill-date {
+  font-size: 10px;
+  opacity: 0.7;
+}
+.todo-calendar-app .table-scroll-wrapper {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: auto;
+}

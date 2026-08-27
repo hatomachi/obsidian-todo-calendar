@@ -1,12 +1,17 @@
 import { App, TFile, TFolder, parseYaml, stringifyYaml } from 'obsidian';
 import { COLLECTIONS_DIR, ITEMS_DIR, ROOT_DATA_DIR } from './constants';
 import { CollectionData, ItemData, TodoItem, AgendaTodoItem } from './types';
+import { IStorageAdapter } from './adapters/IStorageAdapter';
+import { ItemType } from './features/item-types/types';
+import { TemplateStorage } from './features/item-types/templateStorage';
 
-export class StorageManager {
+export class StorageManager implements IStorageAdapter {
   private app: App;
+  private templateStorage: TemplateStorage;
 
   constructor(app: App) {
     this.app = app;
+    this.templateStorage = new TemplateStorage(app);
   }
 
   /**
@@ -352,6 +357,20 @@ export class StorageManager {
     }
 
     return agendaItems;
+  }
+
+  /**
+   * Load template definitions
+   */
+  async loadTemplates(): Promise<ItemType[]> {
+    return this.templateStorage.loadTemplates();
+  }
+
+  /**
+   * Save template definitions
+   */
+  async saveTemplates(types: ItemType[]): Promise<void> {
+    return this.templateStorage.saveTemplates(types);
   }
 }
 

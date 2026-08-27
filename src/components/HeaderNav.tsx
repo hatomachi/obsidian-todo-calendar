@@ -22,11 +22,13 @@ interface HeaderNavProps {
   collections: CollectionData[];
   selectedCollection: CollectionData | null;
   startDate: Date;
+  daysCount?: 3 | 7;
   showCompletedItems?: boolean;
   completedItemsCount?: number;
   enableItemTypes?: boolean;
   itemTypes?: ItemType[];
   selectedType?: ItemType | null;
+  onToggleDaysCount?: (count: 3 | 7) => void;
   onToggleShowCompleted?: () => void;
   onBackToCollections: () => void;
   onSelectAgenda: () => void;
@@ -46,11 +48,13 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   collections,
   selectedCollection,
   startDate,
+  daysCount = 7,
   showCompletedItems = false,
   completedItemsCount = 0,
   enableItemTypes = true,
   itemTypes = [],
   selectedType = null,
+  onToggleDaysCount,
   onToggleShowCompleted,
   onBackToCollections,
   onSelectAgenda,
@@ -64,9 +68,9 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   onOpenTemplateSettings,
   onRefresh,
 }) => {
-  const formatDateRangeHeader = (start: Date) => {
+  const formatDateRangeHeader = (start: Date, count: number) => {
     const end = new Date(start);
-    end.setDate(start.getDate() + 6);
+    end.setDate(start.getDate() + (count - 1));
     const options: Intl.DateTimeFormatOptions = { month: 'numeric', day: 'numeric' };
     return `${start.toLocaleDateString('ja-JP', options)} - ${end.toLocaleDateString('ja-JP', options)}`;
   };
@@ -250,17 +254,61 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             )}
 
             <div className="date-controls">
-              <button className="nav-btn secondary-btn" onClick={() => onNavigateDate(-7)} title="前週">
-                &lt; 前週
+              {onToggleDaysCount && (
+                <div className="days-count-toggle-group" style={{ display: 'inline-flex', borderRadius: '4px', border: '1px solid var(--background-modifier-border)', overflow: 'hidden', marginRight: '4px' }}>
+                  <button
+                    type="button"
+                    onClick={() => onToggleDaysCount(3)}
+                    style={{
+                      padding: '2px 8px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      border: 'none',
+                      cursor: 'pointer',
+                      background: daysCount === 3 ? 'var(--interactive-accent, #7c3aed)' : 'transparent',
+                      color: daysCount === 3 ? '#fff' : 'inherit',
+                    }}
+                    title="3日間表示 (未完了 + 当日含め3日)"
+                  >
+                    3日
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onToggleDaysCount(7)}
+                    style={{
+                      padding: '2px 8px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      border: 'none',
+                      cursor: 'pointer',
+                      background: daysCount === 7 ? 'var(--interactive-accent, #7c3aed)' : 'transparent',
+                      color: daysCount === 7 ? '#fff' : 'inherit',
+                    }}
+                    title="7日間表示 (1週間)"
+                  >
+                    7日
+                  </button>
+                </div>
+              )}
+              <button
+                className="nav-btn secondary-btn"
+                onClick={() => onNavigateDate(-daysCount)}
+                title={daysCount === 3 ? '前の3日間' : '前週'}
+              >
+                &lt; {daysCount === 3 ? '前' : '前週'}
               </button>
               <button className="nav-btn secondary-btn today-btn" onClick={onResetToToday}>
                 今日
               </button>
-              <button className="nav-btn secondary-btn" onClick={() => onNavigateDate(7)} title="次週">
-                次週 &gt;
+              <button
+                className="nav-btn secondary-btn"
+                onClick={() => onNavigateDate(daysCount)}
+                title={daysCount === 3 ? '次の3日間' : '次週'}
+              >
+                {daysCount === 3 ? '次' : '次週'} &gt;
               </button>
 
-              <span className="date-range-label">{formatDateRangeHeader(startDate)}</span>
+              <span className="date-range-label">{formatDateRangeHeader(startDate, daysCount)}</span>
             </div>
           </>
         )}

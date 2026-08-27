@@ -1,0 +1,264 @@
+/* Web / PWA specific styling & Obsidian CSS variables simulation */
+
+:root {
+  --background-primary: #1e1e2e;
+  --background-primary-alt: #181825;
+  --background-secondary: #24273a;
+  --background-secondary-alt: #1b1d2a;
+  --background-modifier-border: #363a4f;
+  --background-modifier-hover: rgba(255, 255, 255, 0.07);
+  --background-modifier-active-hover: rgba(255, 255, 255, 0.12);
+  
+  --text-normal: #cad3f5;
+  --text-muted: #8087a2;
+  --text-accent: #c6a0f6;
+  --interactive-accent: #7c3aed;
+  --interactive-accent-hover: #6d28d9;
+  
+  --font-interface: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-text: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-monospace: "SF Mono", Monaco, Menlo, Consolas, "Ubuntu Mono", monospace;
+  
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --radius-l: 12px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --background-primary: #ffffff;
+    --background-primary-alt: #f8fafc;
+    --background-secondary: #f1f5f9;
+    --background-secondary-alt: #e2e8f0;
+    --background-modifier-border: #cbd5e1;
+    --background-modifier-hover: rgba(0, 0, 0, 0.05);
+    --background-modifier-active-hover: rgba(0, 0, 0, 0.08);
+
+    --text-normal: #1e293b;
+    --text-muted: #64748b;
+    --text-accent: #7c3aed;
+    --interactive-accent: #7c3aed;
+    --interactive-accent-hover: #6d28d9;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  font-family: var(--font-interface);
+  -webkit-font-smoothing: antialiased;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input, textarea, select {
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.todo-calendar-web-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  overflow: hidden;
+}
+
+/* Header */
+.todo-cal-web-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  background-color: var(--background-secondary);
+  border-bottom: 1px solid var(--background-modifier-border);
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+
+.todo-cal-web-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.todo-cal-web-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.todo-cal-web-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.todo-cal-web-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.todo-cal-web-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid var(--background-modifier-border);
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.todo-cal-web-icon-btn:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+/* Content wrapper */
+.todo-cal-web-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.todo-calendar-root {
+  height: 100% !important;
+}
+
+/* Mobile optimizations for Agenda, Header & Drawer */
+@media (max-width: 640px) {
+  .todo-cal-web-header {
+    padding: 0.4rem 0.6rem;
+  }
+
+  .todo-cal-web-title {
+    font-size: 0.95rem;
+  }
+
+  .todo-cal-header {
+    padding: 0.4rem 0.5rem !important;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem !important;
+    background-color: var(--background-secondary-alt, #1e2030);
+    border-bottom: 1px solid var(--background-modifier-border);
+  }
+
+  .todo-cal-header .header-left,
+  .todo-cal-header .header-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.3rem !important;
+  }
+
+  .todo-cal-header .nav-btn {
+    height: 28px !important;
+    padding: 2px 8px !important;
+    font-size: 11.5px !important;
+    border-radius: 5px !important;
+  }
+
+  .todo-cal-header .collection-select-badge,
+  .todo-cal-header .nav-type-dropdown-btn,
+  .todo-cal-header .type-select-badge {
+    height: 28px !important;
+    padding: 2px 6px !important;
+    font-size: 11.5px !important;
+    max-width: 150px;
+  }
+
+  .todo-cal-header .collection-stepper-btn {
+    width: 24px !important;
+    height: 28px !important;
+  }
+
+  .todo-cal-header .date-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem !important;
+    flex-wrap: nowrap;
+  }
+
+  .todo-cal-header .date-range-label {
+    font-size: 11px !important;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 0 2px;
+  }
+
+  .todo-cal-header .create-item-btn {
+    margin-left: auto;
+    height: 28px !important;
+    padding: 2px 8px !important;
+    font-size: 11.5px !important;
+  }
+
+  .todo-cal-header .icon-btn {
+    width: 28px !important;
+    height: 28px !important;
+    padding: 0 !important;
+  }
+  
+  .todo-cal-agenda-container {
+    padding: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .todo-cal-agenda-item-card {
+    padding: 0.75rem 0.6rem;
+  }
+  
+  .todo-cal-modal-content {
+    width: 94% !important;
+    max-height: 85vh !important;
+    padding: 1.2rem 1rem !important;
+  }
+
+  .todo-cal-drawer {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+

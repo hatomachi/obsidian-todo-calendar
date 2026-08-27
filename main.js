@@ -24518,10 +24518,186 @@ var ITEMS_DIR = `${ROOT_DATA_DIR}/items`;
 var import_react8 = __toESM(require_react());
 
 // src/storage.ts
+var import_obsidian2 = require("obsidian");
+
+// src/features/item-types/templateStorage.ts
 var import_obsidian = require("obsidian");
+
+// src/features/item-types/templateUtils.ts
+function isTitleMatch(todoTitle, templateTitle) {
+  const normTodo = todoTitle.trim().toLowerCase();
+  const normTpl = templateTitle.trim().toLowerCase();
+  if (!normTodo || !normTpl) return false;
+  return normTodo.startsWith(normTpl) || normTodo.includes(normTpl);
+}
+function checkTemplateStatus(item, template) {
+  if (!template || !template.todos || template.todos.length === 0) {
+    return {
+      hasTemplate: false,
+      missingTodos: [],
+      missingDueTodos: [],
+      matchedTodosCount: 0,
+      totalTemplateTodosCount: 0,
+      isComplete: true
+    };
+  }
+  const missingTodos = [];
+  const missingDueTodos = [];
+  let matchedTodosCount = 0;
+  for (const tplTodo of template.todos) {
+    const matchedTodo = item.todos.find((t) => isTitleMatch(t.title, tplTodo.title));
+    if (!matchedTodo) {
+      missingTodos.push(tplTodo);
+    } else {
+      matchedTodosCount++;
+      if (!matchedTodo.due || matchedTodo.due.trim() === "") {
+        missingDueTodos.push(matchedTodo);
+      }
+    }
+  }
+  const isComplete = missingTodos.length === 0 && missingDueTodos.length === 0;
+  return {
+    hasTemplate: true,
+    missingTodos,
+    missingDueTodos,
+    matchedTodosCount,
+    totalTemplateTodosCount: template.todos.length,
+    isComplete
+  };
+}
+function findItemType(types, typeIdOrName) {
+  if (!typeIdOrName) return void 0;
+  return types.find((t) => t.id === typeIdOrName || t.name === typeIdOrName);
+}
+function findItemTemplate(itemType, templateIdOrName) {
+  if (!itemType || !templateIdOrName) return void 0;
+  return itemType.templates.find((tpl) => tpl.id === templateIdOrName || tpl.name === templateIdOrName) || itemType.templates[0];
+}
+function getDefaultItemTypes() {
+  return [
+    {
+      id: "release",
+      name: "\u30EA\u30EA\u30FC\u30B9",
+      icon: "rocket",
+      color: "blue",
+      templates: [
+        {
+          id: "rel_standard",
+          name: "\u901A\u5E38\u30EA\u30EA\u30FC\u30B9",
+          todos: [
+            { title: "\u30EA\u30EA\u30FC\u30B9\u8A08\u753B\u7B56\u5B9A", group: "\u8A08\u753B" },
+            { title: "\u90E8\u5185\u4E8B\u524D\u30EC\u30D3\u30E5\u30FC", group: "\u5BE9\u67FB" },
+            { title: "\u672C\u756A\u30EA\u30EA\u30FC\u30B9\u7533\u8ACB \uFF06 \u90E8\u4E00\u89A7\u8D77\u7968", group: "\u7533\u8ACB" },
+            { title: "\u672C\u756A\u4F5C\u696D", group: "\u5F53\u65E5" },
+            { title: "\u4E8B\u5F8C\u52D5\u4F5C\u78BA\u8A8D\u30FB\u5B8C\u4E86\u5831\u544A", group: "\u5F53\u65E5" }
+          ]
+        },
+        {
+          id: "rel_emergency",
+          name: "\u7DCA\u6025\u30D1\u30C3\u30C1\u30EA\u30EA\u30FC\u30B9",
+          todos: [
+            { title: "\u7DCA\u6025\u30EA\u30EA\u30FC\u30B9\u7533\u8ACB", group: "\u7533\u8ACB" },
+            { title: "\u30D1\u30C3\u30C1\u9069\u7528\u4F5C\u696D", group: "\u5F53\u65E5" },
+            { title: "\u4E8B\u5F8C\u691C\u8A3C\u30FB\u5831\u544A", group: "\u5F53\u65E5" }
+          ]
+        }
+      ]
+    },
+    {
+      id: "estimate",
+      name: "\u898B\u7A4D",
+      icon: "calculator",
+      color: "green",
+      templates: [
+        {
+          id: "est_standard",
+          name: "\u6A19\u6E96\u898B\u7A4D",
+          todos: [
+            { title: "\u5DE5\u6570\u7B97\u51FA\u30FB\u898B\u7A4D\u30C9\u30E9\u30D5\u30C8\u4F5C\u6210", group: "\u4F5C\u6210" },
+            { title: "\u30B0\u30EB\u30FC\u30D7\u30EC\u30D3\u30E5\u30FC", group: "\u5BE9\u67FB" },
+            { title: "\u90E8\u5185\u30EC\u30D3\u30E5\u30FC", group: "\u5BE9\u67FB" },
+            { title: "\u9867\u5BA2\u30FB\u95A2\u9023\u90E8\u7F72\u63D0\u51FA", group: "\u63D0\u51FA" }
+          ]
+        }
+      ]
+    },
+    {
+      id: "incident",
+      name: "\u969C\u5BB3\u5BFE\u5FDC",
+      icon: "alert-triangle",
+      color: "red",
+      templates: [
+        {
+          id: "inc_standard",
+          name: "\u969C\u5BB3\u5BFE\u5FDC\u30FB\u5831\u544A",
+          todos: [
+            { title: "\u521D\u52D5\u8ABF\u67FB\u30FB\u66AB\u5B9A\u5FA9\u65E7\u5BFE\u5FDC", group: "\u521D\u52D5" },
+            { title: "\u95A2\u4FC2\u8005\u3078\u306E\u901F\u5831\u9023\u7D61", group: "\u5831\u544A" },
+            { title: "\u6052\u4E45\u5BFE\u7B56\u691C\u8A0E\u30FB\u4FEE\u6B63", group: "\u5BFE\u7B56" },
+            { title: "\u969C\u5BB3\u5831\u544A\u66F8\u4F5C\u6210\u30FB\u90E8\u5185\u30EC\u30D3\u30E5\u30FC", group: "\u5831\u544A" }
+          ]
+        }
+      ]
+    }
+  ];
+}
+
+// src/features/item-types/templateStorage.ts
+var TEMPLATES_FILE_PATH = `${ROOT_DATA_DIR}/templates.json`;
+var TemplateStorage = class {
+  constructor(app) {
+    this.app = app;
+  }
+  /**
+   * Load template definitions from _todo-calendar/templates.json.
+   * If file does not exist, creates it with default seed templates.
+   */
+  async loadTemplates() {
+    try {
+      const adapter = this.app.vault.adapter;
+      const file = this.app.vault.getAbstractFileByPath(TEMPLATES_FILE_PATH);
+      if (file instanceof import_obsidian.TFile) {
+        const content = await this.app.vault.read(file);
+        const data = JSON.parse(content);
+        if (data && Array.isArray(data.types)) {
+          return data.types;
+        }
+      }
+      const defaults = getDefaultItemTypes();
+      await this.saveTemplates(defaults);
+      return defaults;
+    } catch (e) {
+      console.error("Failed to load templates.json, using defaults:", e);
+      return getDefaultItemTypes();
+    }
+  }
+  /**
+   * Save template definitions to _todo-calendar/templates.json
+   */
+  async saveTemplates(types) {
+    try {
+      const adapter = this.app.vault.adapter;
+      if (!await adapter.exists(ROOT_DATA_DIR)) {
+        await this.app.vault.createFolder(ROOT_DATA_DIR);
+      }
+      const content = JSON.stringify({ types }, null, 2);
+      const file = this.app.vault.getAbstractFileByPath(TEMPLATES_FILE_PATH);
+      if (file instanceof import_obsidian.TFile) {
+        await this.app.vault.modify(file, content);
+      } else {
+        await this.app.vault.create(TEMPLATES_FILE_PATH, content);
+      }
+    } catch (e) {
+      console.error("Failed to save templates.json:", e);
+    }
+  }
+};
+
+// src/storage.ts
 var StorageManager = class {
   constructor(app) {
     this.app = app;
+    this.templateStorage = new TemplateStorage(app);
   }
   /**
    * Ensure required directory structure exists in vault:
@@ -24556,7 +24732,7 @@ var StorageManager = class {
     const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
     if (match && match[1]) {
       try {
-        return (0, import_obsidian.parseYaml)(match[1]) || {};
+        return (0, import_obsidian2.parseYaml)(match[1]) || {};
       } catch (e) {
         console.error("Failed to parse YAML frontmatter:", e);
       }
@@ -24567,7 +24743,7 @@ var StorageManager = class {
    * Helper to encode frontmatter into markdown content
    */
   formatMarkdownWithFrontmatter(data, bodyContent = "") {
-    const yamlStr = (0, import_obsidian.stringifyYaml)(data).trim();
+    const yamlStr = (0, import_obsidian2.stringifyYaml)(data).trim();
     return `---
 ${yamlStr}
 ---
@@ -24579,12 +24755,12 @@ ${bodyContent}`;
   async getCollections() {
     await this.ensureDirectoriesExist();
     const collectionsFolder = this.app.vault.getAbstractFileByPath(COLLECTIONS_DIR);
-    if (!collectionsFolder || !(collectionsFolder instanceof import_obsidian.TFolder)) {
+    if (!collectionsFolder || !(collectionsFolder instanceof import_obsidian2.TFolder)) {
       return [];
     }
     const collections = [];
     for (const file of collectionsFolder.children) {
-      if (file instanceof import_obsidian.TFile && file.extension === "md") {
+      if (file instanceof import_obsidian2.TFile && file.extension === "md") {
         const content = await this.app.vault.read(file);
         const frontmatter = this.parseFrontmatter(content);
         const id = frontmatter.id || file.basename;
@@ -24608,8 +24784,8 @@ ${bodyContent}`;
   async getItemCount(collectionId) {
     const folderPath = `${ITEMS_DIR}/${collectionId}`;
     const itemFolder = this.app.vault.getAbstractFileByPath(folderPath);
-    if (itemFolder && itemFolder instanceof import_obsidian.TFolder) {
-      return itemFolder.children.filter((f) => f instanceof import_obsidian.TFile && f.extension === "md").length;
+    if (itemFolder && itemFolder instanceof import_obsidian2.TFolder) {
+      return itemFolder.children.filter((f) => f instanceof import_obsidian2.TFile && f.extension === "md").length;
     }
     return 0;
   }
@@ -24649,12 +24825,12 @@ ${bodyContent}`;
   async deleteCollection(collectionId) {
     const collectionPath = `${COLLECTIONS_DIR}/${collectionId}.md`;
     const file = this.app.vault.getAbstractFileByPath(collectionPath);
-    if (file instanceof import_obsidian.TFile) {
+    if (file instanceof import_obsidian2.TFile) {
       await this.app.vault.delete(file);
     }
     const itemFolderPath = `${ITEMS_DIR}/${collectionId}`;
     const itemFolder = this.app.vault.getAbstractFileByPath(itemFolderPath);
-    if (itemFolder instanceof import_obsidian.TFolder) {
+    if (itemFolder instanceof import_obsidian2.TFolder) {
       await this.app.vault.delete(itemFolder, true);
     }
   }
@@ -24665,12 +24841,12 @@ ${bodyContent}`;
     await this.ensureDirectoriesExist();
     const itemFolderPath = `${ITEMS_DIR}/${collectionId}`;
     const itemFolder = this.app.vault.getAbstractFileByPath(itemFolderPath);
-    if (!itemFolder || !(itemFolder instanceof import_obsidian.TFolder)) {
+    if (!itemFolder || !(itemFolder instanceof import_obsidian2.TFolder)) {
       return [];
     }
     const items = [];
     for (const file of itemFolder.children) {
-      if (file instanceof import_obsidian.TFile && file.extension === "md") {
+      if (file instanceof import_obsidian2.TFile && file.extension === "md") {
         const content = await this.app.vault.read(file);
         const frontmatter = this.parseFrontmatter(content);
         const todos = Array.isArray(frontmatter.todos) ? frontmatter.todos.map((t, idx) => ({
@@ -24741,7 +24917,7 @@ ${bodyContent}`;
    */
   async updateItem(item) {
     const file = this.app.vault.getAbstractFileByPath(item.filePath);
-    if (!(file instanceof import_obsidian.TFile)) {
+    if (!(file instanceof import_obsidian2.TFile)) {
       console.error("File not found for path:", item.filePath);
       return;
     }
@@ -24774,7 +24950,7 @@ ${bodyContent}`;
    */
   async deleteItem(item) {
     const file = this.app.vault.getAbstractFileByPath(item.filePath);
-    if (file instanceof import_obsidian.TFile) {
+    if (file instanceof import_obsidian2.TFile) {
       await this.app.vault.delete(file);
     }
   }
@@ -24813,6 +24989,231 @@ ${bodyContent}`;
       }
     }
     return agendaItems;
+  }
+  /**
+   * Load template definitions
+   */
+  async loadTemplates() {
+    return this.templateStorage.loadTemplates();
+  }
+  /**
+   * Save template definitions
+   */
+  async saveTemplates(types) {
+    return this.templateStorage.saveTemplates(types);
+  }
+};
+
+// src/adapters/LocalStorageAdapter.ts
+var STORAGE_KEYS = {
+  COLLECTIONS: "todo_cal_collections",
+  ITEMS: "todo_cal_items",
+  TEMPLATES: "todo_cal_templates"
+};
+var SEED_COLLECTIONS = [
+  {
+    id: "col-default-1",
+    filePath: "_todo-calendar/collections/col-default-1.md",
+    title: "\u500B\u4EBA\u30BF\u30B9\u30AF",
+    description: "\u65E5\u3005\u306E\u30BF\u30B9\u30AF\u3068\u751F\u6D3B\u306ETODO",
+    color: "purple",
+    createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+    itemCount: 2
+  },
+  {
+    id: "col-default-2",
+    filePath: "_todo-calendar/collections/col-default-2.md",
+    title: "\u958B\u767A\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8",
+    description: "\u30E2\u30D0\u30A4\u30EBWeb\u30A2\u30D7\u30EA\u958B\u767A",
+    color: "blue",
+    createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+    itemCount: 1
+  }
+];
+var SEED_ITEMS = [
+  {
+    id: "item-demo-1",
+    collectionId: "col-default-1",
+    filePath: "_todo-calendar/items/col-default-1/item-demo-1.md",
+    title: "\u30E2\u30D0\u30A4\u30EBWeb\u7248\u306E\u30BB\u30C3\u30C8\u30A2\u30C3\u30D7",
+    status: "todo",
+    description: "PWA\u5BFE\u5FDC\u3068GitHub\u9023\u643A\u306E\u52D5\u4F5C\u78BA\u8A8D\u3092\u884C\u3046",
+    createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+    type: "task",
+    todos: [
+      {
+        id: "todo-1",
+        title: "Safari\u3067\u30DB\u30FC\u30E0\u753B\u9762\u306B\u8FFD\u52A0\u3057\u3066\u8D77\u52D5\u30C6\u30B9\u30C8",
+        due: (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+        status: "todo",
+        description: "PWA\u3068\u3057\u3066\u5168\u753B\u9762\u8D77\u52D5\u3067\u304D\u308B\u304B\u78BA\u8A8D"
+      },
+      {
+        id: "todo-2",
+        title: "GitHub PAT\u3092\u8A2D\u5B9A\u3057\u3066Vault\u3092\u540C\u671F",
+        due: (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+        status: "todo",
+        description: "\u30D7\u30E9\u30A4\u30D9\u30FC\u30C8\u30EA\u30DD\u30B8\u30C8\u30EA\u306E\u30BF\u30B9\u30AF\u3092\u8AAD\u307F\u66F8\u304D\u3059\u308B"
+      }
+    ]
+  },
+  {
+    id: "item-demo-2",
+    collectionId: "col-default-1",
+    filePath: "_todo-calendar/items/col-default-1/item-demo-2.md",
+    title: "\u65E5\u8AB2\u306E\u78BA\u8A8D",
+    status: "todo",
+    description: "\u6BCE\u65E5\u306E\u30EB\u30FC\u30C6\u30A3\u30F3",
+    createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+    type: "routine",
+    todos: [
+      {
+        id: "todo-3",
+        title: "\u671D\u306E\u30E1\u30FC\u30EB\u30FBSlack\u30C1\u30A7\u30C3\u30AF",
+        due: (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+        status: "done",
+        description: ""
+      }
+    ]
+  }
+];
+var LocalStorageAdapter = class {
+  getStoredCollections() {
+    const raw = localStorage.getItem(STORAGE_KEYS.COLLECTIONS);
+    if (!raw) {
+      this.saveStoredCollections(SEED_COLLECTIONS);
+      return SEED_COLLECTIONS;
+    }
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return SEED_COLLECTIONS;
+    }
+  }
+  saveStoredCollections(collections) {
+    localStorage.setItem(STORAGE_KEYS.COLLECTIONS, JSON.stringify(collections));
+  }
+  getStoredItems() {
+    const raw = localStorage.getItem(STORAGE_KEYS.ITEMS);
+    if (!raw) {
+      this.saveStoredItems(SEED_ITEMS);
+      return SEED_ITEMS;
+    }
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return SEED_ITEMS;
+    }
+  }
+  saveStoredItems(items) {
+    localStorage.setItem(STORAGE_KEYS.ITEMS, JSON.stringify(items));
+  }
+  async getCollections() {
+    const collections = this.getStoredCollections();
+    const items = this.getStoredItems();
+    return collections.map((col) => ({
+      ...col,
+      itemCount: items.filter((item) => item.collectionId === col.id).length
+    }));
+  }
+  async createCollection(title, description = "") {
+    const collections = this.getStoredCollections();
+    const id = `col-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    const newCol = {
+      id,
+      filePath: `_todo-calendar/collections/${id}.md`,
+      title: title.trim() || "New Collection",
+      description: description.trim(),
+      color: "purple",
+      createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+      itemCount: 0
+    };
+    collections.push(newCol);
+    this.saveStoredCollections(collections);
+    return newCol;
+  }
+  async deleteCollection(collectionId) {
+    let collections = this.getStoredCollections();
+    collections = collections.filter((c) => c.id !== collectionId);
+    this.saveStoredCollections(collections);
+    let items = this.getStoredItems();
+    items = items.filter((i) => i.collectionId !== collectionId);
+    this.saveStoredItems(items);
+  }
+  async getItems(collectionId) {
+    const items = this.getStoredItems();
+    return items.filter((i) => i.collectionId === collectionId).sort((a, b) => a.createdAt < b.createdAt ? -1 : 1);
+  }
+  async createItem(collectionId, title, description = "", type, template, initialTodos = []) {
+    const items = this.getStoredItems();
+    const id = `item-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    const newItem = {
+      id,
+      collectionId,
+      filePath: `_todo-calendar/items/${collectionId}/${id}.md`,
+      title: title.trim() || "\u65B0\u898F\u30A2\u30A4\u30C6\u30E0",
+      status: "todo",
+      description: description.trim(),
+      createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+      type,
+      template,
+      todos: initialTodos
+    };
+    items.unshift(newItem);
+    this.saveStoredItems(items);
+    return newItem;
+  }
+  async updateItem(item) {
+    const items = this.getStoredItems();
+    const index = items.findIndex((i) => i.id === item.id);
+    if (index !== -1) {
+      items[index] = item;
+      this.saveStoredItems(items);
+    }
+  }
+  async deleteItem(item) {
+    let items = this.getStoredItems();
+    items = items.filter((i) => i.id !== item.id);
+    this.saveStoredItems(items);
+  }
+  async getItemsByType(typeId) {
+    const items = this.getStoredItems();
+    return items.filter((i) => i.type === typeId).sort((a, b) => a.createdAt < b.createdAt ? -1 : 1);
+  }
+  async getAllAgendaItems() {
+    const collections = await this.getCollections();
+    const items = this.getStoredItems();
+    const colMap = new Map(collections.map((c) => [c.id, c]));
+    const agendaItems = [];
+    for (const item of items) {
+      const col = colMap.get(item.collectionId);
+      if (col) {
+        for (const todo of item.todos) {
+          agendaItems.push({
+            todo,
+            item,
+            collection: col
+          });
+        }
+      }
+    }
+    return agendaItems;
+  }
+  async loadTemplates() {
+    const raw = localStorage.getItem(STORAGE_KEYS.TEMPLATES);
+    if (!raw) {
+      const defaults = getDefaultItemTypes();
+      this.saveTemplates(defaults);
+      return defaults;
+    }
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return getDefaultItemTypes();
+    }
+  }
+  async saveTemplates(types) {
+    localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(types));
   }
 };
 
@@ -25227,11 +25628,13 @@ var HeaderNav = ({
   collections,
   selectedCollection,
   startDate,
+  daysCount = 7,
   showCompletedItems = false,
   completedItemsCount = 0,
   enableItemTypes = true,
   itemTypes = [],
   selectedType = null,
+  onToggleDaysCount,
   onToggleShowCompleted,
   onBackToCollections,
   onSelectAgenda,
@@ -25245,9 +25648,9 @@ var HeaderNav = ({
   onOpenTemplateSettings,
   onRefresh
 }) => {
-  const formatDateRangeHeader = (start) => {
+  const formatDateRangeHeader = (start, count) => {
     const end = new Date(start);
-    end.setDate(start.getDate() + 6);
+    end.setDate(start.getDate() + (count - 1));
     const options = { month: "numeric", day: "numeric" };
     return `${start.toLocaleDateString("ja-JP", options)} - ${end.toLocaleDateString("ja-JP", options)}`;
   };
@@ -25431,10 +25834,70 @@ var HeaderNav = ({
           }
         ),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "date-controls", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "nav-btn secondary-btn", onClick: () => onNavigateDate(-7), title: "\u524D\u9031", children: "< \u524D\u9031" }),
+          onToggleDaysCount && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "days-count-toggle-group", style: { display: "inline-flex", borderRadius: "4px", border: "1px solid var(--background-modifier-border)", overflow: "hidden", marginRight: "4px" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "button",
+              {
+                type: "button",
+                onClick: () => onToggleDaysCount(3),
+                style: {
+                  padding: "2px 8px",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  border: "none",
+                  cursor: "pointer",
+                  background: daysCount === 3 ? "var(--interactive-accent, #7c3aed)" : "transparent",
+                  color: daysCount === 3 ? "#fff" : "inherit"
+                },
+                title: "3\u65E5\u9593\u8868\u793A (\u672A\u5B8C\u4E86 + \u5F53\u65E5\u542B\u30813\u65E5)",
+                children: "3\u65E5"
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "button",
+              {
+                type: "button",
+                onClick: () => onToggleDaysCount(7),
+                style: {
+                  padding: "2px 8px",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  border: "none",
+                  cursor: "pointer",
+                  background: daysCount === 7 ? "var(--interactive-accent, #7c3aed)" : "transparent",
+                  color: daysCount === 7 ? "#fff" : "inherit"
+                },
+                title: "7\u65E5\u9593\u8868\u793A (1\u9031\u9593)",
+                children: "7\u65E5"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+            "button",
+            {
+              className: "nav-btn secondary-btn",
+              onClick: () => onNavigateDate(-daysCount),
+              title: daysCount === 3 ? "\u524D\u306E3\u65E5\u9593" : "\u524D\u9031",
+              children: [
+                "< ",
+                daysCount === 3 ? "\u524D" : "\u524D\u9031"
+              ]
+            }
+          ),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "nav-btn secondary-btn today-btn", onClick: onResetToToday, children: "\u4ECA\u65E5" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "nav-btn secondary-btn", onClick: () => onNavigateDate(7), title: "\u6B21\u9031", children: "\u6B21\u9031 >" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "date-range-label", children: formatDateRangeHeader(startDate) })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+            "button",
+            {
+              className: "nav-btn secondary-btn",
+              onClick: () => onNavigateDate(daysCount),
+              title: daysCount === 3 ? "\u6B21\u306E3\u65E5\u9593" : "\u6B21\u9031",
+              children: [
+                daysCount === 3 ? "\u6B21" : "\u6B21\u9031",
+                " >"
+              ]
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "date-range-label", children: formatDateRangeHeader(startDate, daysCount) })
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "icon-btn", onClick: onRefresh, title: "\u30C7\u30FC\u30BF\u66F4\u65B0", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { size: 16 }) }),
@@ -25674,125 +26137,6 @@ function isJapaneseHoliday(date) {
   return false;
 }
 
-// src/features/item-types/templateUtils.ts
-function isTitleMatch(todoTitle, templateTitle) {
-  const normTodo = todoTitle.trim().toLowerCase();
-  const normTpl = templateTitle.trim().toLowerCase();
-  if (!normTodo || !normTpl) return false;
-  return normTodo.startsWith(normTpl) || normTodo.includes(normTpl);
-}
-function checkTemplateStatus(item, template) {
-  if (!template || !template.todos || template.todos.length === 0) {
-    return {
-      hasTemplate: false,
-      missingTodos: [],
-      missingDueTodos: [],
-      matchedTodosCount: 0,
-      totalTemplateTodosCount: 0,
-      isComplete: true
-    };
-  }
-  const missingTodos = [];
-  const missingDueTodos = [];
-  let matchedTodosCount = 0;
-  for (const tplTodo of template.todos) {
-    const matchedTodo = item.todos.find((t) => isTitleMatch(t.title, tplTodo.title));
-    if (!matchedTodo) {
-      missingTodos.push(tplTodo);
-    } else {
-      matchedTodosCount++;
-      if (!matchedTodo.due || matchedTodo.due.trim() === "") {
-        missingDueTodos.push(matchedTodo);
-      }
-    }
-  }
-  const isComplete = missingTodos.length === 0 && missingDueTodos.length === 0;
-  return {
-    hasTemplate: true,
-    missingTodos,
-    missingDueTodos,
-    matchedTodosCount,
-    totalTemplateTodosCount: template.todos.length,
-    isComplete
-  };
-}
-function findItemType(types, typeIdOrName) {
-  if (!typeIdOrName) return void 0;
-  return types.find((t) => t.id === typeIdOrName || t.name === typeIdOrName);
-}
-function findItemTemplate(itemType, templateIdOrName) {
-  if (!itemType || !templateIdOrName) return void 0;
-  return itemType.templates.find((tpl) => tpl.id === templateIdOrName || tpl.name === templateIdOrName) || itemType.templates[0];
-}
-function getDefaultItemTypes() {
-  return [
-    {
-      id: "release",
-      name: "\u30EA\u30EA\u30FC\u30B9",
-      icon: "rocket",
-      color: "blue",
-      templates: [
-        {
-          id: "rel_standard",
-          name: "\u901A\u5E38\u30EA\u30EA\u30FC\u30B9",
-          todos: [
-            { title: "\u30EA\u30EA\u30FC\u30B9\u8A08\u753B\u7B56\u5B9A", group: "\u8A08\u753B" },
-            { title: "\u90E8\u5185\u4E8B\u524D\u30EC\u30D3\u30E5\u30FC", group: "\u5BE9\u67FB" },
-            { title: "\u672C\u756A\u30EA\u30EA\u30FC\u30B9\u7533\u8ACB \uFF06 \u90E8\u4E00\u89A7\u8D77\u7968", group: "\u7533\u8ACB" },
-            { title: "\u672C\u756A\u4F5C\u696D", group: "\u5F53\u65E5" },
-            { title: "\u4E8B\u5F8C\u52D5\u4F5C\u78BA\u8A8D\u30FB\u5B8C\u4E86\u5831\u544A", group: "\u5F53\u65E5" }
-          ]
-        },
-        {
-          id: "rel_emergency",
-          name: "\u7DCA\u6025\u30D1\u30C3\u30C1\u30EA\u30EA\u30FC\u30B9",
-          todos: [
-            { title: "\u7DCA\u6025\u30EA\u30EA\u30FC\u30B9\u7533\u8ACB", group: "\u7533\u8ACB" },
-            { title: "\u30D1\u30C3\u30C1\u9069\u7528\u4F5C\u696D", group: "\u5F53\u65E5" },
-            { title: "\u4E8B\u5F8C\u691C\u8A3C\u30FB\u5831\u544A", group: "\u5F53\u65E5" }
-          ]
-        }
-      ]
-    },
-    {
-      id: "estimate",
-      name: "\u898B\u7A4D",
-      icon: "calculator",
-      color: "green",
-      templates: [
-        {
-          id: "est_standard",
-          name: "\u6A19\u6E96\u898B\u7A4D",
-          todos: [
-            { title: "\u5DE5\u6570\u7B97\u51FA\u30FB\u898B\u7A4D\u30C9\u30E9\u30D5\u30C8\u4F5C\u6210", group: "\u4F5C\u6210" },
-            { title: "\u30B0\u30EB\u30FC\u30D7\u30EC\u30D3\u30E5\u30FC", group: "\u5BE9\u67FB" },
-            { title: "\u90E8\u5185\u30EC\u30D3\u30E5\u30FC", group: "\u5BE9\u67FB" },
-            { title: "\u9867\u5BA2\u30FB\u95A2\u9023\u90E8\u7F72\u63D0\u51FA", group: "\u63D0\u51FA" }
-          ]
-        }
-      ]
-    },
-    {
-      id: "incident",
-      name: "\u969C\u5BB3\u5BFE\u5FDC",
-      icon: "alert-triangle",
-      color: "red",
-      templates: [
-        {
-          id: "inc_standard",
-          name: "\u969C\u5BB3\u5BFE\u5FDC\u30FB\u5831\u544A",
-          todos: [
-            { title: "\u521D\u52D5\u8ABF\u67FB\u30FB\u66AB\u5B9A\u5FA9\u65E7\u5BFE\u5FDC", group: "\u521D\u52D5" },
-            { title: "\u95A2\u4FC2\u8005\u3078\u306E\u901F\u5831\u9023\u7D61", group: "\u5831\u544A" },
-            { title: "\u6052\u4E45\u5BFE\u7B56\u691C\u8A0E\u30FB\u4FEE\u6B63", group: "\u5BFE\u7B56" },
-            { title: "\u969C\u5BB3\u5831\u544A\u66F8\u4F5C\u6210\u30FB\u90E8\u5185\u30EC\u30D3\u30E5\u30FC", group: "\u5831\u544A" }
-          ]
-        }
-      ]
-    }
-  ];
-}
-
 // src/features/item-types/TypeBadge.tsx
 var import_jsx_runtime3 = __toESM(require_jsx_runtime());
 var renderTypeIcon = (iconName, size = 12) => {
@@ -25860,6 +26204,7 @@ var formatShortDate = (dateStr) => {
 var CalendarMatrixView = ({
   items,
   startDate,
+  daysCount = 7,
   selectedItemId,
   showCompletedItems = false,
   enableItemTypes = true,
@@ -25896,7 +26241,7 @@ var CalendarMatrixView = ({
       onCloseDrawer();
     }
   };
-  const days = Array.from({ length: 7 }, (_, i) => {
+  const days = Array.from({ length: daysCount }, (_, i) => {
     const d = new Date(startDate);
     d.setDate(startDate.getDate() + i);
     const dateStr = formatDateStr(d);
@@ -25909,8 +26254,8 @@ var CalendarMatrixView = ({
     const dayLabel = d.toLocaleDateString("ja-JP", { weekday: "short", month: "numeric", day: "numeric" });
     return { dateStr, dayLabel, isToday, isSunday, isSaturday, isHoliday, isNonWorkingDay };
   });
-  const minDateStr = days[0].dateStr;
-  const maxDateStr = days[6].dateStr;
+  const minDateStr = days[0]?.dateStr || todayStr;
+  const maxDateStr = days[days.length - 1]?.dateStr || todayStr;
   import_react4.default.useEffect(() => {
     const resetDrag = () => {
       setTimeout(() => {
@@ -26029,24 +26374,11 @@ var CalendarMatrixView = ({
   };
   const completedCount = items.filter((it) => it.status === "done").length;
   const visibleItems = showCompletedItems ? items : items.filter((it) => it.status !== "done");
-  return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "calendar-matrix-container", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "table-scroll-wrapper", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("table", { className: "matrix-table", children: [
+  const totalColumns = daysCount === 3 ? 5 : 10;
+  return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "calendar-matrix-container", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "table-scroll-wrapper", onClick: handleContainerClick, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("table", { className: `matrix-table ${daysCount === 3 ? "compact-3days" : ""}`, children: [
     /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("thead", { onClick: handleHeaderClick, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("tr", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "row-header-th", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "row-header-th-content", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item)" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-          "button",
-          {
-            className: "row-header-add-item-btn",
-            onClick: (e) => {
-              e.stopPropagation();
-              onOpenCreateItemModal();
-            },
-            title: "\u65B0\u898F\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (\u30A2\u30A4\u30C6\u30E0) \u3092\u8FFD\u52A0",
-            children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Plus, { size: 13 })
-          }
-        )
-      ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "past-header-th", children: "\u904E\u53BB\u306E\u672A\u5B8C\u4E86" }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "row-header-th", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "row-header-th-content", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item)" }) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "past-header-th", children: daysCount === 3 ? "\u672A\u5B8C\u4E86" : "\u904E\u53BB\u306E\u672A\u5B8C\u4E86" }),
       days.map((day) => {
         let colClass = "weekday-col";
         if (day.isToday) {
@@ -26069,15 +26401,15 @@ var CalendarMatrixView = ({
           day.dateStr
         );
       }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "future-header-th", children: "\u672A\u6765" })
+      daysCount === 7 && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "future-header-th", children: "\u672A\u6765" })
     ] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tbody", { children: items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { colSpan: 10, className: "empty-matrix-td", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "empty-matrix-state", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tbody", { children: items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { colSpan: totalColumns, className: "empty-matrix-td", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "empty-matrix-state", children: [
       /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { children: isCrossCollection ? `\u30BF\u30A4\u30D7\u300C${typeName || "\u6307\u5B9A\u30BF\u30A4\u30D7"}\u300D\u306E\u30A2\u30A4\u30C6\u30E0\u306F\u307E\u3060\u3042\u308A\u307E\u305B\u3093\u3002` : "\u3053\u306E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u306B\u306F\u307E\u3060\u30A2\u30A4\u30C6\u30E0\u304C\u3042\u308A\u307E\u305B\u3093\u3002" }),
       /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("button", { className: "nav-btn primary-btn", onClick: onOpenCreateItemModal, children: [
         /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Plus, { size: 16 }),
         /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\u65B0\u898F\u30A2\u30A4\u30C6\u30E0\u3092\u4F5C\u6210" })
       ] })
-    ] }) }) }) : visibleItems.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { colSpan: 10, className: "empty-matrix-td", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "empty-matrix-state", children: [
+    ] }) }) }) : visibleItems.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { colSpan: totalColumns, className: "empty-matrix-td", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "empty-matrix-state", children: [
       /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("p", { children: [
         "\u3059\u3079\u3066\u306E\u30BF\u30B9\u30AF\u304C\u5B8C\u4E86\u3057\u3066\u3044\u307E\u3059\uFF08",
         completedCount,
@@ -26094,7 +26426,11 @@ var CalendarMatrixView = ({
       visibleItems.map((item) => {
         const isSelected = item.id === selectedItemId;
         const isItemDone = item.status === "done";
-        const pastTodos = item.todos.filter((t) => t.due && t.due < minDateStr && t.status === "todo").sort((a, b) => a.due.localeCompare(b.due));
+        const pastTodos = item.todos.filter((t) => {
+          if (t.status !== "todo") return false;
+          if (!t.due || t.due.trim() === "") return daysCount === 3;
+          return t.due < minDateStr;
+        }).sort((a, b) => (a.due || "").localeCompare(b.due || ""));
         const isPastExpanded = !!expandedPastRows[item.id];
         const hasPastMore = pastTodos.length > 2;
         const visiblePastTodos = hasPastMore && !isPastExpanded ? pastTodos.slice(0, 2) : pastTodos;
@@ -26362,7 +26698,7 @@ ${todo.description || ""}`,
                   day.dateStr
                 );
               }),
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { className: "matrix-cell future-col-cell", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "cell-todo-stack", children: [
+              daysCount === 7 && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { className: "matrix-cell future-col-cell", onClick: () => onSelectItem(item), children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "cell-todo-stack", children: [
                 visibleFutureTodos.map((todo) => /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
                   "div",
                   {
@@ -26441,7 +26777,7 @@ ${todo.description || ""}`,
           item.id
         );
       }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tr", { className: "matrix-add-item-row", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { colSpan: 10, className: "matrix-add-item-td", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tr", { className: "matrix-add-item-row", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { colSpan: totalColumns, className: "matrix-add-item-td", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
         "button",
         {
           className: "matrix-add-item-btn",
@@ -27472,58 +27808,6 @@ var AgendaCard = ({
   ] });
 };
 
-// src/features/item-types/templateStorage.ts
-var import_obsidian2 = require("obsidian");
-var TEMPLATES_FILE_PATH = `${ROOT_DATA_DIR}/templates.json`;
-var TemplateStorage = class {
-  constructor(app) {
-    this.app = app;
-  }
-  /**
-   * Load template definitions from _todo-calendar/templates.json.
-   * If file does not exist, creates it with default seed templates.
-   */
-  async loadTemplates() {
-    try {
-      const adapter = this.app.vault.adapter;
-      const file = this.app.vault.getAbstractFileByPath(TEMPLATES_FILE_PATH);
-      if (file instanceof import_obsidian2.TFile) {
-        const content = await this.app.vault.read(file);
-        const data = JSON.parse(content);
-        if (data && Array.isArray(data.types)) {
-          return data.types;
-        }
-      }
-      const defaults = getDefaultItemTypes();
-      await this.saveTemplates(defaults);
-      return defaults;
-    } catch (e) {
-      console.error("Failed to load templates.json, using defaults:", e);
-      return getDefaultItemTypes();
-    }
-  }
-  /**
-   * Save template definitions to _todo-calendar/templates.json
-   */
-  async saveTemplates(types) {
-    try {
-      const adapter = this.app.vault.adapter;
-      if (!await adapter.exists(ROOT_DATA_DIR)) {
-        await this.app.vault.createFolder(ROOT_DATA_DIR);
-      }
-      const content = JSON.stringify({ types }, null, 2);
-      const file = this.app.vault.getAbstractFileByPath(TEMPLATES_FILE_PATH);
-      if (file instanceof import_obsidian2.TFile) {
-        await this.app.vault.modify(file, content);
-      } else {
-        await this.app.vault.create(TEMPLATES_FILE_PATH, content);
-      }
-    } catch (e) {
-      console.error("Failed to save templates.json:", e);
-    }
-  }
-};
-
 // src/features/item-types/TemplateSettingsModal.tsx
 var import_react7 = __toESM(require_react());
 var import_jsx_runtime8 = __toESM(require_jsx_runtime());
@@ -27887,15 +28171,14 @@ var TemplateSettingsModal = ({
 
 // src/components/AppView.tsx
 var import_jsx_runtime9 = __toESM(require_jsx_runtime());
-var AppView = ({ app, plugin, settings }) => {
-  const [storage] = (0, import_react8.useState)(() => new StorageManager(app));
-  const [templateStorage] = (0, import_react8.useState)(() => new TemplateStorage(app));
+var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "collections" }) => {
+  const [storage] = (0, import_react8.useState)(() => storageAdapter || (app ? new StorageManager(app) : new LocalStorageAdapter()));
   const [pluginSettings, setPluginSettings] = (0, import_react8.useState)(
     () => settings || plugin?.settings || DEFAULT_SETTINGS
   );
   const [itemTypes, setItemTypes] = (0, import_react8.useState)([]);
   const [isTemplateSettingsOpen, setIsTemplateSettingsOpen] = (0, import_react8.useState)(false);
-  const [viewMode, setViewMode] = (0, import_react8.useState)("collections");
+  const [viewMode, setViewMode] = (0, import_react8.useState)(initialViewMode);
   const [collections, setCollections] = (0, import_react8.useState)([]);
   const [selectedCollection, setSelectedCollection] = (0, import_react8.useState)(null);
   const [selectedType, setSelectedType] = (0, import_react8.useState)(null);
@@ -27906,6 +28189,7 @@ var AppView = ({ app, plugin, settings }) => {
   const [selectedTodoId, setSelectedTodoId] = (0, import_react8.useState)(null);
   const [isDrawerOpen, setIsDrawerOpen] = (0, import_react8.useState)(false);
   const [startDate, setStartDate] = (0, import_react8.useState)(() => /* @__PURE__ */ new Date());
+  const [daysCount, setDaysCount] = (0, import_react8.useState)(() => typeof window !== "undefined" && window.innerWidth <= 768 ? 3 : 7);
   const [showCompletedItems, setShowCompletedItems] = (0, import_react8.useState)(false);
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = (0, import_react8.useState)(false);
   const [newItemTitle, setNewItemTitle] = (0, import_react8.useState)("");
@@ -27922,9 +28206,9 @@ var AppView = ({ app, plugin, settings }) => {
     }
   }, [plugin]);
   const loadTemplates = (0, import_react8.useCallback)(async () => {
-    const loaded = await templateStorage.loadTemplates();
+    const loaded = await storage.loadTemplates();
     setItemTypes(loaded);
-  }, [templateStorage]);
+  }, [storage]);
   (0, import_react8.useEffect)(() => {
     loadTemplates();
   }, [loadTemplates]);
@@ -28138,7 +28422,7 @@ var AppView = ({ app, plugin, settings }) => {
     setIsDrawerOpen(true);
   };
   const handleSaveTemplates = async (newTypes) => {
-    await templateStorage.saveTemplates(newTypes);
+    await storage.saveTemplates(newTypes);
     setItemTypes(newTypes);
   };
   const handleUpdateItem = async (updatedItem) => {
@@ -28210,11 +28494,13 @@ var AppView = ({ app, plugin, settings }) => {
         collections,
         selectedCollection,
         startDate,
+        daysCount,
         showCompletedItems,
         completedItemsCount: items.filter((it) => it.status === "done").length,
         enableItemTypes: pluginSettings.enableItemTypes,
         itemTypes,
         selectedType,
+        onToggleDaysCount: setDaysCount,
         onToggleShowCompleted: () => setShowCompletedItems((prev) => !prev),
         onBackToCollections: handleBackToCollections,
         onSelectAgenda: handleSelectAgenda,
@@ -28245,6 +28531,7 @@ var AppView = ({ app, plugin, settings }) => {
           {
             items,
             startDate,
+            daysCount,
             selectedItemId: selectedItem?.id || null,
             showCompletedItems,
             enableItemTypes: pluginSettings.enableItemTypes,
@@ -28267,6 +28554,7 @@ var AppView = ({ app, plugin, settings }) => {
           {
             items,
             startDate,
+            daysCount,
             selectedItemId: selectedItem?.id || null,
             showCompletedItems,
             enableItemTypes: pluginSettings.enableItemTypes,

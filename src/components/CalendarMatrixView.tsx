@@ -24,6 +24,7 @@ import { TypeBadge } from '../features/item-types/TypeBadge';
 interface CalendarMatrixViewProps {
   items: ItemData[];
   startDate: Date;
+  daysCount?: 3 | 7;
   selectedItemId: string | null;
   showCompletedItems?: boolean;
   enableItemTypes?: boolean;
@@ -63,6 +64,7 @@ const formatShortDate = (dateStr: string): string => {
 export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
   items,
   startDate,
+  daysCount = 7,
   selectedItemId,
   showCompletedItems = false,
   enableItemTypes = true,
@@ -109,8 +111,8 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
     }
   };
 
-  // Generate 7 days starting from startDate
-  const days = Array.from({ length: 7 }, (_, i) => {
+  // Generate days based on daysCount (3 or 7) starting from startDate
+  const days = Array.from({ length: daysCount }, (_, i) => {
     const d = new Date(startDate);
     d.setDate(startDate.getDate() + i);
     const dateStr = formatDateStr(d);
@@ -124,8 +126,8 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
     return { dateStr, dayLabel, isToday, isSunday, isSaturday, isHoliday, isNonWorkingDay };
   });
 
-  const minDateStr = days[0].dateStr;
-  const maxDateStr = days[6].dateStr;
+  const minDateStr = days[0]?.dateStr || todayStr;
+  const maxDateStr = days[days.length - 1]?.dateStr || todayStr;
 
   // Global cleanup to guarantee isDraggingRef never gets stuck true on component updates
   React.useEffect(() => {
@@ -272,28 +274,20 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
   const completedCount = items.filter((it) => it.status === 'done').length;
   const visibleItems = showCompletedItems ? items : items.filter((it) => it.status !== 'done');
 
+  const totalColumns = daysCount === 3 ? 5 : 10;
+
   return (
     <div className="calendar-matrix-container" onClick={handleContainerClick}>
       <div className="table-scroll-wrapper" onClick={handleContainerClick}>
-        <table className="matrix-table">
+        <table className={`matrix-table ${daysCount === 3 ? 'compact-3days' : ''}`}>
           <thead onClick={handleHeaderClick}>
             <tr>
               <th className="row-header-th">
                 <div className="row-header-th-content">
                   <span>タスクノート (Item)</span>
-                  <button
-                    className="row-header-add-item-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenCreateItemModal();
-                    }}
-                    title="新規タスクノート (アイテム) を追加"
-                  >
-                    <Plus size={13} />
-                  </button>
                 </div>
               </th>
-              <th className="past-header-th">過去の未完了</th>
+              <th className="past-header-th">{daysCount === 3 ? '未完了' : '過去の未完了'}</th>
               {days.map((day) => {
                 let colClass = 'weekday-col';
                 if (day.isToday) {
@@ -316,13 +310,13 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                   </th>
                 );
               })}
-              <th className="future-header-th">未来</th>
+              {daysCount === 7 && <th className="future-header-th">未来</th>}
             </tr>
           </thead>
           <tbody>
             {items.length === 0 ? (
               <tr>
-                <td colSpan={10} className="empty-matrix-td">
+                <td colSpan={totalColumns} className="empty-matrix-td">
                   <div className="empty-matrix-state">
                     <p>
                       {isCrossCollection
@@ -338,7 +332,7 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
               </tr>
             ) : visibleItems.length === 0 ? (
               <tr>
-                <td colSpan={10} className="empty-matrix-td">
+                <td colSpan={totalColumns} className="empty-matrix-td">
                   <div className="empty-matrix-state">
                     <p>すべてのタスクが完了しています（{completedCount}件の完了タスクが非表示中）</p>
                     <div className="empty-matrix-actions">
@@ -362,9 +356,14 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                 const isItemDone = item.status === 'done';
 
                 // Past incomplete todos (due < minDateStr and status === 'todo')
+                // When in 3-day mode, also include unscheduled todos so nothing is missed
                 const pastTodos = item.todos
-                  .filter((t) => t.due && t.due < minDateStr && t.status === 'todo')
-                  .sort((a, b) => a.due.localeCompare(b.due));
+                  .filter((t) => {
+                    if (t.status !== 'todo') return false;
+                    if (!t.due || t.due.trim() === '') return daysCount === 3;
+                    return t.due < minDateStr;
+                  })
+                  .sort((a, b) => (a.due || '').localeCompare(b.due || ''));
 
                 const isPastExpanded = !!expandedPastRows[item.id];
                 const hasPastMore = pastTodos.length > 2;
@@ -643,6 +642,7 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                     })}
 
                     {/* Future Cell */}
+                    {daysCount === 7 && (
                     <td className="matrix-cell future-col-cell" onClick={() => onSelectItem(item)}>
                       <div className="cell-todo-stack">
                         {visibleFutureTodos.map((todo) => (
@@ -709,11 +709,12 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                         )}
                       </div>
                     </td>
+                    )}
                   </tr>
                 );
               })}
               <tr className="matrix-add-item-row">
-                <td colSpan={10} className="matrix-add-item-td">
+                <td colSpan={totalColumns} className="matrix-add-item-td">
                   <button
                     className="matrix-add-item-btn"
                     onClick={(e) => {

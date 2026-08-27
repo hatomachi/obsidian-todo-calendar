@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { App } from 'obsidian';
+import type { App } from 'obsidian';
 import { StorageManager } from '../storage';
+import { IStorageAdapter } from '../adapters/IStorageAdapter';
+import { LocalStorageAdapter } from '../adapters/LocalStorageAdapter';
 import { CollectionData, ItemData, TodoStatus, AgendaTodoItem, PluginSettings, DEFAULT_SETTINGS, TodoItem } from '../types';
 import { HeaderNav } from './HeaderNav';
 import { CollectionsGrid } from './CollectionsGrid';
@@ -8,20 +10,20 @@ import { CalendarMatrixView } from './CalendarMatrixView';
 import { TaskDetailDrawer } from './TaskDetailDrawer';
 import { AgendaView } from './AgendaView';
 import { ItemType } from '../features/item-types/types';
-import { TemplateStorage } from '../features/item-types/templateStorage';
 import { findItemTemplate, findItemType } from '../features/item-types/templateUtils';
 import { TemplateSettingsModal } from '../features/item-types/TemplateSettingsModal';
 import type TodoCalendarPlugin from '../main';
 
 interface AppViewProps {
-  app: App;
+  app?: App;
+  storageAdapter?: IStorageAdapter;
   plugin?: TodoCalendarPlugin;
   settings?: PluginSettings;
+  initialViewMode?: 'collections' | 'calendar' | 'agenda' | 'type-calendar';
 }
 
-export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
-  const [storage] = useState(() => new StorageManager(app));
-  const [templateStorage] = useState(() => new TemplateStorage(app));
+export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, settings, initialViewMode = 'collections' }) => {
+  const [storage] = useState<IStorageAdapter>(() => storageAdapter || (app ? new StorageManager(app) : new LocalStorageAdapter()));
 
   const [pluginSettings, setPluginSettings] = useState<PluginSettings>(
     () => settings || plugin?.settings || DEFAULT_SETTINGS
@@ -29,7 +31,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
   const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
   const [isTemplateSettingsOpen, setIsTemplateSettingsOpen] = useState(false);
 
-  const [viewMode, setViewMode] = useState<'collections' | 'calendar' | 'agenda' | 'type-calendar'>('collections');
+  const [viewMode, setViewMode] = useState<'collections' | 'calendar' | 'agenda' | 'type-calendar'>(initialViewMode);
   const [collections, setCollections] = useState<CollectionData[]>([]);
   const [selectedCollection, setSelectedCollection] = useState<CollectionData | null>(null);
   const [selectedType, setSelectedType] = useState<ItemType | null>(null);
@@ -43,6 +45,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const [startDate, setStartDate] = useState<Date>(() => new Date());
+  const [daysCount, setDaysCount] = useState<3 | 7>(() => (typeof window !== 'undefined' && window.innerWidth <= 768 ? 3 : 7));
   const [showCompletedItems, setShowCompletedItems] = useState(false);
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false);
   const [newItemTitle, setNewItemTitle] = useState('');
@@ -63,9 +66,9 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
 
   // Load templates
   const loadTemplates = useCallback(async () => {
-    const loaded = await templateStorage.loadTemplates();
+    const loaded = await storage.loadTemplates();
     setItemTypes(loaded);
-  }, [templateStorage]);
+  }, [storage]);
 
   useEffect(() => {
     loadTemplates();
@@ -326,7 +329,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
 
   // Save updated templates
   const handleSaveTemplates = async (newTypes: ItemType[]) => {
-    await templateStorage.saveTemplates(newTypes);
+    await storage.saveTemplates(newTypes);
     setItemTypes(newTypes);
   };
 
@@ -418,11 +421,13 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
         collections={collections}
         selectedCollection={selectedCollection}
         startDate={startDate}
+        daysCount={daysCount}
         showCompletedItems={showCompletedItems}
         completedItemsCount={items.filter((it) => it.status === 'done').length}
         enableItemTypes={pluginSettings.enableItemTypes}
         itemTypes={itemTypes}
         selectedType={selectedType}
+        onToggleDaysCount={setDaysCount}
         onToggleShowCompleted={() => setShowCompletedItems((prev) => !prev)}
         onBackToCollections={handleBackToCollections}
         onSelectAgenda={handleSelectAgenda}
@@ -452,6 +457,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
             <CalendarMatrixView
               items={items}
               startDate={startDate}
+              daysCount={daysCount}
               selectedItemId={selectedItem?.id || null}
               showCompletedItems={showCompletedItems}
               enableItemTypes={pluginSettings.enableItemTypes}
@@ -474,6 +480,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, plugin, settings }) => {
             <CalendarMatrixView
               items={items}
               startDate={startDate}
+              daysCount={daysCount}
               selectedItemId={selectedItem?.id || null}
               showCompletedItems={showCompletedItems}
               enableItemTypes={pluginSettings.enableItemTypes}
