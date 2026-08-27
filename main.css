@@ -1598,6 +1598,28 @@
   background-color: var(--background-modifier-hover);
   color: var(--text-muted);
 }
+.todo-calendar-app .todo-cal-agenda-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+.todo-calendar-app .todo-cal-spinner {
+  animation: todoCalSpin 1s linear infinite;
+  color: var(--interactive-accent);
+}
+@keyframes todoCalSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 .todo-calendar-app .todo-cal-agenda-empty {
   padding: 16px;
   border-radius: 8px;

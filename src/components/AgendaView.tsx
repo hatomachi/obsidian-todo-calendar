@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { AlertCircle, Calendar, CheckCircle2, Circle, Clock, ChevronDown, ChevronRight, ExternalLink, Filter } from 'lucide-react';
+import { AlertCircle, Calendar, CheckCircle2, Circle, Clock, ChevronDown, ChevronRight, ExternalLink, Filter, Loader2 } from 'lucide-react';
 import { AgendaTodoItem, CollectionData, ItemData } from '../types';
 
 interface AgendaViewProps {
   agendaItems: AgendaTodoItem[];
   collections: CollectionData[];
   selectedCollectionId: string | null;
+  isLoading?: boolean;
   onSelectCollectionFilter: (colId: string | null) => void;
   onQuickToggleTodoStatus: (item: ItemData, todoId: string) => void;
   onSelectItem: (item: ItemData, todoId?: string) => void;
@@ -38,6 +39,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
   agendaItems,
   collections,
   selectedCollectionId,
+  isLoading = false,
   onSelectCollectionFilter,
   onQuickToggleTodoStatus,
   onSelectItem,
@@ -113,6 +115,13 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
 
       {/* Main Agenda Content */}
       <div className="todo-cal-agenda-content">
+        {isLoading ? (
+          <div className="todo-cal-agenda-loading">
+            <Loader2 className="todo-cal-spinner" size={28} />
+            <span>アジェンダを読み込み中...</span>
+          </div>
+        ) : (
+          <>
         {/* Overdue Section */}
         {overdue.length > 0 && (
           <div className="todo-cal-agenda-section overdue-section">
@@ -216,6 +225,8 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
               </div>
             )}
           </div>
+        )}
+          </>
         )}
       </div>
     </div>

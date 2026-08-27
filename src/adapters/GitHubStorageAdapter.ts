@@ -24,16 +24,63 @@ function base64ToUtf8(str: string): string {
   return decodeURIComponent(escape(window.atob(str)));
 }
 
+interface FileCacheEntry {
+  sha: string;
+  content: string;
+}
+
 export class GitHubStorageAdapter implements IStorageAdapter {
   private octokit: Octokit;
   private config: GitHubConfig;
   private fileShaCache = new Map<string, string>();
+  private memoryCache: Record<string, FileCacheEntry> = {};
 
   constructor(config: GitHubConfig) {
     this.config = config;
     this.octokit = new Octokit({
       auth: config.token,
     });
+    this.memoryCache = this.loadCache();
+  }
+
+  private getCacheKey(): string {
+    return `todo_cal_file_cache_${this.config.owner}_${this.config.repo}`;
+  }
+
+  private loadCache(): Record<string, FileCacheEntry> {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const raw = localStorage.getItem(this.getCacheKey());
+        if (raw) {
+          return JSON.parse(raw);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load file cache from localStorage:', e);
+    }
+    return {};
+  }
+
+  private saveCache(): void {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem(this.getCacheKey(), JSON.stringify(this.memoryCache));
+      }
+    } catch (e) {
+      console.warn('Failed to save file cache to localStorage:', e);
+    }
+  }
+
+  private updateCacheEntry(path: string, sha: string, content: string): void {
+    this.memoryCache[path] = { sha, content };
+    this.saveCache();
+  }
+
+  private deleteCacheEntry(path: string): void {
+    if (this.memoryCache[path]) {
+      delete this.memoryCache[path];
+      this.saveCache();
+    }
   }
 
   private generateUniqueId(): string {
@@ -73,17 +120,24 @@ export class GitHubStorageAdapter implements IStorageAdapter {
   }
 
   /**
-   * Read file content via GitHub Contents API / Blob API
+   * Read file content via GitHub Contents API / Blob API with SHA diff cache
    */
   private async readFile(path: string, sha?: string): Promise<string> {
     try {
+      // 1. Cache hit if SHA matches cached SHA
+      if (sha && this.memoryCache[path] && this.memoryCache[path].sha === sha) {
+        return this.memoryCache[path].content;
+      }
+
       if (sha) {
         const { data } = await this.octokit.rest.git.getBlob({
           owner: this.config.owner,
           repo: this.config.repo,
           file_sha: sha,
         });
-        return base64ToUtf8(data.content.replace(/\n/g, ''));
+        const content = base64ToUtf8(data.content.replace(/\n/g, ''));
+        this.updateCacheEntry(path, sha, content);
+        return content;
       }
 
       const { data } = await this.octokit.rest.repos.getContent({
@@ -94,8 +148,11 @@ export class GitHubStorageAdapter implements IStorageAdapter {
       });
 
       if ('content' in data && data.content) {
-        if (data.sha) this.fileShaCache.set(path, data.sha);
-        return base64ToUtf8(data.content.replace(/\n/g, ''));
+        const fileSha = data.sha || '';
+        if (fileSha) this.fileShaCache.set(path, fileSha);
+        const content = base64ToUtf8(data.content.replace(/\n/g, ''));
+        if (fileSha) this.updateCacheEntry(path, fileSha, content);
+        return content;
       }
       return '';
     } catch (e: any) {
@@ -140,6 +197,7 @@ export class GitHubStorageAdapter implements IStorageAdapter {
 
     if (data.content?.sha) {
       this.fileShaCache.set(path, data.content.sha);
+      this.updateCacheEntry(path, data.content.sha, content);
       return data.content.sha;
     }
     return '';
@@ -177,6 +235,7 @@ export class GitHubStorageAdapter implements IStorageAdapter {
         sha,
       });
       this.fileShaCache.delete(path);
+      this.deleteCacheEntry(path);
     }
   }
 
@@ -186,29 +245,29 @@ export class GitHubStorageAdapter implements IStorageAdapter {
       (node) => node.path.startsWith(`${COLLECTIONS_DIR}/`) && node.path.endsWith('.md')
     );
 
-    const collections: CollectionData[] = [];
+    const collections = await Promise.all(
+      collectionFiles.map(async (node) => {
+        const content = await this.readFile(node.path, node.sha);
+        const frontmatter = parseYamlContent(content);
 
-    for (const node of collectionFiles) {
-      const content = await this.readFile(node.path, node.sha);
-      const frontmatter = parseYamlContent(content);
+        const filename = node.path.split('/').pop()?.replace(/\.md$/, '') || '';
+        const id = frontmatter.id || filename;
 
-      const filename = node.path.split('/').pop()?.replace(/\.md$/, '') || '';
-      const id = frontmatter.id || filename;
+        // Count items in this collection
+        const prefix = `${ITEMS_DIR}/${id}/`;
+        const itemCount = tree.filter((n) => n.path.startsWith(prefix) && n.path.endsWith('.md')).length;
 
-      // Count items in this collection
-      const prefix = `${ITEMS_DIR}/${id}/`;
-      const itemCount = tree.filter((n) => n.path.startsWith(prefix) && n.path.endsWith('.md')).length;
-
-      collections.push({
-        id,
-        filePath: node.path,
-        title: frontmatter.title || 'Untitled Collection',
-        description: frontmatter.description || '',
-        color: frontmatter.color || 'purple',
-        createdAt: frontmatter.created_at || new Date().toISOString(),
-        itemCount,
-      });
-    }
+        return {
+          id,
+          filePath: node.path,
+          title: frontmatter.title || 'Untitled Collection',
+          description: frontmatter.description || '',
+          color: frontmatter.color || 'purple',
+          createdAt: frontmatter.created_at || new Date().toISOString(),
+          itemCount,
+        } as CollectionData;
+      })
+    );
 
     return collections.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
   }
@@ -246,47 +305,49 @@ export class GitHubStorageAdapter implements IStorageAdapter {
     const tree = await this.fetchTree();
     const prefix = `${ITEMS_DIR}/${collectionId}/`;
     const itemFiles = tree.filter((n) => n.path.startsWith(prefix));
-    for (const itemFile of itemFiles) {
-      await this.deleteFile(itemFile.path, `chore(todo): delete item ${itemFile.path}`);
-    }
+    await Promise.all(
+      itemFiles.map((itemFile) =>
+        this.deleteFile(itemFile.path, `chore(todo): delete item ${itemFile.path}`)
+      )
+    );
   }
 
-  async getItems(collectionId: string): Promise<ItemData[]> {
-    const tree = await this.fetchTree();
+  async getItems(collectionId: string, passedTree?: { path: string; sha: string; size?: number }[]): Promise<ItemData[]> {
+    const tree = passedTree || (await this.fetchTree());
     const prefix = `${ITEMS_DIR}/${collectionId}/`;
     const itemFiles = tree.filter((node) => node.path.startsWith(prefix) && node.path.endsWith('.md'));
 
-    const items: ItemData[] = [];
+    const items = await Promise.all(
+      itemFiles.map(async (node) => {
+        const content = await this.readFile(node.path, node.sha);
+        const frontmatter = parseYamlContent(content);
+        const filename = node.path.split('/').pop()?.replace(/\.md$/, '') || '';
 
-    for (const node of itemFiles) {
-      const content = await this.readFile(node.path, node.sha);
-      const frontmatter = parseYamlContent(content);
-      const filename = node.path.split('/').pop()?.replace(/\.md$/, '') || '';
+        const todos: TodoItem[] = Array.isArray(frontmatter.todos)
+          ? frontmatter.todos.map((t: any, idx: number) => ({
+              id: t.id || `todo-${idx}-${Date.now()}`,
+              title: t.title || 'Untitled TODO',
+              due: t.due || '',
+              status: t.status === 'done' ? 'done' : 'todo',
+              description: t.description || '',
+              group: t.group || '',
+            }))
+          : [];
 
-      const todos: TodoItem[] = Array.isArray(frontmatter.todos)
-        ? frontmatter.todos.map((t: any, idx: number) => ({
-            id: t.id || `todo-${idx}-${Date.now()}`,
-            title: t.title || 'Untitled TODO',
-            due: t.due || '',
-            status: t.status === 'done' ? 'done' : 'todo',
-            description: t.description || '',
-            group: t.group || '',
-          }))
-        : [];
-
-      items.push({
-        id: frontmatter.id || filename,
-        collectionId,
-        filePath: node.path,
-        title: frontmatter.title || 'Untitled Item',
-        type: frontmatter.type,
-        template: frontmatter.template,
-        status: frontmatter.status === 'done' ? 'done' : 'todo',
-        description: frontmatter.description || '',
-        createdAt: frontmatter.created_at || new Date().toISOString(),
-        todos,
-      });
-    }
+        return {
+          id: frontmatter.id || filename,
+          collectionId,
+          filePath: node.path,
+          title: frontmatter.title || 'Untitled Item',
+          type: frontmatter.type,
+          template: frontmatter.template,
+          status: frontmatter.status === 'done' ? 'done' : 'todo',
+          description: frontmatter.description || '',
+          createdAt: frontmatter.created_at || new Date().toISOString(),
+          todos,
+        } as ItemData;
+      })
+    );
 
     return items.sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
   }
@@ -366,35 +427,143 @@ export class GitHubStorageAdapter implements IStorageAdapter {
   }
 
   async getItemsByType(typeId: string): Promise<ItemData[]> {
-    const collections = await this.getCollections();
-    const matchedItems: ItemData[] = [];
+    const tree = await this.fetchTree();
+    const itemFiles = tree.filter(
+      (node) => node.path.startsWith(`${ITEMS_DIR}/`) && node.path.endsWith('.md')
+    );
 
-    for (const col of collections) {
-      const items = await this.getItems(col.id);
-      for (const item of items) {
-        if (item.type === typeId) {
-          matchedItems.push(item);
-        }
-      }
-    }
+    const items = await Promise.all(
+      itemFiles.map(async (node) => {
+        const parts = node.path.split('/');
+        const collectionId = parts.length >= 3 ? parts[parts.length - 2] : '';
+        const filename = parts.pop()?.replace(/\.md$/, '') || '';
 
+        const content = await this.readFile(node.path, node.sha);
+        const frontmatter = parseYamlContent(content);
+
+        const todos: TodoItem[] = Array.isArray(frontmatter.todos)
+          ? frontmatter.todos.map((t: any, idx: number) => ({
+              id: t.id || `todo-${idx}-${Date.now()}`,
+              title: t.title || 'Untitled TODO',
+              due: t.due || '',
+              status: t.status === 'done' ? 'done' : 'todo',
+              description: t.description || '',
+              group: t.group || '',
+            }))
+          : [];
+
+        return {
+          id: frontmatter.id || filename,
+          collectionId: frontmatter.collection_id || collectionId,
+          filePath: node.path,
+          title: frontmatter.title || 'Untitled Item',
+          type: frontmatter.type,
+          template: frontmatter.template,
+          status: frontmatter.status === 'done' ? 'done' : 'todo',
+          description: frontmatter.description || '',
+          createdAt: frontmatter.created_at || new Date().toISOString(),
+          todos,
+        } as ItemData;
+      })
+    );
+
+    const matchedItems = items.filter((item) => item.type === typeId);
     return matchedItems.sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
   }
 
   async getAllAgendaItems(): Promise<AgendaTodoItem[]> {
-    const collections = await this.getCollections();
-    const agendaItems: AgendaTodoItem[] = [];
+    const tree = await this.fetchTree();
 
+    // 1. Fetch all collections in parallel
+    const collectionFiles = tree.filter(
+      (node) => node.path.startsWith(`${COLLECTIONS_DIR}/`) && node.path.endsWith('.md')
+    );
+
+    const collections = await Promise.all(
+      collectionFiles.map(async (node) => {
+        const content = await this.readFile(node.path, node.sha);
+        const frontmatter = parseYamlContent(content);
+        const filename = node.path.split('/').pop()?.replace(/\.md$/, '') || '';
+        const id = frontmatter.id || filename;
+        const prefix = `${ITEMS_DIR}/${id}/`;
+        const itemCount = tree.filter((n) => n.path.startsWith(prefix) && n.path.endsWith('.md')).length;
+
+        return {
+          id,
+          filePath: node.path,
+          title: frontmatter.title || 'Untitled Collection',
+          description: frontmatter.description || '',
+          color: frontmatter.color || 'purple',
+          createdAt: frontmatter.created_at || new Date().toISOString(),
+          itemCount,
+        } as CollectionData;
+      })
+    );
+
+    const collectionMap = new Map<string, CollectionData>();
     for (const col of collections) {
-      const items = await this.getItems(col.id);
-      for (const item of items) {
-        for (const todo of item.todos) {
-          agendaItems.push({
-            todo,
-            item,
-            collection: col,
-          });
-        }
+      collectionMap.set(col.id, col);
+    }
+
+    // 2. Fetch all items across all collections in parallel
+    const itemFiles = tree.filter(
+      (node) => node.path.startsWith(`${ITEMS_DIR}/`) && node.path.endsWith('.md')
+    );
+
+    const items = await Promise.all(
+      itemFiles.map(async (node) => {
+        const parts = node.path.split('/');
+        const collectionId = parts.length >= 3 ? parts[parts.length - 2] : '';
+        const filename = parts.pop()?.replace(/\.md$/, '') || '';
+
+        const content = await this.readFile(node.path, node.sha);
+        const frontmatter = parseYamlContent(content);
+
+        const todos: TodoItem[] = Array.isArray(frontmatter.todos)
+          ? frontmatter.todos.map((t: any, idx: number) => ({
+              id: t.id || `todo-${idx}-${Date.now()}`,
+              title: t.title || 'Untitled TODO',
+              due: t.due || '',
+              status: t.status === 'done' ? 'done' : 'todo',
+              description: t.description || '',
+              group: t.group || '',
+            }))
+          : [];
+
+        return {
+          id: frontmatter.id || filename,
+          collectionId: frontmatter.collection_id || collectionId,
+          filePath: node.path,
+          title: frontmatter.title || 'Untitled Item',
+          type: frontmatter.type,
+          template: frontmatter.template,
+          status: frontmatter.status === 'done' ? 'done' : 'todo',
+          description: frontmatter.description || '',
+          createdAt: frontmatter.created_at || new Date().toISOString(),
+          todos,
+        } as ItemData;
+      })
+    );
+
+    // 3. Construct AgendaTodoItem[]
+    const agendaItems: AgendaTodoItem[] = [];
+    for (const item of items) {
+      const col = collectionMap.get(item.collectionId) || {
+        id: item.collectionId,
+        filePath: `${COLLECTIONS_DIR}/${item.collectionId}.md`,
+        title: 'Unknown Collection',
+        description: '',
+        color: 'purple',
+        createdAt: new Date().toISOString(),
+        itemCount: 0,
+      };
+
+      for (const todo of item.todos) {
+        agendaItems.push({
+          todo,
+          item,
+          collection: col,
+        });
       }
     }
 

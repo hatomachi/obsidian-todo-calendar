@@ -2444,7 +2444,7 @@ var require_react_dom_development = __commonJS({
         var HostPortal = 4;
         var HostComponent = 5;
         var HostText = 6;
-        var Fragment4 = 7;
+        var Fragment5 = 7;
         var Mode = 8;
         var ContextConsumer = 9;
         var ContextProvider = 10;
@@ -3601,7 +3601,7 @@ var require_react_dom_development = __commonJS({
               return "DehydratedFragment";
             case ForwardRef:
               return getWrappedName$1(type, type.render, "ForwardRef");
-            case Fragment4:
+            case Fragment5:
               return "Fragment";
             case HostComponent:
               return type;
@@ -12030,7 +12030,7 @@ var require_react_dom_development = __commonJS({
             }
           }
           function updateFragment2(returnFiber, current2, fragment, lanes, key) {
-            if (current2 === null || current2.tag !== Fragment4) {
+            if (current2 === null || current2.tag !== Fragment5) {
               var created = createFiberFromFragment(fragment, returnFiber.mode, lanes, key);
               created.return = returnFiber;
               return created;
@@ -12433,7 +12433,7 @@ var require_react_dom_development = __commonJS({
               if (child.key === key) {
                 var elementType = element.type;
                 if (elementType === REACT_FRAGMENT_TYPE) {
-                  if (child.tag === Fragment4) {
+                  if (child.tag === Fragment5) {
                     deleteRemainingChildren(returnFiber, child.sibling);
                     var existing = useFiber(child, element.props.children);
                     existing.return = returnFiber;
@@ -17909,7 +17909,7 @@ var require_react_dom_development = __commonJS({
               var _resolvedProps2 = workInProgress2.elementType === type ? _unresolvedProps2 : resolveDefaultProps(type, _unresolvedProps2);
               return updateForwardRef(current2, workInProgress2, type, _resolvedProps2, renderLanes2);
             }
-            case Fragment4:
+            case Fragment5:
               return updateFragment(current2, workInProgress2, renderLanes2);
             case Mode:
               return updateMode(current2, workInProgress2, renderLanes2);
@@ -18181,7 +18181,7 @@ var require_react_dom_development = __commonJS({
             case SimpleMemoComponent:
             case FunctionComponent:
             case ForwardRef:
-            case Fragment4:
+            case Fragment5:
             case Mode:
             case Profiler:
             case ContextConsumer:
@@ -22442,7 +22442,7 @@ var require_react_dom_development = __commonJS({
           return fiber;
         }
         function createFiberFromFragment(elements, mode, lanes, key) {
-          var fiber = createFiber(Fragment4, elements, key, mode);
+          var fiber = createFiber(Fragment5, elements, key, mode);
           fiber.lanes = lanes;
           return fiber;
         }
@@ -25489,6 +25489,11 @@ var List = createLucideIcon("List", [
   ["line", { x1: "3", x2: "3.01", y1: "18", y2: "18", key: "28t2mc" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/loader-circle.js
+var LoaderCircle = createLucideIcon("LoaderCircle", [
+  ["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/pencil.js
 var Pencil = createLucideIcon("Pencil", [
   [
@@ -27594,6 +27599,7 @@ var AgendaView = ({
   agendaItems,
   collections,
   selectedCollectionId,
+  isLoading = false,
   onSelectCollectionFilter,
   onQuickToggleTodoStatus,
   onSelectItem,
@@ -27654,7 +27660,10 @@ var AgendaView = ({
         )
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-content", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "todo-cal-agenda-content", children: isLoading ? /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-loading", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(LoaderCircle, { className: "todo-cal-spinner", size: 28 }),
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { children: "\u30A2\u30B8\u30A7\u30F3\u30C0\u3092\u8AAD\u307F\u8FBC\u307F\u4E2D..." })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(import_jsx_runtime7.Fragment, { children: [
       overdue.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-section overdue-section", children: [
         /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-section-header", children: [
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(CircleAlert, { className: "icon overdue-icon", size: 18 }),
@@ -27742,7 +27751,7 @@ var AgendaView = ({
           entry.todo.id
         )) })
       ] })
-    ] })
+    ] }) })
   ] });
 };
 var AgendaCard = ({
@@ -28184,6 +28193,7 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
   const [selectedType, setSelectedType] = (0, import_react8.useState)(null);
   const [items, setItems] = (0, import_react8.useState)([]);
   const [agendaItems, setAgendaItems] = (0, import_react8.useState)([]);
+  const [isAgendaLoading, setIsAgendaLoading] = (0, import_react8.useState)(false);
   const [selectedCollectionFilterId, setSelectedCollectionFilterId] = (0, import_react8.useState)(null);
   const [selectedItem, setSelectedItem] = (0, import_react8.useState)(null);
   const [selectedTodoId, setSelectedTodoId] = (0, import_react8.useState)(null);
@@ -28221,12 +28231,24 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
     setItems(loadedItems);
   }, [storage]);
   const loadAgendaItems = (0, import_react8.useCallback)(async () => {
-    const loadedAgenda = await storage.getAllAgendaItems();
-    setAgendaItems(loadedAgenda);
+    setIsAgendaLoading(true);
+    try {
+      const loadedAgenda = await storage.getAllAgendaItems();
+      setAgendaItems(loadedAgenda);
+    } catch (e) {
+      console.error("Failed to load agenda items:", e);
+    } finally {
+      setIsAgendaLoading(false);
+    }
   }, [storage]);
   (0, import_react8.useEffect)(() => {
     loadCollections();
   }, [loadCollections]);
+  (0, import_react8.useEffect)(() => {
+    if (viewMode === "agenda") {
+      loadAgendaItems();
+    }
+  }, [viewMode, loadAgendaItems]);
   const handleSelectCollection = (0, import_react8.useCallback)(
     async (collection) => {
       setSelectedCollection(collection);
@@ -28579,6 +28601,7 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
             agendaItems,
             collections,
             selectedCollectionId: selectedCollectionFilterId,
+            isLoading: isAgendaLoading,
             onSelectCollectionFilter: setSelectedCollectionFilterId,
             onQuickToggleTodoStatus: handleQuickToggleTodoStatus,
             onSelectItem: handleSelectItem,
@@ -29184,6 +29207,14 @@ lucide-react/dist/esm/icons/layers.js:
    *)
 
 lucide-react/dist/esm/icons/list.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/loader-circle.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *

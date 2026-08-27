@@ -38,6 +38,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
 
   const [items, setItems] = useState<ItemData[]>([]);
   const [agendaItems, setAgendaItems] = useState<AgendaTodoItem[]>([]);
+  const [isAgendaLoading, setIsAgendaLoading] = useState(false);
   const [selectedCollectionFilterId, setSelectedCollectionFilterId] = useState<string | null>(null);
 
   const [selectedItem, setSelectedItem] = useState<ItemData | null>(null);
@@ -88,13 +89,26 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
 
   // Load all items for Agenda view
   const loadAgendaItems = useCallback(async () => {
-    const loadedAgenda = await storage.getAllAgendaItems();
-    setAgendaItems(loadedAgenda);
+    setIsAgendaLoading(true);
+    try {
+      const loadedAgenda = await storage.getAllAgendaItems();
+      setAgendaItems(loadedAgenda);
+    } catch (e) {
+      console.error('Failed to load agenda items:', e);
+    } finally {
+      setIsAgendaLoading(false);
+    }
   }, [storage]);
 
   useEffect(() => {
     loadCollections();
   }, [loadCollections]);
+
+  useEffect(() => {
+    if (viewMode === 'agenda') {
+      loadAgendaItems();
+    }
+  }, [viewMode, loadAgendaItems]);
 
   // Handle select collection (to Calendar view)
   const handleSelectCollection = useCallback(
@@ -505,6 +519,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
               agendaItems={agendaItems}
               collections={collections}
               selectedCollectionId={selectedCollectionFilterId}
+              isLoading={isAgendaLoading}
               onSelectCollectionFilter={setSelectedCollectionFilterId}
               onQuickToggleTodoStatus={handleQuickToggleTodoStatus}
               onSelectItem={handleSelectItem}
