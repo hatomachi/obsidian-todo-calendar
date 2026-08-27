@@ -36,6 +36,18 @@
 
 ※ タグがプッシュされることで、GitHub Actions (`.github/workflows/release.yml`) がトリガーされ、GitHub Releasesに必須ファイル（`main.js`, `manifest.json`, `styles.css`, zipアーカイブ）が自動公開されます。
 
+## モバイル環境の設計思想・アーキテクチャ (Cloudflare Pages × PWA)
+
+このプラグインにおける**モバイル（スマートフォン・タブレット）利用は、Obsidianモバイルアプリではなく、Cloudflare Pages にデプロイされた PWA (Web版) ＋ GitHub API 直接連携**を前提としています。
+
+- **PC環境**: Obsidian デスクトッププラグイン（ローカル Vault を直接読み書き）
+- **モバイル環境**: **Cloudflare Pages (PWA)**
+  - `main` ブランチに push されると、Cloudflare Pages 側で `npm run build:web` が自動実行され、最新の Web アプリ（PWA）が即座にデプロイされます。
+  - スマホの Safari/Chrome でホーム画面に追加（PWA化）して使用します。
+  - データは `GitHubStorageAdapter` を介してプライベートリポジトリと直接通信・同期されます。
+- **ドキュメント参照**:
+  - [SETUP_MOBILE_WEB_GUIDE.md](file:///Users/s-ikari/work/obsidian-todo-calendar/docs/SETUP_MOBILE_WEB_GUIDE.md)
+
 ## AIエージェント直接ファイル操作規約 (Vault Direct Markdown Edit)
 
 AIエージェントがプラグインを介さずにVault内のTODOデータを直接編集・追加・完了するための仕様・ルールは、以下にまとめられています。
