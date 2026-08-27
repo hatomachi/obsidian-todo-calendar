@@ -31,6 +31,9 @@ npm run dev:web
 - **Root directory**: `/`
 - 完全無料・サーバーレスでどこからでもスマホからアクセス可能になります。
 
+📖 **詳しい初期構築・GitHub Privateリポジトリ同期・PWA化・セキュリティ設定手順**:
+👉 [Cloudflare Pages × GitHub API モバイル Web (PWA) 連携・デプロイ完全ガイド](docs/SETUP_MOBILE_WEB_GUIDE.md)
+
 ---
 
 ## 💻 Obsidian プラグイン（PC）のビルド
