@@ -28716,7 +28716,8 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
     setSelectedTodoId(null);
   };
   const selectedNewTypeObj = findItemType(itemTypes, newItemType);
-  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "todo-calendar-app", children: [
+  const isMatrixView = viewMode === "calendar" || viewMode === "type-calendar";
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: `todo-calendar-app ${isMatrixView ? "has-mobile-bottom-bar" : ""}`, children: [
     /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
       HeaderNav,
       {

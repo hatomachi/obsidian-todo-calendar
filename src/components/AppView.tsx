@@ -429,8 +429,10 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
 
   const selectedNewTypeObj = findItemType(itemTypes, newItemType);
 
+  const isMatrixView = viewMode === 'calendar' || viewMode === 'type-calendar';
+
   return (
-    <div className="todo-calendar-app">
+    <div className={`todo-calendar-app ${isMatrixView ? 'has-mobile-bottom-bar' : ''}`}>
       <HeaderNav
         viewMode={viewMode}
         collections={collections}

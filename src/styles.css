@@ -2906,7 +2906,7 @@
 }
 
 @media (max-width: 768px) {
-  .todo-calendar-app {
+  .todo-calendar-app.has-mobile-bottom-bar {
     padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
   }
 
