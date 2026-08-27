@@ -90,7 +90,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
       {/* Header Bar */}
       <div className="todo-cal-agenda-header">
         <div className="todo-cal-agenda-title-group">
-          <h2>📅 今日のアジェンダ (Today's Agenda)</h2>
+          <h2>📅 今日のアジェンダ</h2>
           <span className="todo-cal-agenda-date">{todayStr}</span>
         </div>
 

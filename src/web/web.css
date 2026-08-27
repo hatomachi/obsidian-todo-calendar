@@ -241,13 +241,60 @@ input, textarea, select {
     padding: 0 !important;
   }
   
-  .todo-cal-agenda-container {
-    padding: 0.5rem;
+  .todo-calendar-app .todo-cal-agenda-container {
+    padding: 10px 12px !important;
     -webkit-overflow-scrolling: touch;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
   }
 
-  .todo-cal-agenda-item-card {
-    padding: 0.75rem 0.6rem;
+  .todo-calendar-app .todo-cal-agenda-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .todo-calendar-app .todo-cal-agenda-title-group {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+
+  .todo-calendar-app .todo-cal-agenda-title-group h2 {
+    font-size: 1.05rem !important;
+  }
+
+  .todo-calendar-app .todo-cal-agenda-filter-group {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  .todo-calendar-app .todo-cal-agenda-filter-select {
+    flex: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 0.8rem !important;
+    padding: 4px 8px !important;
+  }
+
+  .todo-calendar-app .todo-cal-agenda-card {
+    padding: 8px 10px !important;
+    gap: 8px !important;
+  }
+
+  .todo-calendar-app .todo-cal-agenda-card-title {
+    font-size: 0.9rem !important;
+  }
+
+  .todo-calendar-app .todo-cal-collection-badge {
+    max-width: 100px !important;
+    font-size: 0.7rem !important;
+    padding: 2px 6px !important;
   }
   
   .todo-cal-modal-content {

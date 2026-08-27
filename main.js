@@ -27631,7 +27631,7 @@ var AgendaView = ({
   return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-container", children: [
     /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-header", children: [
       /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-title-group", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("h2", { children: "\u{1F4C5} \u4ECA\u65E5\u306E\u30A2\u30B8\u30A7\u30F3\u30C0 (Today's Agenda)" }),
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("h2", { children: "\u{1F4C5} \u4ECA\u65E5\u306E\u30A2\u30B8\u30A7\u30F3\u30C0" }),
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "todo-cal-agenda-date", children: todayStr })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "todo-cal-agenda-filter-group", children: [
