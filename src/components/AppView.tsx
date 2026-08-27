@@ -12,6 +12,7 @@ import { AgendaView } from './AgendaView';
 import { ItemType } from '../features/item-types/types';
 import { findItemTemplate, findItemType } from '../features/item-types/templateUtils';
 import { TemplateSettingsModal } from '../features/item-types/TemplateSettingsModal';
+import { MobileBottomBar } from './MobileBottomBar';
 import type TodoCalendarPlugin from '../main';
 
 interface AppViewProps {
@@ -542,6 +543,25 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
           />
         )}
       </div>
+
+      {/* Mobile Fixed Bottom Navigation Bar (Calendar & Type-Calendar modes) */}
+      {(viewMode === 'calendar' || viewMode === 'type-calendar') && (
+        <MobileBottomBar
+          viewMode={viewMode}
+          collections={collections}
+          selectedCollection={selectedCollection}
+          itemTypes={itemTypes}
+          selectedType={selectedType}
+          startDate={startDate}
+          daysCount={daysCount}
+          onNavigateCollection={handleNavigateCollection}
+          onSelectCollection={handleSelectCollection}
+          onNavigateType={handleNavigateType}
+          onSelectType={handleSelectType}
+          onNavigateDate={handleNavigateDate}
+          onResetToToday={handleResetToToday}
+        />
+      )}
 
       {/* Modal for creating a new Item */}
       {isCreateItemModalOpen && (

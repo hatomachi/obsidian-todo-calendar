@@ -1102,7 +1102,7 @@ var require_react_development = __commonJS({
           var dispatcher = resolveDispatcher();
           return dispatcher.useReducer(reducer, initialArg, init);
         }
-        function useRef(initialValue) {
+        function useRef2(initialValue) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useRef(initialValue);
         }
@@ -1896,7 +1896,7 @@ var require_react_development = __commonJS({
         exports.useLayoutEffect = useLayoutEffect;
         exports.useMemo = useMemo2;
         exports.useReducer = useReducer;
-        exports.useRef = useRef;
+        exports.useRef = useRef2;
         exports.useState = useState6;
         exports.useSyncExternalStore = useSyncExternalStore;
         exports.useTransition = useTransition;
@@ -2393,9 +2393,9 @@ var require_react_dom_development = __commonJS({
         if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
           __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
         }
-        var React8 = require_react();
+        var React9 = require_react();
         var Scheduler = require_scheduler();
-        var ReactSharedInternals = React8.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+        var ReactSharedInternals = React9.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
         var suppressWarning = false;
         function setSuppressWarning(newSuppressWarning) {
           {
@@ -4002,7 +4002,7 @@ var require_react_dom_development = __commonJS({
           {
             if (props.value == null) {
               if (typeof props.children === "object" && props.children !== null) {
-                React8.Children.forEach(props.children, function(child) {
+                React9.Children.forEach(props.children, function(child) {
                   if (child == null) {
                     return;
                   }
@@ -23598,7 +23598,7 @@ var require_react_jsx_runtime_development = __commonJS({
     if (true) {
       (function() {
         "use strict";
-        var React8 = require_react();
+        var React9 = require_react();
         var REACT_ELEMENT_TYPE = Symbol.for("react.element");
         var REACT_PORTAL_TYPE = Symbol.for("react.portal");
         var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
@@ -23624,7 +23624,7 @@ var require_react_jsx_runtime_development = __commonJS({
           }
           return null;
         }
-        var ReactSharedInternals = React8.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+        var ReactSharedInternals = React9.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
         function error(format) {
           {
             {
@@ -24474,11 +24474,11 @@ var require_react_jsx_runtime_development = __commonJS({
             return jsxWithValidation(type, props, key, false);
           }
         }
-        var jsx10 = jsxWithValidationDynamic;
-        var jsxs10 = jsxWithValidationStatic;
+        var jsx11 = jsxWithValidationDynamic;
+        var jsxs11 = jsxWithValidationStatic;
         exports.Fragment = REACT_FRAGMENT_TYPE;
-        exports.jsx = jsx10;
-        exports.jsxs = jsxs10;
+        exports.jsx = jsx11;
+        exports.jsxs = jsxs11;
       })();
     }
   }
@@ -24505,7 +24505,7 @@ __export(main_exports, {
 });
 module.exports = __toCommonJS(main_exports);
 var import_obsidian3 = require("obsidian");
-var import_react9 = __toESM(require_react());
+var import_react10 = __toESM(require_react());
 var import_client = __toESM(require_client());
 
 // src/constants.ts
@@ -24515,7 +24515,7 @@ var COLLECTIONS_DIR = `${ROOT_DATA_DIR}/collections`;
 var ITEMS_DIR = `${ROOT_DATA_DIR}/items`;
 
 // src/components/AppView.tsx
-var import_react8 = __toESM(require_react());
+var import_react9 = __toESM(require_react());
 
 // src/storage.ts
 var import_obsidian2 = require("obsidian");
@@ -28178,36 +28178,244 @@ var TemplateSettingsModal = ({
   ] }) });
 };
 
-// src/components/AppView.tsx
+// src/components/MobileBottomBar.tsx
+var import_react8 = __toESM(require_react());
 var import_jsx_runtime9 = __toESM(require_jsx_runtime());
+var MobileBottomBar = ({
+  viewMode,
+  collections,
+  selectedCollection,
+  itemTypes = [],
+  selectedType = null,
+  startDate,
+  daysCount = 3,
+  onNavigateCollection,
+  onSelectCollection,
+  onNavigateType,
+  onSelectType,
+  onNavigateDate,
+  onResetToToday
+}) => {
+  const touchStartX = (0, import_react8.useRef)(null);
+  const touchStartY = (0, import_react8.useRef)(null);
+  const today = /* @__PURE__ */ new Date();
+  const isToday = startDate.getFullYear() === today.getFullYear() && startDate.getMonth() === today.getMonth() && startDate.getDate() === today.getDate();
+  const currentCollectionIndex = selectedCollection ? collections.findIndex((c) => c.id === selectedCollection.id) : -1;
+  const currentTypeIndex = selectedType ? itemTypes.findIndex((t) => t.id === selectedType.id) : -1;
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 40) {
+      if (deltaX > 0) {
+        if (viewMode === "calendar" && onNavigateCollection) {
+          onNavigateCollection(-1);
+        } else if (viewMode === "type-calendar" && onNavigateType) {
+          onNavigateType(-1);
+        }
+      } else {
+        if (viewMode === "calendar" && onNavigateCollection) {
+          onNavigateCollection(1);
+        } else if (viewMode === "type-calendar" && onNavigateType) {
+          onNavigateType(1);
+        }
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+  const totalCount = viewMode === "calendar" ? collections.length : itemTypes.length;
+  const currentIndex = viewMode === "calendar" ? currentCollectionIndex : currentTypeIndex;
+  const canNavigate = totalCount > 1;
+  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(
+    "div",
+    {
+      className: "todo-cal-mobile-bottom-bar",
+      onTouchStart: handleTouchStart,
+      onTouchEnd: handleTouchEnd,
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "mobile-bottom-date-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(
+            "button",
+            {
+              type: "button",
+              className: `mobile-bottom-today-btn ${isToday ? "is-today-active" : ""}`,
+              onClick: onResetToToday,
+              title: "\u4ECA\u65E5\u306B\u623B\u308B",
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Calendar, { size: 13 }),
+                /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { children: "\u4ECA\u65E5" })
+              ]
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "mobile-bottom-date-steppers", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+              "button",
+              {
+                type: "button",
+                className: "mobile-bottom-date-step-btn",
+                onClick: () => onNavigateDate(-daysCount),
+                title: daysCount === 3 ? "\u524D\u306E3\u65E5\u9593" : "\u524D\u9031",
+                children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(ChevronLeft, { size: 16 })
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+              "button",
+              {
+                type: "button",
+                className: "mobile-bottom-date-step-btn",
+                onClick: () => onNavigateDate(daysCount),
+                title: daysCount === 3 ? "\u6B21\u306E3\u65E5\u9593" : "\u6B21\u9031",
+                children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(ChevronRight, { size: 16 })
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "mobile-bottom-center-group", children: [
+          viewMode === "calendar" && selectedCollection && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "mobile-bottom-dropdown-wrapper", title: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u3092\u9078\u629E", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Layers, { size: 13, className: "mobile-bottom-icon" }),
+            /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { className: "mobile-bottom-name-text", children: selectedCollection.title }),
+            totalCount > 1 && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("span", { className: "mobile-bottom-counter", children: [
+              currentIndex + 1,
+              "/",
+              totalCount
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(ChevronDown, { size: 12, className: "mobile-bottom-chevron" }),
+            /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+              "select",
+              {
+                className: "mobile-bottom-hidden-select",
+                value: selectedCollection.id,
+                onChange: (e) => {
+                  const target = collections.find((c) => c.id === e.target.value);
+                  if (target && onSelectCollection) {
+                    onSelectCollection(target);
+                  }
+                },
+                children: collections.map((col, idx) => /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("option", { value: col.id, children: [
+                  col.title,
+                  " (",
+                  idx + 1,
+                  "/",
+                  collections.length,
+                  ")"
+                ] }, col.id))
+              }
+            )
+          ] }),
+          viewMode === "type-calendar" && selectedType && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "mobile-bottom-dropdown-wrapper", title: "\u30BF\u30A4\u30D7\u3092\u9078\u629E", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Tag, { size: 13, className: "mobile-bottom-icon" }),
+            /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("span", { className: "mobile-bottom-name-text", children: [
+              selectedType.icon ? `${selectedType.icon} ` : "",
+              selectedType.name
+            ] }),
+            totalCount > 1 && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("span", { className: "mobile-bottom-counter", children: [
+              currentIndex + 1,
+              "/",
+              totalCount
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(ChevronDown, { size: 12, className: "mobile-bottom-chevron" }),
+            /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+              "select",
+              {
+                className: "mobile-bottom-hidden-select",
+                value: selectedType.id,
+                onChange: (e) => {
+                  const target = itemTypes.find((t) => t.id === e.target.value);
+                  if (target && onSelectType) {
+                    onSelectType(target);
+                  }
+                },
+                children: itemTypes.map((t, idx) => /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("option", { value: t.id, children: [
+                  t.icon ? `${t.icon} ` : "",
+                  t.name,
+                  " (",
+                  idx + 1,
+                  "/",
+                  itemTypes.length,
+                  ")"
+                ] }, t.id))
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "mobile-bottom-nav-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+            "button",
+            {
+              type: "button",
+              className: "mobile-bottom-rapid-btn",
+              disabled: !canNavigate,
+              onClick: () => {
+                if (viewMode === "calendar" && onNavigateCollection) {
+                  onNavigateCollection(-1);
+                } else if (viewMode === "type-calendar" && onNavigateType) {
+                  onNavigateType(-1);
+                }
+              },
+              title: "\u524D\u3078 (\u2190)",
+              "aria-label": "\u524D\u306E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u3078",
+              children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(ChevronLeft, { size: 22 })
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+            "button",
+            {
+              type: "button",
+              className: "mobile-bottom-rapid-btn",
+              disabled: !canNavigate,
+              onClick: () => {
+                if (viewMode === "calendar" && onNavigateCollection) {
+                  onNavigateCollection(1);
+                } else if (viewMode === "type-calendar" && onNavigateType) {
+                  onNavigateType(1);
+                }
+              },
+              title: "\u6B21\u3078 (\u2192)",
+              "aria-label": "\u6B21\u306E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u3078",
+              children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(ChevronRight, { size: 22 })
+            }
+          )
+        ] })
+      ]
+    }
+  );
+};
+
+// src/components/AppView.tsx
+var import_jsx_runtime10 = __toESM(require_jsx_runtime());
 var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "collections" }) => {
-  const [storage] = (0, import_react8.useState)(() => storageAdapter || (app ? new StorageManager(app) : new LocalStorageAdapter()));
-  const [pluginSettings, setPluginSettings] = (0, import_react8.useState)(
+  const [storage] = (0, import_react9.useState)(() => storageAdapter || (app ? new StorageManager(app) : new LocalStorageAdapter()));
+  const [pluginSettings, setPluginSettings] = (0, import_react9.useState)(
     () => settings || plugin?.settings || DEFAULT_SETTINGS
   );
-  const [itemTypes, setItemTypes] = (0, import_react8.useState)([]);
-  const [isTemplateSettingsOpen, setIsTemplateSettingsOpen] = (0, import_react8.useState)(false);
-  const [viewMode, setViewMode] = (0, import_react8.useState)(initialViewMode);
-  const [collections, setCollections] = (0, import_react8.useState)([]);
-  const [selectedCollection, setSelectedCollection] = (0, import_react8.useState)(null);
-  const [selectedType, setSelectedType] = (0, import_react8.useState)(null);
-  const [items, setItems] = (0, import_react8.useState)([]);
-  const [agendaItems, setAgendaItems] = (0, import_react8.useState)([]);
-  const [isAgendaLoading, setIsAgendaLoading] = (0, import_react8.useState)(false);
-  const [selectedCollectionFilterId, setSelectedCollectionFilterId] = (0, import_react8.useState)(null);
-  const [selectedItem, setSelectedItem] = (0, import_react8.useState)(null);
-  const [selectedTodoId, setSelectedTodoId] = (0, import_react8.useState)(null);
-  const [isDrawerOpen, setIsDrawerOpen] = (0, import_react8.useState)(false);
-  const [startDate, setStartDate] = (0, import_react8.useState)(() => /* @__PURE__ */ new Date());
-  const [daysCount, setDaysCount] = (0, import_react8.useState)(() => typeof window !== "undefined" && window.innerWidth <= 768 ? 3 : 7);
-  const [showCompletedItems, setShowCompletedItems] = (0, import_react8.useState)(false);
-  const [isCreateItemModalOpen, setIsCreateItemModalOpen] = (0, import_react8.useState)(false);
-  const [newItemTitle, setNewItemTitle] = (0, import_react8.useState)("");
-  const [newItemDescription, setNewItemDescription] = (0, import_react8.useState)("");
-  const [newItemType, setNewItemType] = (0, import_react8.useState)("");
-  const [newItemTemplate, setNewItemTemplate] = (0, import_react8.useState)("");
-  const [newItemCollectionId, setNewItemCollectionId] = (0, import_react8.useState)("");
-  (0, import_react8.useEffect)(() => {
+  const [itemTypes, setItemTypes] = (0, import_react9.useState)([]);
+  const [isTemplateSettingsOpen, setIsTemplateSettingsOpen] = (0, import_react9.useState)(false);
+  const [viewMode, setViewMode] = (0, import_react9.useState)(initialViewMode);
+  const [collections, setCollections] = (0, import_react9.useState)([]);
+  const [selectedCollection, setSelectedCollection] = (0, import_react9.useState)(null);
+  const [selectedType, setSelectedType] = (0, import_react9.useState)(null);
+  const [items, setItems] = (0, import_react9.useState)([]);
+  const [agendaItems, setAgendaItems] = (0, import_react9.useState)([]);
+  const [isAgendaLoading, setIsAgendaLoading] = (0, import_react9.useState)(false);
+  const [selectedCollectionFilterId, setSelectedCollectionFilterId] = (0, import_react9.useState)(null);
+  const [selectedItem, setSelectedItem] = (0, import_react9.useState)(null);
+  const [selectedTodoId, setSelectedTodoId] = (0, import_react9.useState)(null);
+  const [isDrawerOpen, setIsDrawerOpen] = (0, import_react9.useState)(false);
+  const [startDate, setStartDate] = (0, import_react9.useState)(() => /* @__PURE__ */ new Date());
+  const [daysCount, setDaysCount] = (0, import_react9.useState)(() => typeof window !== "undefined" && window.innerWidth <= 768 ? 3 : 7);
+  const [showCompletedItems, setShowCompletedItems] = (0, import_react9.useState)(false);
+  const [isCreateItemModalOpen, setIsCreateItemModalOpen] = (0, import_react9.useState)(false);
+  const [newItemTitle, setNewItemTitle] = (0, import_react9.useState)("");
+  const [newItemDescription, setNewItemDescription] = (0, import_react9.useState)("");
+  const [newItemType, setNewItemType] = (0, import_react9.useState)("");
+  const [newItemTemplate, setNewItemTemplate] = (0, import_react9.useState)("");
+  const [newItemCollectionId, setNewItemCollectionId] = (0, import_react9.useState)("");
+  (0, import_react9.useEffect)(() => {
     if (plugin) {
       const unsubscribe = plugin.onSettingsChange((newSettings) => {
         setPluginSettings(newSettings);
@@ -28215,22 +28423,22 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
       return unsubscribe;
     }
   }, [plugin]);
-  const loadTemplates = (0, import_react8.useCallback)(async () => {
+  const loadTemplates = (0, import_react9.useCallback)(async () => {
     const loaded = await storage.loadTemplates();
     setItemTypes(loaded);
   }, [storage]);
-  (0, import_react8.useEffect)(() => {
+  (0, import_react9.useEffect)(() => {
     loadTemplates();
   }, [loadTemplates]);
-  const loadCollections = (0, import_react8.useCallback)(async () => {
+  const loadCollections = (0, import_react9.useCallback)(async () => {
     const cols = await storage.getCollections();
     setCollections(cols);
   }, [storage]);
-  const loadItems = (0, import_react8.useCallback)(async (colId) => {
+  const loadItems = (0, import_react9.useCallback)(async (colId) => {
     const loadedItems = await storage.getItems(colId);
     setItems(loadedItems);
   }, [storage]);
-  const loadAgendaItems = (0, import_react8.useCallback)(async () => {
+  const loadAgendaItems = (0, import_react9.useCallback)(async () => {
     setIsAgendaLoading(true);
     try {
       const loadedAgenda = await storage.getAllAgendaItems();
@@ -28241,15 +28449,15 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
       setIsAgendaLoading(false);
     }
   }, [storage]);
-  (0, import_react8.useEffect)(() => {
+  (0, import_react9.useEffect)(() => {
     loadCollections();
   }, [loadCollections]);
-  (0, import_react8.useEffect)(() => {
+  (0, import_react9.useEffect)(() => {
     if (viewMode === "agenda") {
       loadAgendaItems();
     }
   }, [viewMode, loadAgendaItems]);
-  const handleSelectCollection = (0, import_react8.useCallback)(
+  const handleSelectCollection = (0, import_react9.useCallback)(
     async (collection) => {
       setSelectedCollection(collection);
       setSelectedType(null);
@@ -28260,7 +28468,7 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
     },
     [loadItems]
   );
-  const handleSelectType = (0, import_react8.useCallback)(
+  const handleSelectType = (0, import_react9.useCallback)(
     async (type) => {
       setSelectedType(type);
       setSelectedCollection(null);
@@ -28272,7 +28480,7 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
     },
     [storage]
   );
-  const handleNavigateCollection = (0, import_react8.useCallback)(
+  const handleNavigateCollection = (0, import_react9.useCallback)(
     async (direction) => {
       if (collections.length <= 1 || !selectedCollection) return;
       const currentIndex = collections.findIndex((c) => c.id === selectedCollection.id);
@@ -28287,7 +28495,7 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
     },
     [collections, selectedCollection, handleSelectCollection]
   );
-  const handleNavigateType = (0, import_react8.useCallback)(
+  const handleNavigateType = (0, import_react9.useCallback)(
     async (direction) => {
       if (itemTypes.length <= 1 || !selectedType) return;
       const currentIndex = itemTypes.findIndex((t) => t.id === selectedType.id);
@@ -28302,7 +28510,7 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
     },
     [itemTypes, selectedType, handleSelectType]
   );
-  (0, import_react8.useEffect)(() => {
+  (0, import_react9.useEffect)(() => {
     const handleKeyDown = (e) => {
       if (isCreateItemModalOpen || isTemplateSettingsOpen) return;
       const target = e.target;
@@ -28508,8 +28716,8 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
     setSelectedTodoId(null);
   };
   const selectedNewTypeObj = findItemType(itemTypes, newItemType);
-  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-calendar-app", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "todo-calendar-app", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
       HeaderNav,
       {
         viewMode,
@@ -28537,9 +28745,9 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
         onRefresh: handleRefresh
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "app-main-layout", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "main-content-pane", children: [
-        viewMode === "collections" && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "app-main-layout", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "main-content-pane", children: [
+        viewMode === "collections" && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
           CollectionsGrid,
           {
             collections,
@@ -28548,7 +28756,7 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
             onDeleteCollection: handleDeleteCollection
           }
         ),
-        viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+        viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
           CalendarMatrixView,
           {
             items,
@@ -28571,7 +28779,7 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
             onUpdateItem: handleUpdateItem
           }
         ),
-        viewMode === "type-calendar" && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+        viewMode === "type-calendar" && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
           CalendarMatrixView,
           {
             items,
@@ -28595,7 +28803,7 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
             onUpdateItem: handleUpdateItem
           }
         ),
-        viewMode === "agenda" && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+        viewMode === "agenda" && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
           AgendaView,
           {
             agendaItems,
@@ -28609,7 +28817,7 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
           }
         )
       ] }),
-      (viewMode === "calendar" || viewMode === "type-calendar" || viewMode === "agenda") && isDrawerOpen && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+      (viewMode === "calendar" || viewMode === "type-calendar" || viewMode === "agenda") && isDrawerOpen && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
         TaskDetailDrawer,
         {
           item: selectedItem,
@@ -28623,25 +28831,43 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
         }
       )
     ] }),
-    isCreateItemModalOpen && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "todo-cal-modal-backdrop", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-cal-modal-content", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("h3", { children: "\u65B0\u898F\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item) \u306E\u4F5C\u6210" }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("form", { onSubmit: handleCreateItemSubmit, children: [
-        !selectedCollection && collections.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-cal-form-group", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("label", { children: "\u6240\u5C5E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3 *" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+    (viewMode === "calendar" || viewMode === "type-calendar") && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+      MobileBottomBar,
+      {
+        viewMode,
+        collections,
+        selectedCollection,
+        itemTypes,
+        selectedType,
+        startDate,
+        daysCount,
+        onNavigateCollection: handleNavigateCollection,
+        onSelectCollection: handleSelectCollection,
+        onNavigateType: handleNavigateType,
+        onSelectType: handleSelectType,
+        onNavigateDate: handleNavigateDate,
+        onResetToToday: handleResetToToday
+      }
+    ),
+    isCreateItemModalOpen && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "todo-cal-modal-backdrop", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "todo-cal-modal-content", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("h3", { children: "\u65B0\u898F\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8 (Item) \u306E\u4F5C\u6210" }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("form", { onSubmit: handleCreateItemSubmit, children: [
+        !selectedCollection && collections.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("label", { children: "\u6240\u5C5E\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3 *" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
             "select",
             {
               className: "todo-cal-form-input",
               value: newItemCollectionId || collections[0].id,
               onChange: (e) => setNewItemCollectionId(e.target.value),
               required: true,
-              children: collections.map((col) => /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("option", { value: col.id, children: col.title }, col.id))
+              children: collections.map((col) => /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("option", { value: col.id, children: col.title }, col.id))
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-cal-form-group", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("label", { children: "\u30CE\u30FC\u30C8\u30BF\u30A4\u30C8\u30EB *" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("label", { children: "\u30CE\u30FC\u30C8\u30BF\u30A4\u30C8\u30EB *" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
             "input",
             {
               type: "text",
@@ -28654,10 +28880,10 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
             }
           )
         ] }),
-        pluginSettings.enableItemTypes && itemTypes.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-cal-form-group", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("label", { children: "\u30BF\u30A4\u30D7 (\u4EFB\u610F\u30FB\u30C6\u30F3\u30D7\u30ECTODO\u3092\u81EA\u52D5\u30BB\u30C3\u30C8)" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "create-type-selection-row", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(
+        pluginSettings.enableItemTypes && itemTypes.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("label", { children: "\u30BF\u30A4\u30D7 (\u4EFB\u610F\u30FB\u30C6\u30F3\u30D7\u30ECTODO\u3092\u81EA\u52D5\u30BB\u30C3\u30C8)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "create-type-selection-row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(
               "select",
               {
                 className: "todo-cal-form-input flex-1",
@@ -28668,18 +28894,18 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
                   setNewItemTemplate(tObj?.templates[0]?.name || "");
                 },
                 children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("option", { value: "", children: "(\u6307\u5B9A\u306A\u3057 - \u7A7A\u306E\u30A2\u30A4\u30C6\u30E0)" }),
-                  itemTypes.map((type) => /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("option", { value: type.id, children: type.name }, type.id))
+                  /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("option", { value: "", children: "(\u6307\u5B9A\u306A\u3057 - \u7A7A\u306E\u30A2\u30A4\u30C6\u30E0)" }),
+                  itemTypes.map((type) => /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("option", { value: type.id, children: type.name }, type.id))
                 ]
               }
             ),
-            selectedNewTypeObj && selectedNewTypeObj.templates.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+            selectedNewTypeObj && selectedNewTypeObj.templates.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
               "select",
               {
                 className: "todo-cal-form-input flex-1",
                 value: newItemTemplate || selectedNewTypeObj.templates[0]?.name || "",
                 onChange: (e) => setNewItemTemplate(e.target.value),
-                children: selectedNewTypeObj.templates.map((tpl) => /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("option", { value: tpl.name, children: [
+                children: selectedNewTypeObj.templates.map((tpl) => /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("option", { value: tpl.name, children: [
                   tpl.name,
                   " (",
                   tpl.todos.length,
@@ -28688,15 +28914,15 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
               }
             )
           ] }),
-          selectedNewTypeObj && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "create-template-hint", children: [
+          selectedNewTypeObj && /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "create-template-hint", children: [
             "\u{1F4A1} \u9078\u629E\u3055\u308C\u305F\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u306ETODO\uFF08",
             (findItemTemplate(selectedNewTypeObj, newItemTemplate) || selectedNewTypeObj.templates[0])?.todos.length,
             "\u4EF6\uFF09\u304C\u65E5\u4ED8\u306A\u3057\u3067\u81EA\u52D5\u4F5C\u6210\u3055\u308C\u307E\u3059\u3002"
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-cal-form-group", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("label", { children: "\u30E1\u30E2 / \u8A73\u7D30\u8AAC\u660E (\u4EFB\u610F)" }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("label", { children: "\u30E1\u30E2 / \u8A73\u7D30\u8AAC\u660E (\u4EFB\u610F)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
             "textarea",
             {
               className: "todo-cal-form-input",
@@ -28707,8 +28933,8 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "todo-cal-modal-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "todo-cal-modal-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
             "button",
             {
               type: "button",
@@ -28717,11 +28943,11 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
               children: "\u30AD\u30E3\u30F3\u30BB\u30EB"
             }
           ),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("button", { type: "submit", className: "nav-btn primary-btn", children: "\u4F5C\u6210" })
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("button", { type: "submit", className: "nav-btn primary-btn", children: "\u4F5C\u6210" })
         ] })
       ] })
     ] }) }),
-    isTemplateSettingsOpen && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+    isTemplateSettingsOpen && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
       TemplateSettingsModal,
       {
         isOpen: isTemplateSettingsOpen,
@@ -28755,10 +28981,10 @@ var TodoCalendarView = class extends import_obsidian3.ItemView {
     container.addClass("todo-calendar-view-container");
     this.root = (0, import_client.createRoot)(container);
     this.root.render(
-      import_react9.default.createElement(
-        import_react9.default.StrictMode,
+      import_react10.default.createElement(
+        import_react10.default.StrictMode,
         null,
-        import_react9.default.createElement(AppView, {
+        import_react10.default.createElement(AppView, {
           app: this.app,
           plugin: this.plugin,
           settings: this.plugin.settings
