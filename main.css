@@ -273,9 +273,16 @@
 }
 .todo-calendar-app .main-content-pane {
   flex: 1;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
+  width: 100%;
+  box-sizing: border-box;
 }
 .todo-calendar-app .collections-dashboard {
   padding: 24px;
@@ -1467,18 +1474,14 @@
 .todo-calendar-app .todo-cal-agenda-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
   width: 100%;
   max-width: 860px;
   margin: 0 auto;
   padding: 16px 24px;
-  overflow-y: auto;
-  overflow-x: hidden;
   box-sizing: border-box;
   gap: 20px;
   background-color: var(--background-primary);
-  overscroll-behavior-x: none;
-  touch-action: pan-y;
+  overflow-x: hidden;
 }
 .todo-calendar-app .todo-cal-agenda-header {
   display: flex;
