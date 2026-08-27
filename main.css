@@ -8,6 +8,7 @@
   color: var(--text-normal);
   font-family: var(--font-interface, system-ui, -apple-system, sans-serif);
   overflow: hidden;
+  overscroll-behavior: none;
   box-sizing: border-box;
 }
 .todo-calendar-app .todo-cal-header {
@@ -278,8 +279,7 @@
   display: flex;
   flex-direction: column;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  overscroll-behavior-x: none;
+  overscroll-behavior: none;
   touch-action: pan-y;
   width: 100%;
   box-sizing: border-box;
@@ -421,16 +421,15 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: auto;
-  overscroll-behavior-x: none;
+  overflow: hidden;
+  overscroll-behavior: none;
   touch-action: pan-x pan-y;
 }
 .todo-calendar-app .table-scroll-wrapper {
   flex: 1;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: none;
-  overscroll-behavior-y: auto;
+  overscroll-behavior: none;
   touch-action: pan-x pan-y;
 }
 .todo-calendar-app .matrix-table {
