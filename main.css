@@ -422,10 +422,16 @@
   display: flex;
   flex-direction: column;
   overflow: auto;
+  overscroll-behavior-x: none;
+  touch-action: pan-x pan-y;
 }
 .todo-calendar-app .table-scroll-wrapper {
   flex: 1;
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: auto;
+  touch-action: pan-x pan-y;
 }
 .todo-calendar-app .matrix-table {
   width: 100%;
@@ -2481,8 +2487,4 @@
 .todo-calendar-app .matrix-table.compact-3days .todo-pill-date {
   font-size: 10px;
   opacity: 0.7;
-}
-.todo-calendar-app .table-scroll-wrapper {
-  -webkit-overflow-scrolling: touch;
-  overflow-x: auto;
 }

@@ -1,6 +1,6 @@
 {
   "name": "obsidian-todo-calendar",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Obsidian custom plugin for managing TODOs in a 7-day calendar matrix view with NotebookLM-style collections.",
   "main": "main.js",
   "scripts": {
