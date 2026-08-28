@@ -25300,6 +25300,12 @@ var AlignLeft = createLucideIcon("AlignLeft", [
   ["line", { x1: "17", x2: "3", y1: "18", y2: "18", key: "1awlsn" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/arrow-left.js
+var ArrowLeft = createLucideIcon("ArrowLeft", [
+  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
+  ["path", { d: "M19 12H5", key: "x3x0zl" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/arrow-up-down.js
 var ArrowUpDown = createLucideIcon("ArrowUpDown", [
   ["path", { d: "m21 16-4 4-4-4", key: "f6ql7i" }],
@@ -25662,24 +25668,29 @@ var HeaderNav = ({
   const currentCollectionIndex = selectedCollection ? collections.findIndex((c) => c.id === selectedCollection.id) : -1;
   const currentTypeIndex = selectedType ? itemTypes.findIndex((t) => t.id === selectedType.id) : -1;
   const isMatrixView = viewMode === "calendar" || viewMode === "type-calendar";
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "todo-cal-header", children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `todo-cal-header ${isMatrixView ? "header-matrix-mode" : "header-overview-mode"}`, children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "header-left", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
         "button",
         {
-          className: `nav-btn ${viewMode === "collections" ? "active-tab" : "secondary-btn"}`,
+          className: `nav-btn ${viewMode === "collections" ? "active-tab" : "secondary-btn"} ${isMatrixView ? "matrix-back-btn" : ""}`,
           onClick: onBackToCollections,
           title: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u4E00\u89A7",
-          children: [
+          children: isMatrixView ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { size: 16, className: "mobile-only-icon" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Layers, { size: 16, className: "desktop-only-icon" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "desktop-btn-label", children: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mobile-btn-label", children: "\u4E00\u89A7" })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Layers, { size: 16 }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3" })
-          ]
+          ] })
         }
       ),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
         "button",
         {
-          className: `nav-btn ${viewMode === "agenda" ? "active-tab" : "secondary-btn"}`,
+          className: `nav-btn ${viewMode === "agenda" ? "active-tab" : "secondary-btn"} ${isMatrixView ? "desktop-only" : ""}`,
           onClick: onSelectAgenda,
           title: "\u4ECA\u65E5\u306E\u30A2\u30B8\u30A7\u30F3\u30C0",
           children: [
@@ -25688,7 +25699,7 @@ var HeaderNav = ({
           ]
         }
       ),
-      enableItemTypes && itemTypes.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `nav-type-dropdown-btn ${viewMode === "type-calendar" ? "active-tab" : "secondary-btn"}`, children: [
+      enableItemTypes && itemTypes.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `nav-type-dropdown-btn ${viewMode === "type-calendar" ? "active-tab" : "secondary-btn"} ${isMatrixView ? "desktop-only" : ""}`, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Tag, { size: 16, className: "badge-icon" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
           "select",
@@ -25713,8 +25724,8 @@ var HeaderNav = ({
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { size: 14, className: "dropdown-arrow-icon" })
       ] }),
       viewMode === "calendar" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "breadcrumb-separator", children: "/" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "collection-stepper-container", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "breadcrumb-separator desktop-only", children: "/" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "collection-stepper-container desktop-only", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
             "button",
             {
@@ -25768,8 +25779,8 @@ var HeaderNav = ({
         ] })
       ] }),
       viewMode === "type-calendar" && selectedType && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "breadcrumb-separator", children: "/" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "collection-stepper-container type-stepper-container", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "breadcrumb-separator desktop-only", children: "/" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "collection-stepper-container type-stepper-container desktop-only", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
             "button",
             {
@@ -25829,31 +25840,23 @@ var HeaderNav = ({
         onToggleShowCompleted && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
           "button",
           {
-            className: `nav-btn toggle-completed-btn ${showCompletedItems ? "active-toggle" : "secondary-btn"}`,
+            className: `nav-btn toggle-completed-btn header-toggle-completed-btn ${showCompletedItems ? "active-toggle" : "secondary-btn"}`,
             onClick: onToggleShowCompleted,
             title: showCompletedItems ? "\u5B8C\u4E86\u884C\u3092\u96A0\u3059" : "\u5B8C\u4E86\u884C\u3092\u8868\u793A\u3059\u308B",
             children: [
               showCompletedItems ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { size: 15 }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { size: 15 }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: showCompletedItems ? "\u5B8C\u4E86\u884C\u3092\u975E\u8868\u793A" : `\u5B8C\u4E86\u884C\u3092\u8868\u793A${completedItemsCount > 0 ? ` (${completedItemsCount})` : ""}` })
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "desktop-btn-label", children: showCompletedItems ? "\u5B8C\u4E86\u884C\u3092\u975E\u8868\u793A" : `\u5B8C\u4E86\u884C\u3092\u8868\u793A${completedItemsCount > 0 ? ` (${completedItemsCount})` : ""}` })
             ]
           }
         ),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "date-controls", children: [
-          onToggleDaysCount && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "days-count-toggle-group", style: { display: "inline-flex", borderRadius: "4px", border: "1px solid var(--background-modifier-border)", overflow: "hidden", marginRight: "4px" }, children: [
+          onToggleDaysCount && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "days-count-toggle-group", children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
               "button",
               {
                 type: "button",
+                className: `days-count-btn ${daysCount === 3 ? "active" : ""}`,
                 onClick: () => onToggleDaysCount(3),
-                style: {
-                  padding: "2px 8px",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  border: "none",
-                  cursor: "pointer",
-                  background: daysCount === 3 ? "var(--interactive-accent, #7c3aed)" : "transparent",
-                  color: daysCount === 3 ? "#fff" : "inherit"
-                },
                 title: "3\u65E5\u9593\u8868\u793A (\u672A\u5B8C\u4E86 + \u5F53\u65E5\u542B\u30813\u65E5)",
                 children: "3\u65E5"
               }
@@ -25862,16 +25865,8 @@ var HeaderNav = ({
               "button",
               {
                 type: "button",
+                className: `days-count-btn ${daysCount === 7 ? "active" : ""}`,
                 onClick: () => onToggleDaysCount(7),
-                style: {
-                  padding: "2px 8px",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  border: "none",
-                  cursor: "pointer",
-                  background: daysCount === 7 ? "var(--interactive-accent, #7c3aed)" : "transparent",
-                  color: daysCount === 7 ? "#fff" : "inherit"
-                },
                 title: "7\u65E5\u9593\u8868\u793A (1\u9031\u9593)",
                 children: "7\u65E5"
               }
@@ -25880,7 +25875,7 @@ var HeaderNav = ({
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
             "button",
             {
-              className: "nav-btn secondary-btn",
+              className: "nav-btn secondary-btn desktop-only",
               onClick: () => onNavigateDate(-daysCount),
               title: daysCount === 3 ? "\u524D\u306E3\u65E5\u9593" : "\u524D\u9031",
               children: [
@@ -25889,11 +25884,11 @@ var HeaderNav = ({
               ]
             }
           ),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "nav-btn secondary-btn today-btn", onClick: onResetToToday, children: "\u4ECA\u65E5" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "nav-btn secondary-btn today-btn desktop-only", onClick: onResetToToday, children: "\u4ECA\u65E5" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
             "button",
             {
-              className: "nav-btn secondary-btn",
+              className: "nav-btn secondary-btn desktop-only",
               onClick: () => onNavigateDate(daysCount),
               title: daysCount === 3 ? "\u6B21\u306E3\u65E5\u9593" : "\u6B21\u9031",
               children: [
@@ -25905,11 +25900,11 @@ var HeaderNav = ({
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "date-range-label", children: formatDateRangeHeader(startDate, daysCount) })
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "icon-btn", onClick: onRefresh, title: "\u30C7\u30FC\u30BF\u66F4\u65B0", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { size: 16 }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: `icon-btn ${isMatrixView ? "desktop-only" : ""}`, onClick: onRefresh, title: "\u30C7\u30FC\u30BF\u66F4\u65B0", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { size: 16 }) }),
       enableItemTypes && onOpenTemplateSettings && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
         "button",
         {
-          className: "icon-btn",
+          className: `icon-btn ${isMatrixView ? "desktop-only" : ""}`,
           onClick: onOpenTemplateSettings,
           title: "\u30BF\u30A4\u30D7 & \u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u8A2D\u5B9A",
           children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Settings, { size: 16 })
@@ -25918,12 +25913,12 @@ var HeaderNav = ({
       isMatrixView && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
         "button",
         {
-          className: "nav-btn primary-btn create-item-btn",
+          className: "nav-btn primary-btn create-item-btn header-create-item-btn",
           onClick: onOpenCreateItemModal,
           title: "\u65B0\u898F\u30A2\u30A4\u30C6\u30E0 (\u30BF\u30B9\u30AF\u30CE\u30FC\u30C8) \u3092\u4F5C\u6210",
           children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { size: 16 }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "\u65B0\u898F\u30A2\u30A4\u30C6\u30E0" })
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "desktop-btn-label", children: "\u65B0\u898F\u30A2\u30A4\u30C6\u30E0" })
           ]
         }
       )
@@ -29281,6 +29276,14 @@ lucide-react/dist/esm/createLucideIcon.js:
    *)
 
 lucide-react/dist/esm/icons/align-left.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/arrow-left.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *

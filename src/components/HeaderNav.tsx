@@ -86,19 +86,30 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   const isMatrixView = viewMode === 'calendar' || viewMode === 'type-calendar';
 
   return (
-    <div className="todo-cal-header">
+    <div className={`todo-cal-header ${isMatrixView ? 'header-matrix-mode' : 'header-overview-mode'}`}>
       <div className="header-left">
         <button
-          className={`nav-btn ${viewMode === 'collections' ? 'active-tab' : 'secondary-btn'}`}
+          className={`nav-btn ${viewMode === 'collections' ? 'active-tab' : 'secondary-btn'} ${isMatrixView ? 'matrix-back-btn' : ''}`}
           onClick={onBackToCollections}
           title="コレクション一覧"
         >
-          <Layers size={16} />
-          <span>コレクション</span>
+          {isMatrixView ? (
+            <>
+              <ArrowLeft size={16} className="mobile-only-icon" />
+              <Layers size={16} className="desktop-only-icon" />
+              <span className="desktop-btn-label">コレクション</span>
+              <span className="mobile-btn-label">一覧</span>
+            </>
+          ) : (
+            <>
+              <Layers size={16} />
+              <span>コレクション</span>
+            </>
+          )}
         </button>
 
         <button
-          className={`nav-btn ${viewMode === 'agenda' ? 'active-tab' : 'secondary-btn'}`}
+          className={`nav-btn ${viewMode === 'agenda' ? 'active-tab' : 'secondary-btn'} ${isMatrixView ? 'desktop-only' : ''}`}
           onClick={onSelectAgenda}
           title="今日のアジェンダ"
         >
@@ -107,7 +118,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
         </button>
 
         {enableItemTypes && itemTypes.length > 0 && (
-          <div className={`nav-type-dropdown-btn ${viewMode === 'type-calendar' ? 'active-tab' : 'secondary-btn'}`}>
+          <div className={`nav-type-dropdown-btn ${viewMode === 'type-calendar' ? 'active-tab' : 'secondary-btn'} ${isMatrixView ? 'desktop-only' : ''}`}>
             <Tag size={16} className="badge-icon" />
             <select
               className="nav-type-dropdown-select"
@@ -134,8 +145,8 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 
         {viewMode === 'calendar' && (
           <>
-            <span className="breadcrumb-separator">/</span>
-            <div className="collection-stepper-container">
+            <span className="breadcrumb-separator desktop-only">/</span>
+            <div className="collection-stepper-container desktop-only">
               <button
                 className="collection-stepper-btn"
                 onClick={() => onNavigateCollection && onNavigateCollection(-1)}
@@ -185,8 +196,8 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 
         {viewMode === 'type-calendar' && selectedType && (
           <>
-            <span className="breadcrumb-separator">/</span>
-            <div className="collection-stepper-container type-stepper-container">
+            <span className="breadcrumb-separator desktop-only">/</span>
+            <div className="collection-stepper-container type-stepper-container desktop-only">
               <button
                 className="collection-stepper-btn"
                 onClick={() => onNavigateType && onNavigateType(-1)}
@@ -240,12 +251,12 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           <>
             {onToggleShowCompleted && (
               <button
-                className={`nav-btn toggle-completed-btn ${showCompletedItems ? 'active-toggle' : 'secondary-btn'}`}
+                className={`nav-btn toggle-completed-btn header-toggle-completed-btn ${showCompletedItems ? 'active-toggle' : 'secondary-btn'}`}
                 onClick={onToggleShowCompleted}
                 title={showCompletedItems ? '完了行を隠す' : '完了行を表示する'}
               >
                 {showCompletedItems ? <EyeOff size={15} /> : <Eye size={15} />}
-                <span>
+                <span className="desktop-btn-label">
                   {showCompletedItems
                     ? '完了行を非表示'
                     : `完了行を表示${completedItemsCount > 0 ? ` (${completedItemsCount})` : ''}`}
@@ -255,35 +266,19 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 
             <div className="date-controls">
               {onToggleDaysCount && (
-                <div className="days-count-toggle-group" style={{ display: 'inline-flex', borderRadius: '4px', border: '1px solid var(--background-modifier-border)', overflow: 'hidden', marginRight: '4px' }}>
+                <div className="days-count-toggle-group">
                   <button
                     type="button"
+                    className={`days-count-btn ${daysCount === 3 ? 'active' : ''}`}
                     onClick={() => onToggleDaysCount(3)}
-                    style={{
-                      padding: '2px 8px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      border: 'none',
-                      cursor: 'pointer',
-                      background: daysCount === 3 ? 'var(--interactive-accent, #7c3aed)' : 'transparent',
-                      color: daysCount === 3 ? '#fff' : 'inherit',
-                    }}
                     title="3日間表示 (未完了 + 当日含め3日)"
                   >
                     3日
                   </button>
                   <button
                     type="button"
+                    className={`days-count-btn ${daysCount === 7 ? 'active' : ''}`}
                     onClick={() => onToggleDaysCount(7)}
-                    style={{
-                      padding: '2px 8px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      border: 'none',
-                      cursor: 'pointer',
-                      background: daysCount === 7 ? 'var(--interactive-accent, #7c3aed)' : 'transparent',
-                      color: daysCount === 7 ? '#fff' : 'inherit',
-                    }}
                     title="7日間表示 (1週間)"
                   >
                     7日
@@ -291,17 +286,17 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                 </div>
               )}
               <button
-                className="nav-btn secondary-btn"
+                className="nav-btn secondary-btn desktop-only"
                 onClick={() => onNavigateDate(-daysCount)}
                 title={daysCount === 3 ? '前の3日間' : '前週'}
               >
                 &lt; {daysCount === 3 ? '前' : '前週'}
               </button>
-              <button className="nav-btn secondary-btn today-btn" onClick={onResetToToday}>
+              <button className="nav-btn secondary-btn today-btn desktop-only" onClick={onResetToToday}>
                 今日
               </button>
               <button
-                className="nav-btn secondary-btn"
+                className="nav-btn secondary-btn desktop-only"
                 onClick={() => onNavigateDate(daysCount)}
                 title={daysCount === 3 ? '次の3日間' : '次週'}
               >
@@ -313,13 +308,13 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           </>
         )}
 
-        <button className="icon-btn" onClick={onRefresh} title="データ更新">
+        <button className={`icon-btn ${isMatrixView ? 'desktop-only' : ''}`} onClick={onRefresh} title="データ更新">
           <RefreshCw size={16} />
         </button>
 
         {enableItemTypes && onOpenTemplateSettings && (
           <button
-            className="icon-btn"
+            className={`icon-btn ${isMatrixView ? 'desktop-only' : ''}`}
             onClick={onOpenTemplateSettings}
             title="タイプ & テンプレート設定"
           >
@@ -329,12 +324,12 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 
         {isMatrixView && (
           <button
-            className="nav-btn primary-btn create-item-btn"
+            className="nav-btn primary-btn create-item-btn header-create-item-btn"
             onClick={onOpenCreateItemModal}
             title="新規アイテム (タスクノート) を作成"
           >
             <Plus size={16} />
-            <span>新規アイテム</span>
+            <span className="desktop-btn-label">新規アイテム</span>
           </button>
         )}
       </div>

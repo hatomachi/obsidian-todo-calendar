@@ -60,6 +60,9 @@ export const WebApp: React.FC = () => {
   };
 
   const isConfigured = activeMode === 'github' ? Boolean(githubConfig.token && githubConfig.owner && githubConfig.repo) : true;
+  const isStaging =
+    (activeMode === 'github' && (githubConfig.repo.toLowerCase().includes('staging') || githubConfig.repo.toLowerCase().includes('stg'))) ||
+    (typeof window !== 'undefined' && (window.location.hostname.includes('staging') || window.location.hostname.includes('stg')));
 
   return (
     <div className="todo-calendar-web-root">
@@ -71,11 +74,20 @@ export const WebApp: React.FC = () => {
             className="todo-cal-web-mode-badge"
             onClick={() => setIsSettingsOpen(true)}
             title="クリックして設定を開く"
+            style={
+              isStaging
+                ? {
+                    background: 'rgba(245, 158, 11, 0.15)',
+                    border: '1px solid #f59e0b',
+                    color: '#f59e0b',
+                  }
+                : undefined
+            }
           >
             {activeMode === 'github' && isConfigured ? (
               <>
-                <Cloud size={14} color="#10b981" />
-                <span>GitHub ({githubConfig.repo})</span>
+                <Cloud size={14} color={isStaging ? '#f59e0b' : '#10b981'} />
+                <span>{isStaging ? '🧪 Staging' : 'GitHub'} ({githubConfig.repo})</span>
               </>
             ) : (
               <>

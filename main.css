@@ -199,6 +199,42 @@
   text-overflow: ellipsis;
   vertical-align: middle;
 }
+.todo-calendar-app .mobile-only-icon,
+.todo-calendar-app .mobile-btn-label {
+  display: none !important;
+}
+.todo-calendar-app .desktop-only-icon {
+  display: inline-flex;
+}
+.todo-calendar-app .desktop-btn-label {
+  display: inline;
+}
+.todo-calendar-app .days-count-toggle-group {
+  display: inline-flex;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15));
+  overflow: hidden;
+  background-color: var(--background-primary);
+  margin-right: 4px;
+}
+.todo-calendar-app .days-count-btn {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.12s ease;
+}
+.todo-calendar-app .days-count-btn.active {
+  background: var(--interactive-accent, #7c3aed);
+  color: #ffffff;
+}
+.todo-calendar-app .days-count-btn:hover:not(.active) {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
 .todo-calendar-app .nav-btn {
   display: inline-flex;
   align-items: center;
@@ -2528,6 +2564,90 @@
 @media (max-width: 768px) {
   .todo-calendar-app.has-mobile-bottom-bar {
     padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  }
+  .todo-calendar-app .desktop-only {
+    display: none !important;
+  }
+  .todo-calendar-app .desktop-only-icon,
+  .todo-calendar-app .desktop-btn-label {
+    display: none !important;
+  }
+  .todo-calendar-app .mobile-only-icon {
+    display: inline-flex !important;
+  }
+  .todo-calendar-app .mobile-btn-label {
+    display: inline !important;
+  }
+  .todo-calendar-app .todo-cal-header {
+    height: 44px;
+    min-height: 44px;
+    padding: 0 8px !important;
+    gap: 6px !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    overflow: hidden !important;
+    background-color: var(--background-secondary) !important;
+    border-bottom: 1px solid var(--border-color, rgba(128, 128, 128, 0.2)) !important;
+  }
+  .todo-calendar-app .todo-cal-header .header-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0;
+    min-width: 0;
+  }
+  .todo-calendar-app .todo-cal-header .header-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    flex-shrink: 0;
+  }
+  .todo-calendar-app .todo-cal-header .nav-btn {
+    height: 30px !important;
+    padding: 0 8px !important;
+    font-size: 12px !important;
+    gap: 4px !important;
+    border-radius: 6px !important;
+  }
+  .todo-calendar-app .matrix-back-btn {
+    padding: 0 8px !important;
+    font-weight: 600;
+  }
+  .todo-calendar-app .todo-cal-header .date-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+  .todo-calendar-app .todo-cal-header .date-range-label {
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    color: var(--text-normal) !important;
+    white-space: nowrap !important;
+    margin: 0 2px !important;
+  }
+  .todo-calendar-app .days-count-toggle-group {
+    border-radius: 5px;
+    margin-right: 2px;
+  }
+  .todo-calendar-app .days-count-btn {
+    padding: 2px 6px;
+    font-size: 10.5px;
+  }
+  .todo-calendar-app .header-toggle-completed-btn {
+    height: 30px !important;
+    width: 30px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+  }
+  .todo-calendar-app .header-create-item-btn {
+    height: 30px !important;
+    width: 30px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
   }
   .todo-cal-mobile-bottom-bar {
     display: flex;

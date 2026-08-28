@@ -1,0 +1,28 @@
+name: Sync to Staging Vault
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # 手動実行も可能
+
+jobs:
+  sync:
+    name: Mirror to Staging Repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Vault (Prod)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to Staging Vault
+        env:
+          SYNC_PAT: ${{ secrets.STAGING_SYNC_PAT }}
+          TARGET_OWNER: ${{ secrets.STAGING_OWNER }}
+          TARGET_REPO: ${{ secrets.STAGING_REPO }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote add staging "https://x-access-token:${SYNC_PAT}@github.com/${TARGET_OWNER}/${TARGET_REPO}.git"
+          git push staging main:main --force

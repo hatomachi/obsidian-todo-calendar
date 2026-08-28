@@ -47,6 +47,7 @@
   - データは `GitHubStorageAdapter` を介してプライベートリポジトリと直接通信・同期されます。
 - **ドキュメント参照**:
   - [SETUP_MOBILE_WEB_GUIDE.md](file:///Users/s-ikari/work/obsidian-todo-calendar/docs/SETUP_MOBILE_WEB_GUIDE.md)
+  - [SETUP_STAGING_ENVIRONMENT_GUIDE.md](file:///Users/s-ikari/work/obsidian-todo-calendar/docs/SETUP_STAGING_ENVIRONMENT_GUIDE.md)
 
 ## AIエージェント直接ファイル操作規約 (Vault Direct Markdown Edit)
 
