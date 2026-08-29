@@ -81,8 +81,40 @@ flowchart TD
      - `STAGING_OWNER`: GitHub ユーザー名（例: `hatomachi`）
      - `STAGING_REPO`: ステージングリポジトリ名（例: `my-todo-vault-staging`）
 3. **ワークフローファイルの配置**:
-   - 本番 Vault リポジトリの `.github/workflows/sync-to-staging.yml` に [templates/sync-to-staging.yml](file:///Users/s-ikari/work/obsidian-todo-calendar/templates/sync-to-staging.yml) の内容を配置して push します。
-   - 以降、本番 Vault が更新されるたびにステージング Vault も自動で最新化されます。
+   - 本番 Vault リポジトリの `.github/workflows/sync-to-staging.yml` に以下の内容を配置して push します。
+
+```yaml
+name: Sync to Staging Vault
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: Mirror to Staging Repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Vault (Prod)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Push to Staging Vault
+        env:
+          SYNC_PAT: ${{ secrets.STAGING_SYNC_PAT }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # ステージング側には同期ワークフローは不要なため除外（PATのworkflow権限不要にするため）
+          git rm -rf .github || true
+          git commit -m "sync: mirror from prod" || true
+          git remote add staging "https://x-access-token:${SYNC_PAT}@github.com/hatomachi/my-todo-repo-staging.git"
+          git push staging HEAD:main --force
+```
 
 #### パターン B: 手動ワンライナー / スクリプト同期
 ローカル PC から手動で同期したい場合は、以下のいずれかを実行します。

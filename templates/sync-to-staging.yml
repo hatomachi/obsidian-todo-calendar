@@ -15,14 +15,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Push to Staging Vault
         env:
           SYNC_PAT: ${{ secrets.STAGING_SYNC_PAT }}
-          TARGET_OWNER: ${{ secrets.STAGING_OWNER }}
-          TARGET_REPO: ${{ secrets.STAGING_REPO }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git remote add staging "https://x-access-token:${SYNC_PAT}@github.com/${TARGET_OWNER}/${TARGET_REPO}.git"
-          git push staging main:main --force
+          # ステージング側には同期ワークフローは不要なため除外（PATのworkflow権限不要にするため）
+          git rm -rf .github || true
+          git commit -m "sync: mirror from prod" || true
+          git remote add staging "https://x-access-token:${SYNC_PAT}@github.com/hatomachi/my-todo-repo-staging.git"
+          git push staging HEAD:main --force
