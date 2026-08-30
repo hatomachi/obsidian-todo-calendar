@@ -70,8 +70,6 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
   // Grouping features state
   const [isGroupedView, setIsGroupedView] = useState(true);
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
-  const [newGroupInput, setNewGroupInput] = useState('');
-  const [showAddGroupInput, setShowAddGroupInput] = useState(false);
 
   useEffect(() => {
     setLocalItem(item);
@@ -94,6 +92,8 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     });
     return Array.from(groups);
   }, [localItem]);
+
+  const hasCustomGroups = existingGroups.length > 0;
 
   // Group items by group name
   const groupedTodos = useMemo(() => {
@@ -235,18 +235,6 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     onUpdateItem(updated);
   };
 
-  const handleAddGroupSubmit = () => {
-    const groupName = newGroupInput.trim();
-    if (!groupName) {
-      setShowAddGroupInput(false);
-      return;
-    }
-    // Add a new todo with this group name automatically
-    handleAddTodo(groupName);
-    setNewGroupInput('');
-    setShowAddGroupInput(false);
-  };
-
   const handleUpdateTodo = (todoId: string, fields: Partial<TodoItem>) => {
     const updatedTodos = localItem.todos.map((t) => {
       if (t.id === todoId) {
@@ -360,11 +348,12 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     setDragOverIndex(null);
   };
 
-  // Helper to render single todo card
+  // Helper to render single todo card (2-tier layout)
   const renderTodoCard = (todo: TodoItem, originalIndex: number) => {
     const isFocused = todo.id === selectedTodoId;
     const isEditingDesc = !!editingDescIds[todo.id];
     const hasDesc = !!todo.description?.trim();
+    const hasGroup = !!todo.group?.trim();
     const isDragging = draggedIndex === originalIndex;
     const isDragOver = dragOverIndex === originalIndex;
 
@@ -380,7 +369,8 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           isDragging ? 'dragging' : ''
         } ${isDragOver ? 'drag-over' : ''}`}
       >
-        <div className="todo-card-row">
+        {/* Tier 1: Main Row (Checkbox + Full Width Title Input + Detail Toggle) */}
+        <div className="todo-card-main-row">
           <div className="drag-handle" title="ドラッグして並べ替え">
             <GripVertical size={14} />
           </div>
@@ -398,57 +388,89 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           <input
             type="text"
             className={`todo-title-input ${todo.status === 'done' ? 'done-title' : ''}`}
-            placeholder="TODOの件名..."
+            placeholder="タスク名を入力..."
             value={todo.title}
             title={todo.title}
             onChange={(e) => handleUpdateTodo(todo.id, { title: e.target.value })}
           />
 
-          <div className="due-date-wrapper" title={`期日: ${todo.due || '未設定（警告対象）'}`}>
-            <input
-              type="date"
-              className="due-date-input-overlay"
-              value={todo.due || ''}
-              onChange={(e) => handleUpdateTodo(todo.id, { due: e.target.value })}
-            />
-            <div className={`due-date-badge ${!todo.due || todo.due.trim() === '' ? 'empty-due-badge' : ''}`}>
-              <Calendar size={12} className="due-date-icon" />
-              <span>{formatDueDate(todo.due)}</span>
-            </div>
-          </div>
-
           <button
             className={`icon-btn toggle-desc-btn ${isEditingDesc ? 'active' : ''} ${
-              hasDesc || !!todo.group?.trim() ? 'has-desc' : ''
+              hasDesc || hasGroup ? 'has-desc' : ''
             }`}
             onClick={() => toggleToggleEditDesc(todo.id)}
-            title={isEditingDesc ? '詳細編集を閉じる' : 'グループ・詳細メモを編集'}
+            title={isEditingDesc ? '詳細を閉じる' : '詳細・メモを編集'}
           >
             <Pencil size={13} />
           </button>
-
-          <button
-            className="icon-btn duplicate-todo-btn"
-            onClick={() => handleDuplicateTodo(todo.id)}
-            title="TODOを複製"
-          >
-            <Copy size={13} />
-          </button>
-
-          <button
-            className="icon-btn delete-todo-btn"
-            onClick={() => handleDeleteTodo(todo.id)}
-            title="TODO削除"
-          >
-            <Trash2 size={13} />
-          </button>
         </div>
 
-        {/* Description & Group Editor Section */}
-        {isEditingDesc ? (
+        {/* Tier 2: Meta Row (Due Date badge, Group badge, Memo snippet, Actions) */}
+        <div className="todo-card-meta-row">
+          <div className="meta-left">
+            {/* Due Date Chip */}
+            <div className="due-date-wrapper" title={`期日: ${todo.due || '未設定'}`}>
+              <input
+                type="date"
+                className="due-date-input-overlay"
+                value={todo.due || ''}
+                onChange={(e) => handleUpdateTodo(todo.id, { due: e.target.value })}
+              />
+              <div className={`due-date-badge ${!todo.due || todo.due.trim() === '' ? 'empty-due-badge' : ''}`}>
+                <Calendar size={11} className="due-date-icon" />
+                <span>{formatDueDate(todo.due)}</span>
+              </div>
+            </div>
+
+            {/* Group Tag badge (only shown if assigned) */}
+            {hasGroup && (
+              <div
+                className="todo-group-badge"
+                onClick={() => toggleToggleEditDesc(todo.id)}
+                title="グループを変更"
+              >
+                <Tag size={10} className="todo-group-icon" />
+                <span className="todo-group-name">{todo.group.trim()}</span>
+              </div>
+            )}
+
+            {/* Description Preview snippet (if not editing and has content) */}
+            {!isEditingDesc && hasDesc && (
+              <div
+                className="todo-desc-inline-preview"
+                onClick={() => toggleToggleEditDesc(todo.id)}
+                title="クリックしてメモを編集"
+              >
+                <AlignLeft size={11} className="desc-preview-icon" />
+                <span className="desc-preview-text">{todo.description}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="meta-right">
+            <button
+              className="icon-btn duplicate-todo-btn"
+              onClick={() => handleDuplicateTodo(todo.id)}
+              title="TODOを複製"
+            >
+              <Copy size={12} />
+            </button>
+
+            <button
+              className="icon-btn delete-todo-btn"
+              onClick={() => handleDeleteTodo(todo.id)}
+              title="TODO削除"
+            >
+              <Trash2 size={12} />
+            </button>
+          </div>
+        </div>
+
+        {/* Description & Group Editor Section (Expanded) */}
+        {isEditingDesc && (
           <div className="todo-card-desc-editor">
             <div className="editor-group-bar" title="グループを設定・変更">
-              <Tag size={13} className="editor-group-icon" />
+              <Tag size={12} className="editor-group-icon" />
               <span className="editor-group-label">グループ:</span>
               <input
                 type="text"
@@ -460,7 +482,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
               />
             </div>
             <div className="textarea-wrapper">
-              <AlignLeft size={13} className="textarea-icon" />
+              <AlignLeft size={12} className="textarea-icon" />
               <textarea
                 className="todo-desc-textarea"
                 placeholder="詳細・メモを入力..."
@@ -471,16 +493,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
               />
             </div>
           </div>
-        ) : hasDesc ? (
-          <div
-            className="todo-desc-preview"
-            onClick={() => toggleToggleEditDesc(todo.id)}
-            title="クリックして詳細・グループを編集"
-          >
-            <AlignLeft size={12} className="desc-preview-icon" />
-            <span className="desc-preview-text">{todo.description}</span>
-          </div>
-        ) : null}
+        )}
       </div>
     );
   };
@@ -627,19 +640,21 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
         </div>
 
         <div className="section-title-bar">
-          <h4 className="section-title">TODO タスク一覧 ({localItem.todos.length})</h4>
+          <h4 className="section-title">TODO タスク ({localItem.todos.length})</h4>
           <div className="section-actions">
             {localItem.todos.length > 0 && (
               <>
-                {/* Grouping View Toggle Button */}
-                <button
-                  className={`nav-btn secondary-btn sm-btn ${isGroupedView ? 'active-toggle' : ''}`}
-                  onClick={() => setIsGroupedView(!isGroupedView)}
-                  title={isGroupedView ? 'フラット表示に切替' : 'グループ表示に切替'}
-                >
-                  {isGroupedView ? <Layers size={13} /> : <List size={13} />}
-                  <span>{isGroupedView ? 'グループ表示' : 'リスト表示'}</span>
-                </button>
+                {/* Grouping View Toggle Button (Only when custom groups exist) */}
+                {hasCustomGroups && (
+                  <button
+                    className={`nav-btn secondary-btn sm-btn ${isGroupedView ? 'active-toggle' : ''}`}
+                    onClick={() => setIsGroupedView(!isGroupedView)}
+                    title={isGroupedView ? 'リスト表示に切替' : 'グループ表示に切替'}
+                  >
+                    {isGroupedView ? <Layers size={13} /> : <List size={13} />}
+                    <span className="btn-label-responsive">{isGroupedView ? 'グループ' : 'リスト'}</span>
+                  </button>
+                )}
 
                 <button
                   className="nav-btn secondary-btn sm-btn"
@@ -647,7 +662,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   title="期日の昇順で並べ替え"
                 >
                   <ArrowUpDown size={13} />
-                  <span>期日順</span>
+                  <span className="btn-label-responsive">期日順</span>
                 </button>
 
                 <button
@@ -656,60 +671,24 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   title="すべての詳細説明を開閉"
                 >
                   <ChevronsUpDown size={13} />
-                  <span>全開閉</span>
+                  <span className="btn-label-responsive">全開閉</span>
                 </button>
               </>
             )}
 
-            <button className="nav-btn primary-btn sm-btn" onClick={() => handleAddTodo()}>
+            <button className="nav-btn primary-btn sm-btn add-todo-action-btn" onClick={() => handleAddTodo()}>
               <Plus size={14} />
               <span>TODOを追加</span>
             </button>
           </div>
         </div>
 
-        {/* Add Group inline input */}
-        {showAddGroupInput ? (
-          <div className="add-group-inline-bar">
-            <Tag size={13} className="add-group-icon" />
-            <input
-              type="text"
-              className="add-group-input"
-              placeholder="新しいグループ名（例: ジブリパーク、レゴランド）..."
-              value={newGroupInput}
-              onChange={(e) => setNewGroupInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleAddGroupSubmit();
-                if (e.key === 'Escape') setShowAddGroupInput(false);
-              }}
-              autoFocus
-            />
-            <button className="icon-btn" onClick={handleAddGroupSubmit} title="グループ追加">
-              <Check size={13} />
-            </button>
-            <button className="icon-btn" onClick={() => setShowAddGroupInput(false)} title="キャンセル">
-              <X size={13} />
-            </button>
-          </div>
-        ) : isGroupedView && localItem.todos.length > 0 ? (
-          <div className="add-group-btn-container">
-            <button
-              className="subtle-add-group-btn"
-              onClick={() => setShowAddGroupInput(true)}
-              title="新しいグループを追加してタスクを作成"
-            >
-              <Plus size={12} />
-              <span>新しいグループを追加...</span>
-            </button>
-          </div>
-        ) : null}
-
         {localItem.todos.length === 0 ? (
           <div className="empty-todos">
             <p>このノートにはTODOがまだありません。「TODOを追加」ボタンを押して登録してください。</p>
           </div>
-        ) : isGroupedView ? (
-          /* Grouped View Mode */
+        ) : hasCustomGroups && isGroupedView ? (
+          /* Grouped View Mode (Only when custom groups exist) */
           <div className="grouped-todo-container">
             {groupedTodos.map(({ groupName, todos: groupTodos }) => {
               const isCollapsed = !!collapsedGroups[groupName];
@@ -723,9 +702,9 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   >
                     <div className="group-header-left">
                       <button className="icon-btn collapse-toggle-btn">
-                        {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+                        {isCollapsed ? <ChevronRight size={13} /> : <ChevronDown size={13} />}
                       </button>
-                      <Tag size={13} className="group-header-tag-icon" />
+                      <Tag size={12} className="group-header-tag-icon" />
                       <span className="group-header-title">{groupName}</span>
                       <span className="group-count-badge">{groupTodos.length}</span>
                     </div>
@@ -736,7 +715,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                         onClick={() => handleAddTodo(isUngrouped ? '' : groupName)}
                         title={`"${groupName}" にTODOを追加`}
                       >
-                        <Plus size={13} />
+                        <Plus size={12} />
                         <span>追加</span>
                       </button>
                     </div>
@@ -763,7 +742,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
             })}
           </div>
         ) : (
-          /* Flat View Mode */
+          /* Flat View Mode (Default when no groups or grouped view off) */
           <div className="todo-form-list">
             {localItem.todos.map((todo, index) => renderTodoCard(todo, index))}
           </div>
@@ -771,7 +750,9 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
       </div>
 
       <div className="drawer-footer">
-        <span className="file-path-info">Path: {localItem.filePath}</span>
+        <span className="file-path-info" title={localItem.filePath}>
+          {localItem.filePath}
+        </span>
         <button
           className="drawer-delete-item-btn"
           onClick={() => {

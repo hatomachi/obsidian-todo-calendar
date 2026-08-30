@@ -245,9 +245,13 @@ input, textarea, select {
     padding: 1.2rem 1rem !important;
   }
 
-  .todo-cal-drawer {
+  .todo-calendar-app .detail-drawer {
     width: 100% !important;
     max-width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    border-left: none !important;
   }
 }
+
 
