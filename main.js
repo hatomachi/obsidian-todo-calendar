@@ -27111,12 +27111,16 @@ var TaskDetailDrawer = ({
       [todoId]: !prev[todoId]
     }));
   };
+  const hasAnyOpen = (0, import_react5.useMemo)(() => {
+    return (localItem?.todos.length || 0) > 0 && localItem.todos.some((t) => !!editingDescIds[t.id]);
+  }, [localItem, editingDescIds]);
   const handleToggleExpandAll = () => {
-    const areAllEditing = localItem.todos.length > 0 && localItem.todos.every((t) => editingDescIds[t.id]);
     const newMap = {};
-    localItem.todos.forEach((t) => {
-      newMap[t.id] = !areAllEditing;
-    });
+    if (!hasAnyOpen) {
+      localItem.todos.forEach((t) => {
+        newMap[t.id] = true;
+      });
+    }
     setEditingDescIds(newMap);
   };
   const handleToggleGroupCollapse = (groupName) => {
@@ -27484,10 +27488,10 @@ var TaskDetailDrawer = ({
               {
                 className: "nav-btn secondary-btn sm-btn",
                 onClick: handleToggleExpandAll,
-                title: "\u3059\u3079\u3066\u306E\u8A73\u7D30\u8AAC\u660E\u3092\u958B\u9589",
+                title: hasAnyOpen ? "\u3059\u3079\u3066\u306E\u8A73\u7D30\u3092\u9589\u3058\u308B" : "\u3059\u3079\u3066\u306E\u8A73\u7D30\u3092\u958B\u304F",
                 children: [
                   /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ChevronsUpDown, { size: 13 }),
-                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "btn-label-responsive", children: "\u5168\u958B\u9589" })
+                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "btn-label-responsive", children: hasAnyOpen ? "\u5168\u9589" : "\u5168\u958B" })
                 ]
               }
             )

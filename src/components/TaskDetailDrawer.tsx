@@ -279,15 +279,21 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     }));
   };
 
-  const handleToggleExpandAll = () => {
-    const areAllEditing =
-      localItem.todos.length > 0 &&
-      localItem.todos.every((t) => editingDescIds[t.id]);
+  const hasAnyOpen = useMemo(() => {
+    return (
+      (localItem?.todos.length || 0) > 0 &&
+      localItem!.todos.some((t) => !!editingDescIds[t.id])
+    );
+  }, [localItem, editingDescIds]);
 
+  const handleToggleExpandAll = () => {
     const newMap: Record<string, boolean> = {};
-    localItem.todos.forEach((t) => {
-      newMap[t.id] = !areAllEditing;
-    });
+    // If any todo is currently open, close all. Otherwise, open all.
+    if (!hasAnyOpen) {
+      localItem.todos.forEach((t) => {
+        newMap[t.id] = true;
+      });
+    }
     setEditingDescIds(newMap);
   };
 
@@ -664,10 +670,10 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                 <button
                   className="nav-btn secondary-btn sm-btn"
                   onClick={handleToggleExpandAll}
-                  title="すべての詳細説明を開閉"
+                  title={hasAnyOpen ? 'すべての詳細を閉じる' : 'すべての詳細を開く'}
                 >
                   <ChevronsUpDown size={13} />
-                  <span className="btn-label-responsive">全開閉</span>
+                  <span className="btn-label-responsive">{hasAnyOpen ? '全閉' : '全開'}</span>
                 </button>
               </>
             )}
