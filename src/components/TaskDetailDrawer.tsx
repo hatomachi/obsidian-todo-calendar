@@ -369,7 +369,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           isDragging ? 'dragging' : ''
         } ${isDragOver ? 'drag-over' : ''}`}
       >
-        {/* Tier 1: Main Row (Checkbox + Full Width Title Input + Detail Toggle) */}
+        {/* Single Row (Default View: Drag handle + Checkbox + Full Width Title + Group Tag + Date Chip + Detail Toggle) */}
         <div className="todo-card-main-row">
           <div className="drag-handle" title="ドラッグして並べ替え">
             <GripVertical size={14} />
@@ -394,79 +394,57 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
             onChange={(e) => handleUpdateTodo(todo.id, { title: e.target.value })}
           />
 
+          {/* Group Tag badge (only shown if assigned) */}
+          {hasGroup && (
+            <div
+              className="todo-group-badge"
+              onClick={() => toggleToggleEditDesc(todo.id)}
+              title="グループを変更"
+            >
+              <Tag size={10} className="todo-group-icon" />
+              <span className="todo-group-name">{todo.group.trim()}</span>
+            </div>
+          )}
+
+          {/* Due Date Chip */}
+          <div className="due-date-wrapper" title={`期日: ${todo.due || '未設定（タップして設定）'}`}>
+            <input
+              type="date"
+              className="due-date-input-overlay"
+              value={todo.due || ''}
+              onChange={(e) => handleUpdateTodo(todo.id, { due: e.target.value })}
+            />
+            <div className={`due-date-badge ${!todo.due || todo.due.trim() === '' ? 'empty-due-badge' : ''}`}>
+              <Calendar size={12} className="due-date-icon" />
+              {todo.due && todo.due.trim() !== '' && <span>{formatDueDate(todo.due)}</span>}
+            </div>
+          </div>
+
+          {/* Detail / Memo / Actions Toggle */}
           <button
             className={`icon-btn toggle-desc-btn ${isEditingDesc ? 'active' : ''} ${
               hasDesc || hasGroup ? 'has-desc' : ''
             }`}
             onClick={() => toggleToggleEditDesc(todo.id)}
-            title={isEditingDesc ? '詳細を閉じる' : '詳細・メモを編集'}
+            title={isEditingDesc ? '詳細を閉じる' : '詳細・メモ・操作を展開'}
           >
             <Pencil size={13} />
           </button>
         </div>
 
-        {/* Tier 2: Meta Row (Due Date badge, Group badge, Memo snippet, Actions) */}
-        <div className="todo-card-meta-row">
-          <div className="meta-left">
-            {/* Due Date Chip */}
-            <div className="due-date-wrapper" title={`期日: ${todo.due || '未設定'}`}>
-              <input
-                type="date"
-                className="due-date-input-overlay"
-                value={todo.due || ''}
-                onChange={(e) => handleUpdateTodo(todo.id, { due: e.target.value })}
-              />
-              <div className={`due-date-badge ${!todo.due || todo.due.trim() === '' ? 'empty-due-badge' : ''}`}>
-                <Calendar size={11} className="due-date-icon" />
-                <span>{formatDueDate(todo.due)}</span>
-              </div>
-            </div>
-
-            {/* Group Tag badge (only shown if assigned) */}
-            {hasGroup && (
-              <div
-                className="todo-group-badge"
-                onClick={() => toggleToggleEditDesc(todo.id)}
-                title="グループを変更"
-              >
-                <Tag size={10} className="todo-group-icon" />
-                <span className="todo-group-name">{todo.group.trim()}</span>
-              </div>
-            )}
-
-            {/* Description Preview snippet (if not editing and has content) */}
-            {!isEditingDesc && hasDesc && (
-              <div
-                className="todo-desc-inline-preview"
-                onClick={() => toggleToggleEditDesc(todo.id)}
-                title="クリックしてメモを編集"
-              >
-                <AlignLeft size={11} className="desc-preview-icon" />
-                <span className="desc-preview-text">{todo.description}</span>
-              </div>
-            )}
+        {/* Optional Collapsed Memo Preview (only when not editing and memo exists) */}
+        {!isEditingDesc && hasDesc && (
+          <div
+            className="todo-desc-preview"
+            onClick={() => toggleToggleEditDesc(todo.id)}
+            title="クリックして詳細メモを編集"
+          >
+            <AlignLeft size={11} className="desc-preview-icon" />
+            <span className="desc-preview-text">{todo.description}</span>
           </div>
+        )}
 
-          <div className="meta-right">
-            <button
-              className="icon-btn duplicate-todo-btn"
-              onClick={() => handleDuplicateTodo(todo.id)}
-              title="TODOを複製"
-            >
-              <Copy size={12} />
-            </button>
-
-            <button
-              className="icon-btn delete-todo-btn"
-              onClick={() => handleDeleteTodo(todo.id)}
-              title="TODO削除"
-            >
-              <Trash2 size={12} />
-            </button>
-          </div>
-        </div>
-
-        {/* Description & Group Editor Section (Expanded) */}
+        {/* Expanded Description, Group & Actions Panel */}
         {isEditingDesc && (
           <div className="todo-card-desc-editor">
             <div className="editor-group-bar" title="グループを設定・変更">
@@ -491,6 +469,24 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                 rows={2}
                 autoFocus
               />
+            </div>
+            <div className="editor-actions-bar">
+              <button
+                className="editor-action-btn duplicate"
+                onClick={() => handleDuplicateTodo(todo.id)}
+                title="TODOを複製"
+              >
+                <Copy size={12} />
+                <span>複製</span>
+              </button>
+              <button
+                className="editor-action-btn delete"
+                onClick={() => handleDeleteTodo(todo.id)}
+                title="TODOを削除"
+              >
+                <Trash2 size={12} />
+                <span>削除</span>
+              </button>
             </div>
           </div>
         )}

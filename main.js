@@ -27206,79 +27206,55 @@ var TaskDetailDrawer = ({
                 onChange: (e) => handleUpdateTodo(todo.id, { title: e.target.value })
               }
             ),
+            hasGroup && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
+              "div",
+              {
+                className: "todo-group-badge",
+                onClick: () => toggleToggleEditDesc(todo.id),
+                title: "\u30B0\u30EB\u30FC\u30D7\u3092\u5909\u66F4",
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Tag, { size: 10, className: "todo-group-icon" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "todo-group-name", children: todo.group.trim() })
+                ]
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "due-date-wrapper", title: `\u671F\u65E5: ${todo.due || "\u672A\u8A2D\u5B9A\uFF08\u30BF\u30C3\u30D7\u3057\u3066\u8A2D\u5B9A\uFF09"}`, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+                "input",
+                {
+                  type: "date",
+                  className: "due-date-input-overlay",
+                  value: todo.due || "",
+                  onChange: (e) => handleUpdateTodo(todo.id, { due: e.target.value })
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: `due-date-badge ${!todo.due || todo.due.trim() === "" ? "empty-due-badge" : ""}`, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Calendar, { size: 12, className: "due-date-icon" }),
+                todo.due && todo.due.trim() !== "" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: formatDueDate(todo.due) })
+              ] })
+            ] }),
             /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               "button",
               {
                 className: `icon-btn toggle-desc-btn ${isEditingDesc ? "active" : ""} ${hasDesc || hasGroup ? "has-desc" : ""}`,
                 onClick: () => toggleToggleEditDesc(todo.id),
-                title: isEditingDesc ? "\u8A73\u7D30\u3092\u9589\u3058\u308B" : "\u8A73\u7D30\u30FB\u30E1\u30E2\u3092\u7DE8\u96C6",
+                title: isEditingDesc ? "\u8A73\u7D30\u3092\u9589\u3058\u308B" : "\u8A73\u7D30\u30FB\u30E1\u30E2\u30FB\u64CD\u4F5C\u3092\u5C55\u958B",
                 children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Pencil, { size: 13 })
               }
             )
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-card-meta-row", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "meta-left", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "due-date-wrapper", title: `\u671F\u65E5: ${todo.due || "\u672A\u8A2D\u5B9A"}`, children: [
-                /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-                  "input",
-                  {
-                    type: "date",
-                    className: "due-date-input-overlay",
-                    value: todo.due || "",
-                    onChange: (e) => handleUpdateTodo(todo.id, { due: e.target.value })
-                  }
-                ),
-                /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: `due-date-badge ${!todo.due || todo.due.trim() === "" ? "empty-due-badge" : ""}`, children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Calendar, { size: 11, className: "due-date-icon" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: formatDueDate(todo.due) })
-                ] })
-              ] }),
-              hasGroup && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
-                "div",
-                {
-                  className: "todo-group-badge",
-                  onClick: () => toggleToggleEditDesc(todo.id),
-                  title: "\u30B0\u30EB\u30FC\u30D7\u3092\u5909\u66F4",
-                  children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Tag, { size: 10, className: "todo-group-icon" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "todo-group-name", children: todo.group.trim() })
-                  ]
-                }
-              ),
-              !isEditingDesc && hasDesc && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
-                "div",
-                {
-                  className: "todo-desc-inline-preview",
-                  onClick: () => toggleToggleEditDesc(todo.id),
-                  title: "\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u30E1\u30E2\u3092\u7DE8\u96C6",
-                  children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(AlignLeft, { size: 11, className: "desc-preview-icon" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "desc-preview-text", children: todo.description })
-                  ]
-                }
-              )
-            ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "meta-right", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-                "button",
-                {
-                  className: "icon-btn duplicate-todo-btn",
-                  onClick: () => handleDuplicateTodo(todo.id),
-                  title: "TODO\u3092\u8907\u88FD",
-                  children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Copy, { size: 12 })
-                }
-              ),
-              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-                "button",
-                {
-                  className: "icon-btn delete-todo-btn",
-                  onClick: () => handleDeleteTodo(todo.id),
-                  title: "TODO\u524A\u9664",
-                  children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Trash2, { size: 12 })
-                }
-              )
-            ] })
-          ] }),
+          !isEditingDesc && hasDesc && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
+            "div",
+            {
+              className: "todo-desc-preview",
+              onClick: () => toggleToggleEditDesc(todo.id),
+              title: "\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u8A73\u7D30\u30E1\u30E2\u3092\u7DE8\u96C6",
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(AlignLeft, { size: 11, className: "desc-preview-icon" }),
+                /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "desc-preview-text", children: todo.description })
+              ]
+            }
+          ),
           isEditingDesc && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "todo-card-desc-editor", children: [
             /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "editor-group-bar", title: "\u30B0\u30EB\u30FC\u30D7\u3092\u8A2D\u5B9A\u30FB\u5909\u66F4", children: [
               /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Tag, { size: 12, className: "editor-group-icon" }),
@@ -27306,6 +27282,32 @@ var TaskDetailDrawer = ({
                   onChange: (e) => handleUpdateTodo(todo.id, { description: e.target.value }),
                   rows: 2,
                   autoFocus: true
+                }
+              )
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "editor-actions-bar", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
+                "button",
+                {
+                  className: "editor-action-btn duplicate",
+                  onClick: () => handleDuplicateTodo(todo.id),
+                  title: "TODO\u3092\u8907\u88FD",
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Copy, { size: 12 }),
+                    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: "\u8907\u88FD" })
+                  ]
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
+                "button",
+                {
+                  className: "editor-action-btn delete",
+                  onClick: () => handleDeleteTodo(todo.id),
+                  title: "TODO\u3092\u524A\u9664",
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Trash2, { size: 12 }),
+                    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: "\u524A\u9664" })
+                  ]
                 }
               )
             ] })
