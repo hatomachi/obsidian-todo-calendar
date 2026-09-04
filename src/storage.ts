@@ -4,6 +4,7 @@ import { CollectionData, ItemData, TodoItem, AgendaTodoItem } from './types';
 import { IStorageAdapter } from './adapters/IStorageAdapter';
 import { ItemType } from './features/item-types/types';
 import { TemplateStorage } from './features/item-types/templateStorage';
+import { normalizeTags, extractBodyContent } from './utils/yaml';
 
 export class StorageManager implements IStorageAdapter {
   private app: App;
@@ -94,6 +95,7 @@ export class StorageManager implements IStorageAdapter {
           color: frontmatter.color || 'purple',
           createdAt: frontmatter.created_at || new Date(file.stat.ctime).toISOString(),
           itemCount,
+          tags: normalizeTags(frontmatter.tags),
         });
       }
     }
@@ -117,19 +119,23 @@ export class StorageManager implements IStorageAdapter {
   /**
    * Create a new collection
    */
-  async createCollection(title: string, description = ''): Promise<CollectionData> {
+  async createCollection(title: string, description = '', tags: string[] = []): Promise<CollectionData> {
     await this.ensureDirectoriesExist();
 
     const id = this.generateUniqueId();
     const filePath = `${COLLECTIONS_DIR}/${id}.md`;
     const createdAt = new Date().toISOString();
+    const cleanTags = normalizeTags(tags);
 
-    const frontmatter = {
+    const frontmatter: Record<string, any> = {
       id,
       title: title.trim() || 'New Collection',
       description: description.trim(),
       created_at: createdAt,
     };
+    if (cleanTags.length > 0) {
+      frontmatter.tags = cleanTags;
+    }
 
     const content = this.formatMarkdownWithFrontmatter(frontmatter, `# ${title}\n`);
     await this.app.vault.create(filePath, content);
@@ -147,7 +153,36 @@ export class StorageManager implements IStorageAdapter {
       description: frontmatter.description,
       createdAt,
       itemCount: 0,
+      tags: cleanTags,
     };
+  }
+
+  /**
+   * Update collection metadata (title, description, tags, etc.)
+   */
+  async updateCollection(collection: CollectionData): Promise<void> {
+    const filePath = collection.filePath || `${COLLECTIONS_DIR}/${collection.id}.md`;
+    const file = this.app.vault.getAbstractFileByPath(filePath);
+    if (file instanceof TFile) {
+      const content = await this.app.vault.read(file);
+      const frontmatter = this.parseFrontmatter(content);
+
+      frontmatter.title = collection.title.trim();
+      frontmatter.description = (collection.description || '').trim();
+      const cleanTags = normalizeTags(collection.tags);
+      if (cleanTags.length > 0) {
+        frontmatter.tags = cleanTags;
+      } else {
+        delete frontmatter.tags;
+      }
+      if (collection.color) {
+        frontmatter.color = collection.color;
+      }
+
+      const body = extractBodyContent(content);
+      const newContent = this.formatMarkdownWithFrontmatter(frontmatter, body);
+      await this.app.vault.modify(file, newContent);
+    }
   }
 
   /**

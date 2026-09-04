@@ -3,7 +3,7 @@ import { IStorageAdapter } from './IStorageAdapter';
 import { CollectionData, ItemData, AgendaTodoItem, TodoItem } from '../types';
 import { ItemType } from '../features/item-types/types';
 import { getDefaultItemTypes } from '../features/item-types/templateUtils';
-import { parseYamlContent, stringifyFrontmatter, extractBodyContent } from '../utils/yaml';
+import { parseYamlContent, stringifyFrontmatter, extractBodyContent, normalizeTags } from '../utils/yaml';
 import { ROOT_DATA_DIR, COLLECTIONS_DIR, ITEMS_DIR } from '../constants';
 
 export interface GitHubConfig {
@@ -310,6 +310,7 @@ export class GitHubStorageAdapter implements IStorageAdapter {
           color: frontmatter.color || 'purple',
           createdAt: frontmatter.created_at || new Date().toISOString(),
           itemCount,
+          tags: normalizeTags(frontmatter.tags),
         } as CollectionData;
       })
     );
@@ -317,17 +318,21 @@ export class GitHubStorageAdapter implements IStorageAdapter {
     return collections.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
   }
 
-  async createCollection(title: string, description = ''): Promise<CollectionData> {
+  async createCollection(title: string, description = '', tags: string[] = []): Promise<CollectionData> {
     const id = this.generateUniqueId();
     const filePath = `${COLLECTIONS_DIR}/${id}.md`;
     const createdAt = new Date().toISOString();
+    const cleanTags = normalizeTags(tags);
 
-    const frontmatter = {
+    const frontmatter: Record<string, any> = {
       id,
       title: title.trim() || 'New Collection',
       description: description.trim(),
       created_at: createdAt,
     };
+    if (cleanTags.length > 0) {
+      frontmatter.tags = cleanTags;
+    }
 
     const content = stringifyFrontmatter(frontmatter, `# ${title}\n`);
     await this.writeFile(filePath, content, `chore(todo): create collection "${title}"`);
@@ -339,7 +344,30 @@ export class GitHubStorageAdapter implements IStorageAdapter {
       description: frontmatter.description,
       createdAt,
       itemCount: 0,
+      tags: cleanTags,
     };
+  }
+
+  async updateCollection(collection: CollectionData): Promise<void> {
+    const filePath = collection.filePath || `${COLLECTIONS_DIR}/${collection.id}.md`;
+    const content = await this.readFile(filePath);
+    const frontmatter = parseYamlContent(content);
+
+    frontmatter.title = collection.title.trim();
+    frontmatter.description = (collection.description || '').trim();
+    const cleanTags = normalizeTags(collection.tags);
+    if (cleanTags.length > 0) {
+      frontmatter.tags = cleanTags;
+    } else {
+      delete frontmatter.tags;
+    }
+    if (collection.color) {
+      frontmatter.color = collection.color;
+    }
+
+    const body = extractBodyContent(content);
+    const newContent = stringifyFrontmatter(frontmatter, body);
+    await this.writeFile(filePath, newContent, `chore(todo): update collection "${collection.title}"`);
   }
 
   async deleteCollection(collectionId: string): Promise<void> {

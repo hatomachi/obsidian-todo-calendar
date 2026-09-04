@@ -10,7 +10,12 @@ export interface IStorageAdapter {
   /**
    * Create a new collection
    */
-  createCollection(title: string, description?: string): Promise<CollectionData>;
+  createCollection(title: string, description?: string, tags?: string[]): Promise<CollectionData>;
+
+  /**
+   * Update collection metadata (title, description, tags, etc.)
+   */
+  updateCollection(collection: CollectionData): Promise<void>;
 
   /**
    * Delete a collection and its items

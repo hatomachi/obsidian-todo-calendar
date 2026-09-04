@@ -30,6 +30,7 @@ export interface CollectionData {
   color?: string;
   createdAt: string;
   itemCount?: number;
+  tags?: string[];
 }
 
 export interface AgendaTodoItem {

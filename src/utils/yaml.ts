@@ -36,3 +36,31 @@ export function extractBodyContent(content: string): string {
   const bodyMatch = content.match(/^---\r?\n[\s\S]*?\r?\n---([\s\S]*)$/);
   return bodyMatch ? bodyMatch[1] : content;
 }
+
+/**
+ * Normalize tags input (array or string) into a clean string array.
+ * Strips leading '#', splits by commas or spaces if string, trims and deduplicates.
+ */
+export function normalizeTags(raw: any): string[] {
+  if (!raw) return [];
+  const tagList: string[] = [];
+
+  if (Array.isArray(raw)) {
+    for (const item of raw) {
+      if (typeof item === 'string') {
+        const clean = item.trim().replace(/^#+/, '');
+        if (clean) tagList.push(clean);
+      }
+    }
+  } else if (typeof raw === 'string') {
+    // Split by comma or whitespace
+    const parts = raw.split(/[\s,]+/);
+    for (const part of parts) {
+      const clean = part.trim().replace(/^#+/, '');
+      if (clean) tagList.push(clean);
+    }
+  }
+
+  return Array.from(new Set(tagList));
+}
+

@@ -134,7 +134,7 @@ var require_react_development = __commonJS({
           ReactSharedInternals.ReactDebugCurrentFrame = ReactDebugCurrentFrame;
           ReactSharedInternals.ReactCurrentActQueue = ReactCurrentActQueue;
         }
-        function warn(format) {
+        function warn2(format) {
           {
             {
               for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -272,7 +272,7 @@ var require_react_development = __commonJS({
           var defineDeprecationWarning = function(methodName, info) {
             Object.defineProperty(Component.prototype, methodName, {
               get: function() {
-                warn("%s(...) is deprecated in plain JavaScript React classes. %s", info[0], info[1]);
+                warn2("%s(...) is deprecated in plain JavaScript React classes. %s", info[0], info[1]);
                 return void 0;
               }
             });
@@ -740,7 +740,7 @@ var require_react_development = __commonJS({
               {
                 if (iteratorFn === iterableChildren.entries) {
                   if (!didWarnAboutMaps) {
-                    warn("Using Maps as children is not supported. Use an array of keyed ReactElements instead.");
+                    warn2("Using Maps as children is not supported. Use an array of keyed ReactElements instead.");
                   }
                   didWarnAboutMaps = true;
                 }
@@ -878,7 +878,7 @@ var require_react_development = __commonJS({
                 },
                 set: function(displayName) {
                   if (!hasWarnedAboutDisplayNameOnConsumer) {
-                    warn("Setting `displayName` on Context.Consumer has no effect. You should set it directly on the context with Context.displayName = '%s'.", displayName);
+                    warn2("Setting `displayName` on Context.Consumer has no effect. You should set it directly on the context with Context.displayName = '%s'.", displayName);
                     hasWarnedAboutDisplayNameOnConsumer = true;
                   }
                 }
@@ -1122,7 +1122,7 @@ var require_react_development = __commonJS({
           var dispatcher = resolveDispatcher();
           return dispatcher.useCallback(callback, deps);
         }
-        function useMemo2(create, deps) {
+        function useMemo4(create, deps) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useMemo(create, deps);
         }
@@ -1642,12 +1642,12 @@ var require_react_development = __commonJS({
           {
             if (!didWarnAboutDeprecatedCreateFactory) {
               didWarnAboutDeprecatedCreateFactory = true;
-              warn("React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead.");
+              warn2("React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead.");
             }
             Object.defineProperty(validatedFactory, "type", {
               enumerable: false,
               get: function() {
-                warn("Factory.type is deprecated. Access the class directly before passing it to createFactory.");
+                warn2("Factory.type is deprecated. Access the class directly before passing it to createFactory.");
                 Object.defineProperty(this, "type", {
                   value: type
                 });
@@ -1680,7 +1680,7 @@ var require_react_development = __commonJS({
               if (prevTransition === null && currentTransition._updatedFibers) {
                 var updatedFibersCount = currentTransition._updatedFibers.size;
                 if (updatedFibersCount > 10) {
-                  warn("Detected a large number of updates inside startTransition. If this is due to a subscription please re-write it to use React provided hooks. Otherwise concurrent mode guarantees are off the table.");
+                  warn2("Detected a large number of updates inside startTransition. If this is due to a subscription please re-write it to use React provided hooks. Otherwise concurrent mode guarantees are off the table.");
                 }
                 currentTransition._updatedFibers.clear();
               }
@@ -1894,7 +1894,7 @@ var require_react_development = __commonJS({
         exports.useImperativeHandle = useImperativeHandle;
         exports.useInsertionEffect = useInsertionEffect;
         exports.useLayoutEffect = useLayoutEffect;
-        exports.useMemo = useMemo2;
+        exports.useMemo = useMemo4;
         exports.useReducer = useReducer;
         exports.useRef = useRef2;
         exports.useState = useState6;
@@ -2402,7 +2402,7 @@ var require_react_dom_development = __commonJS({
             suppressWarning = newSuppressWarning;
           }
         }
-        function warn(format) {
+        function warn2(format) {
           {
             if (!suppressWarning) {
               for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -3765,7 +3765,7 @@ var require_react_dom_development = __commonJS({
           if (node.hasOwnProperty(valueField) || typeof descriptor === "undefined" || typeof descriptor.get !== "function" || typeof descriptor.set !== "function") {
             return;
           }
-          var get2 = descriptor.get, set2 = descriptor.set;
+          var get2 = descriptor.get, set3 = descriptor.set;
           Object.defineProperty(node, valueField, {
             configurable: true,
             get: function() {
@@ -3776,7 +3776,7 @@ var require_react_dom_development = __commonJS({
                 checkFormFieldValueStringCoercion(value);
               }
               currentValue = "" + value;
-              set2.call(this, value);
+              set3.call(this, value);
             }
           });
           Object.defineProperty(node, valueField, {
@@ -4433,8 +4433,8 @@ var require_react_dom_development = __commonJS({
           var warnedStyleValues = {};
           var warnedForNaNValue = false;
           var warnedForInfinityValue = false;
-          var camelize = function(string) {
-            return string.replace(hyphenPattern, function(_, character) {
+          var camelize = function(string2) {
+            return string2.replace(hyphenPattern, function(_, character) {
               return character.toUpperCase();
             });
           };
@@ -5691,7 +5691,7 @@ var require_react_dom_development = __commonJS({
         function has(key) {
           return key._reactInternals !== void 0;
         }
-        function set(key, value) {
+        function set2(key, value) {
           key._reactInternals = value;
         }
         var NoFlags = (
@@ -6163,14 +6163,14 @@ var require_react_dom_development = __commonJS({
         }
         function getLaneLabelMap() {
           {
-            var map = /* @__PURE__ */ new Map();
+            var map2 = /* @__PURE__ */ new Map();
             var lane = 1;
             for (var index2 = 0; index2 < TotalLanes; index2++) {
               var label = getLabelForLane(lane);
-              map.set(lane, label);
+              map2.set(lane, label);
               lane *= 2;
             }
-            return map;
+            return map2;
           }
         }
         function markCommitStarted(lanes) {
@@ -6824,14 +6824,14 @@ var require_react_dom_development = __commonJS({
         function includesSomeLane(a, b) {
           return (a & b) !== NoLanes;
         }
-        function isSubsetOfLanes(set2, subset) {
-          return (set2 & subset) === subset;
+        function isSubsetOfLanes(set3, subset) {
+          return (set3 & subset) === subset;
         }
         function mergeLanes(a, b) {
           return a | b;
         }
-        function removeLanes(set2, subset) {
-          return set2 & ~subset;
+        function removeLanes(set3, subset) {
+          return set3 & ~subset;
         }
         function intersectLanes(a, b) {
           return a & b;
@@ -7267,9 +7267,9 @@ var require_react_dom_development = __commonJS({
           }
           return true;
         }
-        function attemptReplayContinuousQueuedEventInMap(queuedEvent, key, map) {
+        function attemptReplayContinuousQueuedEventInMap(queuedEvent, key, map2) {
           if (attemptReplayContinuousQueuedEvent(queuedEvent)) {
-            map.delete(key);
+            map2.delete(key);
           }
         }
         function replayUnblockedEvents() {
@@ -10290,9 +10290,9 @@ var require_react_dom_development = __commonJS({
             var hostContextDev = hostContext;
             validateDOMNesting(type, null, hostContextDev.ancestorInfo);
             if (typeof props.children === "string" || typeof props.children === "number") {
-              var string = "" + props.children;
+              var string2 = "" + props.children;
               var ownAncestorInfo = updatedAncestorInfo(hostContextDev.ancestorInfo, type);
-              validateDOMNesting(null, string, ownAncestorInfo);
+              validateDOMNesting(null, string2, ownAncestorInfo);
             }
             parentNamespace = hostContextDev.namespace;
           }
@@ -10322,9 +10322,9 @@ var require_react_dom_development = __commonJS({
           {
             var hostContextDev = hostContext;
             if (typeof newProps.children !== typeof oldProps.children && (typeof newProps.children === "string" || typeof newProps.children === "number")) {
-              var string = "" + newProps.children;
+              var string2 = "" + newProps.children;
               var ownAncestorInfo = updatedAncestorInfo(hostContextDev.ancestorInfo, type);
-              validateDOMNesting(null, string, ownAncestorInfo);
+              validateDOMNesting(null, string2, ownAncestorInfo);
             }
           }
           return diffProperties(domElement, type, oldProps, newProps);
@@ -11633,9 +11633,9 @@ var require_react_dom_development = __commonJS({
             }
             return maybeStrictRoot;
           };
-          var setToSortedString = function(set2) {
+          var setToSortedString = function(set3) {
             var array = [];
-            set2.forEach(function(value) {
+            set3.forEach(function(value) {
               array.push(value);
             });
             return array.sort().join(", ");
@@ -11734,15 +11734,15 @@ var require_react_dom_development = __commonJS({
             }
             if (componentWillMountUniqueNames.size > 0) {
               var _sortedNames3 = setToSortedString(componentWillMountUniqueNames);
-              warn("componentWillMount has been renamed, and is not recommended for use. See https://reactjs.org/link/unsafe-component-lifecycles for details.\n\n* Move code with side effects to componentDidMount, and set initial state in the constructor.\n* Rename componentWillMount to UNSAFE_componentWillMount to suppress this warning in non-strict mode. In React 18.x, only the UNSAFE_ name will work. To rename all deprecated lifecycles to their new names, you can run `npx react-codemod rename-unsafe-lifecycles` in your project source folder.\n\nPlease update the following components: %s", _sortedNames3);
+              warn2("componentWillMount has been renamed, and is not recommended for use. See https://reactjs.org/link/unsafe-component-lifecycles for details.\n\n* Move code with side effects to componentDidMount, and set initial state in the constructor.\n* Rename componentWillMount to UNSAFE_componentWillMount to suppress this warning in non-strict mode. In React 18.x, only the UNSAFE_ name will work. To rename all deprecated lifecycles to their new names, you can run `npx react-codemod rename-unsafe-lifecycles` in your project source folder.\n\nPlease update the following components: %s", _sortedNames3);
             }
             if (componentWillReceivePropsUniqueNames.size > 0) {
               var _sortedNames4 = setToSortedString(componentWillReceivePropsUniqueNames);
-              warn("componentWillReceiveProps has been renamed, and is not recommended for use. See https://reactjs.org/link/unsafe-component-lifecycles for details.\n\n* Move data fetching code or side effects to componentDidUpdate.\n* If you're updating state whenever props change, refactor your code to use memoization techniques or move it to static getDerivedStateFromProps. Learn more at: https://reactjs.org/link/derived-state\n* Rename componentWillReceiveProps to UNSAFE_componentWillReceiveProps to suppress this warning in non-strict mode. In React 18.x, only the UNSAFE_ name will work. To rename all deprecated lifecycles to their new names, you can run `npx react-codemod rename-unsafe-lifecycles` in your project source folder.\n\nPlease update the following components: %s", _sortedNames4);
+              warn2("componentWillReceiveProps has been renamed, and is not recommended for use. See https://reactjs.org/link/unsafe-component-lifecycles for details.\n\n* Move data fetching code or side effects to componentDidUpdate.\n* If you're updating state whenever props change, refactor your code to use memoization techniques or move it to static getDerivedStateFromProps. Learn more at: https://reactjs.org/link/derived-state\n* Rename componentWillReceiveProps to UNSAFE_componentWillReceiveProps to suppress this warning in non-strict mode. In React 18.x, only the UNSAFE_ name will work. To rename all deprecated lifecycles to their new names, you can run `npx react-codemod rename-unsafe-lifecycles` in your project source folder.\n\nPlease update the following components: %s", _sortedNames4);
             }
             if (componentWillUpdateUniqueNames.size > 0) {
               var _sortedNames5 = setToSortedString(componentWillUpdateUniqueNames);
-              warn("componentWillUpdate has been renamed, and is not recommended for use. See https://reactjs.org/link/unsafe-component-lifecycles for details.\n\n* Move data fetching code or side effects to componentDidUpdate.\n* Rename componentWillUpdate to UNSAFE_componentWillUpdate to suppress this warning in non-strict mode. In React 18.x, only the UNSAFE_ name will work. To rename all deprecated lifecycles to their new names, you can run `npx react-codemod rename-unsafe-lifecycles` in your project source folder.\n\nPlease update the following components: %s", _sortedNames5);
+              warn2("componentWillUpdate has been renamed, and is not recommended for use. See https://reactjs.org/link/unsafe-component-lifecycles for details.\n\n* Move data fetching code or side effects to componentDidUpdate.\n* Rename componentWillUpdate to UNSAFE_componentWillUpdate to suppress this warning in non-strict mode. In React 18.x, only the UNSAFE_ name will work. To rename all deprecated lifecycles to their new names, you can run `npx react-codemod rename-unsafe-lifecycles` in your project source folder.\n\nPlease update the following components: %s", _sortedNames5);
             }
           };
           var pendingLegacyContextWarning = /* @__PURE__ */ new Map();
@@ -14235,7 +14235,7 @@ var require_react_dom_development = __commonJS({
               if (prevTransition === null && currentTransition._updatedFibers) {
                 var updatedFibersCount = currentTransition._updatedFibers.size;
                 if (updatedFibersCount > 10) {
-                  warn("Detected a large number of updates inside startTransition. If this is due to a subscription please re-write it to use React provided hooks. Otherwise concurrent mode guarantees are off the table.");
+                  warn2("Detected a large number of updates inside startTransition. If this is due to a subscription please re-write it to use React provided hooks. Otherwise concurrent mode guarantees are off the table.");
                 }
                 currentTransition._updatedFibers.clear();
               }
@@ -15598,7 +15598,7 @@ var require_react_dom_development = __commonJS({
         function adoptClassInstance(workInProgress2, instance) {
           instance.updater = classComponentUpdater;
           workInProgress2.stateNode = instance;
-          set(instance, workInProgress2);
+          set2(instance, workInProgress2);
           {
             instance._reactInternalInstance = fakeInternalInstance;
           }
@@ -22895,12 +22895,12 @@ var require_react_dom_development = __commonJS({
           };
           var copyWithRename = function(obj, oldPath, newPath) {
             if (oldPath.length !== newPath.length) {
-              warn("copyWithRename() expects paths of the same length");
+              warn2("copyWithRename() expects paths of the same length");
               return;
             } else {
               for (var i = 0; i < newPath.length - 1; i++) {
                 if (oldPath[i] !== newPath[i]) {
-                  warn("copyWithRename() expects paths to be the same except for the deepest key");
+                  warn2("copyWithRename() expects paths to be the same except for the deepest key");
                   return;
                 }
               }
@@ -23123,7 +23123,7 @@ var require_react_dom_development = __commonJS({
           if (options2 !== null && options2 !== void 0) {
             {
               if (options2.hydrate) {
-                warn("hydrate through createRoot is deprecated. Use ReactDOMClient.hydrateRoot(container, <App />) instead.");
+                warn2("hydrate through createRoot is deprecated. Use ReactDOMClient.hydrateRoot(container, <App />) instead.");
               } else {
                 if (typeof options2 === "object" && options2 !== null && options2.$$typeof === REACT_ELEMENT_TYPE) {
                   error("You passed a JSX element to createRoot. You probably meant to call root.render instead. Example usage:\n\n  let root = createRoot(domContainer);\n  root.render(<App />);");
@@ -24693,6 +24693,2296 @@ var TemplateStorage = class {
   }
 };
 
+// node_modules/yaml/browser/dist/nodes/identity.js
+var ALIAS = Symbol.for("yaml.alias");
+var DOC = Symbol.for("yaml.document");
+var MAP = Symbol.for("yaml.map");
+var PAIR = Symbol.for("yaml.pair");
+var SCALAR = Symbol.for("yaml.scalar");
+var SEQ = Symbol.for("yaml.seq");
+var NODE_TYPE = Symbol.for("yaml.node.type");
+var isAlias = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === ALIAS;
+var isDocument = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === DOC;
+var isMap = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === MAP;
+var isPair = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === PAIR;
+var isScalar = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SCALAR;
+var isSeq = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SEQ;
+function isCollection(node) {
+  if (node && typeof node === "object")
+    switch (node[NODE_TYPE]) {
+      case MAP:
+      case SEQ:
+        return true;
+    }
+  return false;
+}
+function isNode(node) {
+  if (node && typeof node === "object")
+    switch (node[NODE_TYPE]) {
+      case ALIAS:
+      case MAP:
+      case SCALAR:
+      case SEQ:
+        return true;
+    }
+  return false;
+}
+var hasAnchor = (node) => (isScalar(node) || isCollection(node)) && !!node.anchor;
+
+// node_modules/yaml/browser/dist/visit.js
+var BREAK = Symbol("break visit");
+var SKIP = Symbol("skip children");
+var REMOVE = Symbol("remove node");
+function visit(node, visitor) {
+  const visitor_ = initVisitor(visitor);
+  if (isDocument(node)) {
+    const cd = visit_(null, node.contents, visitor_, Object.freeze([node]));
+    if (cd === REMOVE)
+      node.contents = null;
+  } else
+    visit_(null, node, visitor_, Object.freeze([]));
+}
+visit.BREAK = BREAK;
+visit.SKIP = SKIP;
+visit.REMOVE = REMOVE;
+function visit_(key, node, visitor, path) {
+  const ctrl = callVisitor(key, node, visitor, path);
+  if (isNode(ctrl) || isPair(ctrl)) {
+    replaceNode(key, path, ctrl);
+    return visit_(key, ctrl, visitor, path);
+  }
+  if (typeof ctrl !== "symbol") {
+    if (isCollection(node)) {
+      path = Object.freeze(path.concat(node));
+      for (let i = 0; i < node.items.length; ++i) {
+        const ci = visit_(i, node.items[i], visitor, path);
+        if (typeof ci === "number")
+          i = ci - 1;
+        else if (ci === BREAK)
+          return BREAK;
+        else if (ci === REMOVE) {
+          node.items.splice(i, 1);
+          i -= 1;
+        }
+      }
+    } else if (isPair(node)) {
+      path = Object.freeze(path.concat(node));
+      const ck = visit_("key", node.key, visitor, path);
+      if (ck === BREAK)
+        return BREAK;
+      else if (ck === REMOVE)
+        node.key = null;
+      const cv = visit_("value", node.value, visitor, path);
+      if (cv === BREAK)
+        return BREAK;
+      else if (cv === REMOVE)
+        node.value = null;
+    }
+  }
+  return ctrl;
+}
+async function visitAsync(node, visitor) {
+  const visitor_ = initVisitor(visitor);
+  if (isDocument(node)) {
+    const cd = await visitAsync_(null, node.contents, visitor_, Object.freeze([node]));
+    if (cd === REMOVE)
+      node.contents = null;
+  } else
+    await visitAsync_(null, node, visitor_, Object.freeze([]));
+}
+visitAsync.BREAK = BREAK;
+visitAsync.SKIP = SKIP;
+visitAsync.REMOVE = REMOVE;
+async function visitAsync_(key, node, visitor, path) {
+  const ctrl = await callVisitor(key, node, visitor, path);
+  if (isNode(ctrl) || isPair(ctrl)) {
+    replaceNode(key, path, ctrl);
+    return visitAsync_(key, ctrl, visitor, path);
+  }
+  if (typeof ctrl !== "symbol") {
+    if (isCollection(node)) {
+      path = Object.freeze(path.concat(node));
+      for (let i = 0; i < node.items.length; ++i) {
+        const ci = await visitAsync_(i, node.items[i], visitor, path);
+        if (typeof ci === "number")
+          i = ci - 1;
+        else if (ci === BREAK)
+          return BREAK;
+        else if (ci === REMOVE) {
+          node.items.splice(i, 1);
+          i -= 1;
+        }
+      }
+    } else if (isPair(node)) {
+      path = Object.freeze(path.concat(node));
+      const ck = await visitAsync_("key", node.key, visitor, path);
+      if (ck === BREAK)
+        return BREAK;
+      else if (ck === REMOVE)
+        node.key = null;
+      const cv = await visitAsync_("value", node.value, visitor, path);
+      if (cv === BREAK)
+        return BREAK;
+      else if (cv === REMOVE)
+        node.value = null;
+    }
+  }
+  return ctrl;
+}
+function initVisitor(visitor) {
+  if (typeof visitor === "object" && (visitor.Collection || visitor.Node || visitor.Value)) {
+    return Object.assign({
+      Alias: visitor.Node,
+      Map: visitor.Node,
+      Scalar: visitor.Node,
+      Seq: visitor.Node
+    }, visitor.Value && {
+      Map: visitor.Value,
+      Scalar: visitor.Value,
+      Seq: visitor.Value
+    }, visitor.Collection && {
+      Map: visitor.Collection,
+      Seq: visitor.Collection
+    }, visitor);
+  }
+  return visitor;
+}
+function callVisitor(key, node, visitor, path) {
+  if (typeof visitor === "function")
+    return visitor(key, node, path);
+  if (isMap(node))
+    return visitor.Map?.(key, node, path);
+  if (isSeq(node))
+    return visitor.Seq?.(key, node, path);
+  if (isPair(node))
+    return visitor.Pair?.(key, node, path);
+  if (isScalar(node))
+    return visitor.Scalar?.(key, node, path);
+  if (isAlias(node))
+    return visitor.Alias?.(key, node, path);
+  return void 0;
+}
+function replaceNode(key, path, node) {
+  const parent = path[path.length - 1];
+  if (isCollection(parent)) {
+    parent.items[key] = node;
+  } else if (isPair(parent)) {
+    if (key === "key")
+      parent.key = node;
+    else
+      parent.value = node;
+  } else if (isDocument(parent)) {
+    parent.contents = node;
+  } else {
+    const pt = isAlias(parent) ? "alias" : "scalar";
+    throw new Error(`Cannot replace node with ${pt} parent`);
+  }
+}
+
+// node_modules/yaml/browser/dist/doc/directives.js
+var escapeChars = {
+  "!": "%21",
+  ",": "%2C",
+  "[": "%5B",
+  "]": "%5D",
+  "{": "%7B",
+  "}": "%7D"
+};
+var escapeTagName = (tn) => tn.replace(/[!,[\]{}]/g, (ch) => escapeChars[ch]);
+var Directives = class _Directives {
+  constructor(yaml, tags) {
+    this.docStart = null;
+    this.docEnd = false;
+    this.yaml = Object.assign({}, _Directives.defaultYaml, yaml);
+    this.tags = Object.assign({}, _Directives.defaultTags, tags);
+  }
+  clone() {
+    const copy = new _Directives(this.yaml, this.tags);
+    copy.docStart = this.docStart;
+    return copy;
+  }
+  /**
+   * During parsing, get a Directives instance for the current document and
+   * update the stream state according to the current version's spec.
+   */
+  atDocument() {
+    const res = new _Directives(this.yaml, this.tags);
+    switch (this.yaml.version) {
+      case "1.1":
+        this.atNextDocument = true;
+        break;
+      case "1.2":
+        this.atNextDocument = false;
+        this.yaml = {
+          explicit: _Directives.defaultYaml.explicit,
+          version: "1.2"
+        };
+        this.tags = Object.assign({}, _Directives.defaultTags);
+        break;
+    }
+    return res;
+  }
+  /**
+   * @param onError - May be called even if the action was successful
+   * @returns `true` on success
+   */
+  add(line, onError) {
+    if (this.atNextDocument) {
+      this.yaml = { explicit: _Directives.defaultYaml.explicit, version: "1.1" };
+      this.tags = Object.assign({}, _Directives.defaultTags);
+      this.atNextDocument = false;
+    }
+    const parts = line.trim().split(/[ \t]+/);
+    const name = parts.shift();
+    switch (name) {
+      case "%TAG": {
+        if (parts.length !== 2) {
+          onError(0, "%TAG directive should contain exactly two parts");
+          if (parts.length < 2)
+            return false;
+        }
+        const [handle, prefix] = parts;
+        this.tags[handle] = prefix;
+        return true;
+      }
+      case "%YAML": {
+        this.yaml.explicit = true;
+        if (parts.length !== 1) {
+          onError(0, "%YAML directive should contain exactly one part");
+          return false;
+        }
+        const [version] = parts;
+        if (version === "1.1" || version === "1.2") {
+          this.yaml.version = version;
+          return true;
+        } else {
+          const isValid = /^\d+\.\d+$/.test(version);
+          onError(6, `Unsupported YAML version ${version}`, isValid);
+          return false;
+        }
+      }
+      default:
+        onError(0, `Unknown directive ${name}`, true);
+        return false;
+    }
+  }
+  /**
+   * Resolves a tag, matching handles to those defined in %TAG directives.
+   *
+   * @returns Resolved tag, which may also be the non-specific tag `'!'` or a
+   *   `'!local'` tag, or `null` if unresolvable.
+   */
+  tagName(source, onError) {
+    if (source === "!")
+      return "!";
+    if (source[0] !== "!") {
+      onError(`Not a valid tag: ${source}`);
+      return null;
+    }
+    if (source[1] === "<") {
+      const verbatim = source.slice(2, -1);
+      if (verbatim === "!" || verbatim === "!!") {
+        onError(`Verbatim tags aren't resolved, so ${source} is invalid.`);
+        return null;
+      }
+      if (source[source.length - 1] !== ">")
+        onError("Verbatim tags must end with a >");
+      return verbatim;
+    }
+    const [, handle, suffix] = source.match(/^(.*!)([^!]*)$/s);
+    if (!suffix)
+      onError(`The ${source} tag has no suffix`);
+    const prefix = this.tags[handle];
+    if (prefix) {
+      try {
+        return prefix + decodeURIComponent(suffix);
+      } catch (error) {
+        onError(String(error));
+        return null;
+      }
+    }
+    if (handle === "!")
+      return source;
+    onError(`Could not resolve tag: ${source}`);
+    return null;
+  }
+  /**
+   * Given a fully resolved tag, returns its printable string form,
+   * taking into account current tag prefixes and defaults.
+   */
+  tagString(tag) {
+    for (const [handle, prefix] of Object.entries(this.tags)) {
+      if (tag.startsWith(prefix))
+        return handle + escapeTagName(tag.substring(prefix.length));
+    }
+    return tag[0] === "!" ? tag : `!<${tag}>`;
+  }
+  toString(doc) {
+    const lines = this.yaml.explicit ? [`%YAML ${this.yaml.version || "1.2"}`] : [];
+    const tagEntries = Object.entries(this.tags);
+    let tagNames;
+    if (doc && tagEntries.length > 0 && isNode(doc.contents)) {
+      const tags = {};
+      visit(doc.contents, (_key, node) => {
+        if (isNode(node) && node.tag)
+          tags[node.tag] = true;
+      });
+      tagNames = Object.keys(tags);
+    } else
+      tagNames = [];
+    for (const [handle, prefix] of tagEntries) {
+      if (handle === "!!" && prefix === "tag:yaml.org,2002:")
+        continue;
+      if (!doc || tagNames.some((tn) => tn.startsWith(prefix)))
+        lines.push(`%TAG ${handle} ${prefix}`);
+    }
+    return lines.join("\n");
+  }
+};
+Directives.defaultYaml = { explicit: false, version: "1.2" };
+Directives.defaultTags = { "!!": "tag:yaml.org,2002:" };
+
+// node_modules/yaml/browser/dist/doc/anchors.js
+function anchorIsValid(anchor) {
+  if (/[\x00-\x19\s,[\]{}]/.test(anchor)) {
+    const sa = JSON.stringify(anchor);
+    const msg = `Anchor must not contain whitespace or control characters: ${sa}`;
+    throw new Error(msg);
+  }
+  return true;
+}
+
+// node_modules/yaml/browser/dist/doc/applyReviver.js
+function applyReviver(reviver, obj, key, val) {
+  if (val && typeof val === "object") {
+    if (Array.isArray(val)) {
+      for (let i = 0, len = val.length; i < len; ++i) {
+        const v0 = val[i];
+        const v1 = applyReviver(reviver, val, String(i), v0);
+        if (v1 === void 0)
+          delete val[i];
+        else if (v1 !== v0)
+          val[i] = v1;
+      }
+    } else if (val instanceof Map) {
+      for (const k of Array.from(val.keys())) {
+        const v0 = val.get(k);
+        const v1 = applyReviver(reviver, val, k, v0);
+        if (v1 === void 0)
+          val.delete(k);
+        else if (v1 !== v0)
+          val.set(k, v1);
+      }
+    } else if (val instanceof Set) {
+      for (const v0 of Array.from(val)) {
+        const v1 = applyReviver(reviver, val, v0, v0);
+        if (v1 === void 0)
+          val.delete(v0);
+        else if (v1 !== v0) {
+          val.delete(v0);
+          val.add(v1);
+        }
+      }
+    } else {
+      for (const [k, v0] of Object.entries(val)) {
+        const v1 = applyReviver(reviver, val, k, v0);
+        if (v1 === void 0)
+          delete val[k];
+        else if (v1 !== v0)
+          val[k] = v1;
+      }
+    }
+  }
+  return reviver.call(obj, key, val);
+}
+
+// node_modules/yaml/browser/dist/nodes/toJS.js
+function toJS(value, arg, ctx) {
+  if (Array.isArray(value))
+    return value.map((v, i) => toJS(v, String(i), ctx));
+  if (value && typeof value.toJSON === "function") {
+    if (!ctx || !hasAnchor(value))
+      return value.toJSON(arg, ctx);
+    const data = { aliasCount: 0, count: 1, res: void 0 };
+    ctx.anchors.set(value, data);
+    ctx.onCreate = (res2) => {
+      data.res = res2;
+      delete ctx.onCreate;
+    };
+    const res = value.toJSON(arg, ctx);
+    if (ctx.onCreate)
+      ctx.onCreate(res);
+    return res;
+  }
+  if (typeof value === "bigint" && !ctx?.keep)
+    return Number(value);
+  return value;
+}
+
+// node_modules/yaml/browser/dist/nodes/Node.js
+var NodeBase = class {
+  constructor(type) {
+    Object.defineProperty(this, NODE_TYPE, { value: type });
+  }
+  /** Create a copy of this node.  */
+  clone() {
+    const copy = Object.create(Object.getPrototypeOf(this), Object.getOwnPropertyDescriptors(this));
+    if (this.range)
+      copy.range = this.range.slice();
+    return copy;
+  }
+  /** A plain JavaScript representation of this node. */
+  toJS(doc, { mapAsMap, maxAliasCount, onAnchor, reviver } = {}) {
+    if (!isDocument(doc))
+      throw new TypeError("A document argument is required");
+    const ctx = {
+      anchors: /* @__PURE__ */ new Map(),
+      doc,
+      keep: true,
+      mapAsMap: mapAsMap === true,
+      mapKeyWarned: false,
+      maxAliasCount: typeof maxAliasCount === "number" ? maxAliasCount : 100
+    };
+    const res = toJS(this, "", ctx);
+    if (typeof onAnchor === "function")
+      for (const { count, res: res2 } of ctx.anchors.values())
+        onAnchor(res2, count);
+    return typeof reviver === "function" ? applyReviver(reviver, { "": res }, "", res) : res;
+  }
+};
+
+// node_modules/yaml/browser/dist/nodes/Alias.js
+var Alias = class extends NodeBase {
+  constructor(source) {
+    super(ALIAS);
+    this.source = source;
+    Object.defineProperty(this, "tag", {
+      set() {
+        throw new Error("Alias nodes cannot have tags");
+      }
+    });
+  }
+  /**
+   * Resolve the value of this alias within `doc`, finding the last
+   * instance of the `source` anchor before this node.
+   */
+  resolve(doc, ctx) {
+    if (ctx?.maxAliasCount === 0)
+      throw new ReferenceError("Alias resolution is disabled");
+    let nodes;
+    if (ctx?.aliasResolveCache) {
+      nodes = ctx.aliasResolveCache;
+    } else {
+      nodes = [];
+      visit(doc, {
+        Node: (_key, node) => {
+          if (isAlias(node) || hasAnchor(node))
+            nodes.push(node);
+        }
+      });
+      if (ctx)
+        ctx.aliasResolveCache = nodes;
+    }
+    let found = void 0;
+    for (const node of nodes) {
+      if (node === this)
+        break;
+      if (node.anchor === this.source)
+        found = node;
+    }
+    return found;
+  }
+  toJSON(_arg, ctx) {
+    if (!ctx)
+      return { source: this.source };
+    const { anchors, doc, maxAliasCount } = ctx;
+    const source = this.resolve(doc, ctx);
+    if (!source) {
+      const msg = `Unresolved alias (the anchor must be set before the alias): ${this.source}`;
+      throw new ReferenceError(msg);
+    }
+    let data = anchors.get(source);
+    if (!data) {
+      toJS(source, null, ctx);
+      data = anchors.get(source);
+    }
+    if (data?.res === void 0) {
+      const msg = "This should not happen: Alias anchor was not resolved?";
+      throw new ReferenceError(msg);
+    }
+    if (maxAliasCount >= 0) {
+      data.count += 1;
+      if (data.aliasCount === 0)
+        data.aliasCount = getAliasCount(doc, source, anchors);
+      if (data.count * data.aliasCount > maxAliasCount) {
+        const msg = "Excessive alias count indicates a resource exhaustion attack";
+        throw new ReferenceError(msg);
+      }
+    }
+    return data.res;
+  }
+  toString(ctx, _onComment, _onChompKeep) {
+    const src = `*${this.source}`;
+    if (ctx) {
+      anchorIsValid(this.source);
+      if (ctx.options.verifyAliasOrder && !ctx.anchors.has(this.source)) {
+        const msg = `Unresolved alias (the anchor must be set before the alias): ${this.source}`;
+        throw new Error(msg);
+      }
+      if (ctx.implicitKey)
+        return `${src} `;
+    }
+    return src;
+  }
+};
+function getAliasCount(doc, node, anchors) {
+  if (isAlias(node)) {
+    const source = node.resolve(doc);
+    const anchor = anchors && source && anchors.get(source);
+    return anchor ? anchor.count * anchor.aliasCount : 0;
+  } else if (isCollection(node)) {
+    let count = 0;
+    for (const item of node.items) {
+      const c = getAliasCount(doc, item, anchors);
+      if (c > count)
+        count = c;
+    }
+    return count;
+  } else if (isPair(node)) {
+    const kc = getAliasCount(doc, node.key, anchors);
+    const vc = getAliasCount(doc, node.value, anchors);
+    return Math.max(kc, vc);
+  }
+  return 1;
+}
+
+// node_modules/yaml/browser/dist/nodes/Scalar.js
+var isScalarValue = (value) => !value || typeof value !== "function" && typeof value !== "object";
+var Scalar = class extends NodeBase {
+  constructor(value) {
+    super(SCALAR);
+    this.value = value;
+  }
+  toJSON(arg, ctx) {
+    return ctx?.keep ? this.value : toJS(this.value, arg, ctx);
+  }
+  toString() {
+    return String(this.value);
+  }
+};
+Scalar.BLOCK_FOLDED = "BLOCK_FOLDED";
+Scalar.BLOCK_LITERAL = "BLOCK_LITERAL";
+Scalar.PLAIN = "PLAIN";
+Scalar.QUOTE_DOUBLE = "QUOTE_DOUBLE";
+Scalar.QUOTE_SINGLE = "QUOTE_SINGLE";
+
+// node_modules/yaml/browser/dist/doc/createNode.js
+var defaultTagPrefix = "tag:yaml.org,2002:";
+function findTagObject(value, tagName, tags) {
+  if (tagName) {
+    const match = tags.filter((t) => t.tag === tagName);
+    const tagObj = match.find((t) => !t.format) ?? match[0];
+    if (!tagObj)
+      throw new Error(`Tag ${tagName} not found`);
+    return tagObj;
+  }
+  return tags.find((t) => t.identify?.(value) && !t.format);
+}
+function createNode(value, tagName, ctx) {
+  if (isDocument(value))
+    value = value.contents;
+  if (isNode(value))
+    return value;
+  if (isPair(value)) {
+    const map2 = ctx.schema[MAP].createNode?.(ctx.schema, null, ctx);
+    map2.items.push(value);
+    return map2;
+  }
+  if (value instanceof String || value instanceof Number || value instanceof Boolean || typeof BigInt !== "undefined" && value instanceof BigInt) {
+    value = value.valueOf();
+  }
+  const { aliasDuplicateObjects, onAnchor, onTagObj, schema: schema4, sourceObjects } = ctx;
+  let ref = void 0;
+  if (aliasDuplicateObjects && value && typeof value === "object") {
+    ref = sourceObjects.get(value);
+    if (ref) {
+      ref.anchor ?? (ref.anchor = onAnchor(value));
+      return new Alias(ref.anchor);
+    } else {
+      ref = { anchor: null, node: null };
+      sourceObjects.set(value, ref);
+    }
+  }
+  if (tagName?.startsWith("!!"))
+    tagName = defaultTagPrefix + tagName.slice(2);
+  let tagObj = findTagObject(value, tagName, schema4.tags);
+  if (!tagObj) {
+    if (value && typeof value.toJSON === "function") {
+      value = value.toJSON();
+    }
+    if (!value || typeof value !== "object") {
+      const node2 = new Scalar(value);
+      if (ref)
+        ref.node = node2;
+      return node2;
+    }
+    tagObj = value instanceof Map ? schema4[MAP] : Symbol.iterator in Object(value) ? schema4[SEQ] : schema4[MAP];
+  }
+  if (onTagObj) {
+    onTagObj(tagObj);
+    delete ctx.onTagObj;
+  }
+  const node = tagObj?.createNode ? tagObj.createNode(ctx.schema, value, ctx) : typeof tagObj?.nodeClass?.from === "function" ? tagObj.nodeClass.from(ctx.schema, value, ctx) : new Scalar(value);
+  if (tagName)
+    node.tag = tagName;
+  else if (!tagObj.default)
+    node.tag = tagObj.tag;
+  if (ref)
+    ref.node = node;
+  return node;
+}
+
+// node_modules/yaml/browser/dist/nodes/Collection.js
+function collectionFromPath(schema4, path, value) {
+  let v = value;
+  for (let i = path.length - 1; i >= 0; --i) {
+    const k = path[i];
+    if (typeof k === "number" && Number.isInteger(k) && k >= 0) {
+      const a = [];
+      a[k] = v;
+      v = a;
+    } else {
+      v = /* @__PURE__ */ new Map([[k, v]]);
+    }
+  }
+  return createNode(v, void 0, {
+    aliasDuplicateObjects: false,
+    keepUndefined: false,
+    onAnchor: () => {
+      throw new Error("This should not happen, please report a bug.");
+    },
+    schema: schema4,
+    sourceObjects: /* @__PURE__ */ new Map()
+  });
+}
+var isEmptyPath = (path) => path == null || typeof path === "object" && !!path[Symbol.iterator]().next().done;
+var Collection = class extends NodeBase {
+  constructor(type, schema4) {
+    super(type);
+    Object.defineProperty(this, "schema", {
+      value: schema4,
+      configurable: true,
+      enumerable: false,
+      writable: true
+    });
+  }
+  /**
+   * Create a copy of this collection.
+   *
+   * @param schema - If defined, overwrites the original's schema
+   */
+  clone(schema4) {
+    const copy = Object.create(Object.getPrototypeOf(this), Object.getOwnPropertyDescriptors(this));
+    if (schema4)
+      copy.schema = schema4;
+    copy.items = copy.items.map((it) => isNode(it) || isPair(it) ? it.clone(schema4) : it);
+    if (this.range)
+      copy.range = this.range.slice();
+    return copy;
+  }
+  /**
+   * Adds a value to the collection. For `!!map` and `!!omap` the value must
+   * be a Pair instance or a `{ key, value }` object, which may not have a key
+   * that already exists in the map.
+   */
+  addIn(path, value) {
+    if (isEmptyPath(path))
+      this.add(value);
+    else {
+      const [key, ...rest] = path;
+      const node = this.get(key, true);
+      if (isCollection(node))
+        node.addIn(rest, value);
+      else if (node === void 0 && this.schema)
+        this.set(key, collectionFromPath(this.schema, rest, value));
+      else
+        throw new Error(`Expected YAML collection at ${key}. Remaining path: ${rest}`);
+    }
+  }
+  /**
+   * Removes a value from the collection.
+   * @returns `true` if the item was found and removed.
+   */
+  deleteIn(path) {
+    const [key, ...rest] = path;
+    if (rest.length === 0)
+      return this.delete(key);
+    const node = this.get(key, true);
+    if (isCollection(node))
+      return node.deleteIn(rest);
+    else
+      throw new Error(`Expected YAML collection at ${key}. Remaining path: ${rest}`);
+  }
+  /**
+   * Returns item at `key`, or `undefined` if not found. By default unwraps
+   * scalar values from their surrounding node; to disable set `keepScalar` to
+   * `true` (collections are always returned intact).
+   */
+  getIn(path, keepScalar) {
+    const [key, ...rest] = path;
+    const node = this.get(key, true);
+    if (rest.length === 0)
+      return !keepScalar && isScalar(node) ? node.value : node;
+    else
+      return isCollection(node) ? node.getIn(rest, keepScalar) : void 0;
+  }
+  hasAllNullValues(allowScalar) {
+    return this.items.every((node) => {
+      if (!isPair(node))
+        return false;
+      const n = node.value;
+      return n == null || allowScalar && isScalar(n) && n.value == null && !n.commentBefore && !n.comment && !n.tag;
+    });
+  }
+  /**
+   * Checks if the collection includes a value with the key `key`.
+   */
+  hasIn(path) {
+    const [key, ...rest] = path;
+    if (rest.length === 0)
+      return this.has(key);
+    const node = this.get(key, true);
+    return isCollection(node) ? node.hasIn(rest) : false;
+  }
+  /**
+   * Sets a value in this collection. For `!!set`, `value` needs to be a
+   * boolean to add/remove the item from the set.
+   */
+  setIn(path, value) {
+    const [key, ...rest] = path;
+    if (rest.length === 0) {
+      this.set(key, value);
+    } else {
+      const node = this.get(key, true);
+      if (isCollection(node))
+        node.setIn(rest, value);
+      else if (node === void 0 && this.schema)
+        this.set(key, collectionFromPath(this.schema, rest, value));
+      else
+        throw new Error(`Expected YAML collection at ${key}. Remaining path: ${rest}`);
+    }
+  }
+};
+
+// node_modules/yaml/browser/dist/stringify/stringifyComment.js
+var stringifyComment = (str) => str.replace(/^(?!$)(?: $)?/gm, "#");
+function indentComment(comment, indent) {
+  if (/^\n+$/.test(comment))
+    return comment.substring(1);
+  return indent ? comment.replace(/^(?! *$)/gm, indent) : comment;
+}
+var lineComment = (str, indent, comment) => str.endsWith("\n") ? indentComment(comment, indent) : comment.includes("\n") ? "\n" + indentComment(comment, indent) : (str.endsWith(" ") ? "" : " ") + comment;
+
+// node_modules/yaml/browser/dist/stringify/foldFlowLines.js
+var FOLD_FLOW = "flow";
+var FOLD_BLOCK = "block";
+var FOLD_QUOTED = "quoted";
+function foldFlowLines(text, indent, mode = "flow", { indentAtStart, lineWidth = 80, minContentWidth = 20, onFold, onOverflow } = {}) {
+  if (!lineWidth || lineWidth < 0)
+    return text;
+  if (lineWidth < minContentWidth)
+    minContentWidth = 0;
+  const endStep = Math.max(1 + minContentWidth, 1 + lineWidth - indent.length);
+  if (text.length <= endStep)
+    return text;
+  const folds = [];
+  const escapedFolds = {};
+  let end = lineWidth - indent.length;
+  if (typeof indentAtStart === "number") {
+    if (indentAtStart > lineWidth - Math.max(2, minContentWidth))
+      folds.push(0);
+    else
+      end = lineWidth - indentAtStart;
+  }
+  let split = void 0;
+  let prev = void 0;
+  let overflow = false;
+  let i = -1;
+  let escStart = -1;
+  let escEnd = -1;
+  if (mode === FOLD_BLOCK) {
+    i = consumeMoreIndentedLines(text, i, indent.length);
+    if (i !== -1)
+      end = i + endStep;
+  }
+  for (let ch; ch = text[i += 1]; ) {
+    if (mode === FOLD_QUOTED && ch === "\\") {
+      escStart = i;
+      switch (text[i + 1]) {
+        case "x":
+          i += 3;
+          break;
+        case "u":
+          i += 5;
+          break;
+        case "U":
+          i += 9;
+          break;
+        default:
+          i += 1;
+      }
+      escEnd = i;
+    }
+    if (ch === "\n") {
+      if (mode === FOLD_BLOCK)
+        i = consumeMoreIndentedLines(text, i, indent.length);
+      end = i + indent.length + endStep;
+      split = void 0;
+    } else {
+      if (ch === " " && prev && prev !== " " && prev !== "\n" && prev !== "	") {
+        const next = text[i + 1];
+        if (next && next !== " " && next !== "\n" && next !== "	")
+          split = i;
+      }
+      if (i >= end) {
+        if (split) {
+          folds.push(split);
+          end = split + endStep;
+          split = void 0;
+        } else if (mode === FOLD_QUOTED) {
+          while (prev === " " || prev === "	") {
+            prev = ch;
+            ch = text[i += 1];
+            overflow = true;
+          }
+          const j = i > escEnd + 1 ? i - 2 : escStart - 1;
+          if (escapedFolds[j])
+            return text;
+          folds.push(j);
+          escapedFolds[j] = true;
+          end = j + endStep;
+          split = void 0;
+        } else {
+          overflow = true;
+        }
+      }
+    }
+    prev = ch;
+  }
+  if (overflow && onOverflow)
+    onOverflow();
+  if (folds.length === 0)
+    return text;
+  if (onFold)
+    onFold();
+  let res = text.slice(0, folds[0]);
+  for (let i2 = 0; i2 < folds.length; ++i2) {
+    const fold = folds[i2];
+    const end2 = folds[i2 + 1] || text.length;
+    if (fold === 0)
+      res = `
+${indent}${text.slice(0, end2)}`;
+    else {
+      if (mode === FOLD_QUOTED && escapedFolds[fold])
+        res += `${text[fold]}\\`;
+      res += `
+${indent}${text.slice(fold + 1, end2)}`;
+    }
+  }
+  return res;
+}
+function consumeMoreIndentedLines(text, i, indent) {
+  let end = i;
+  let start = i + 1;
+  let ch = text[start];
+  while (ch === " " || ch === "	") {
+    if (i < start + indent) {
+      ch = text[++i];
+    } else {
+      do {
+        ch = text[++i];
+      } while (ch && ch !== "\n");
+      end = i;
+      start = i + 1;
+      ch = text[start];
+    }
+  }
+  return end;
+}
+
+// node_modules/yaml/browser/dist/stringify/stringifyString.js
+var getFoldOptions = (ctx, isBlock) => ({
+  indentAtStart: isBlock ? ctx.indent.length : ctx.indentAtStart,
+  lineWidth: ctx.options.lineWidth,
+  minContentWidth: ctx.options.minContentWidth
+});
+var containsDocumentMarker = (str) => /^(%|---|\.\.\.)/m.test(str);
+function lineLengthOverLimit(str, lineWidth, indentLength) {
+  if (!lineWidth || lineWidth < 0)
+    return false;
+  const limit = lineWidth - indentLength;
+  const strLen = str.length;
+  if (strLen <= limit)
+    return false;
+  for (let i = 0, start = 0; i < strLen; ++i) {
+    if (str[i] === "\n") {
+      if (i - start > limit)
+        return true;
+      start = i + 1;
+      if (strLen - start <= limit)
+        return false;
+    }
+  }
+  return true;
+}
+function doubleQuotedString(value, ctx) {
+  const json = JSON.stringify(value);
+  if (ctx.options.doubleQuotedAsJSON)
+    return json;
+  const { implicitKey } = ctx;
+  const minMultiLineLength = ctx.options.doubleQuotedMinMultiLineLength;
+  const indent = ctx.indent || (containsDocumentMarker(value) ? "  " : "");
+  let str = "";
+  let start = 0;
+  for (let i = 0, ch = json[i]; ch; ch = json[++i]) {
+    if (ch === " " && json[i + 1] === "\\" && json[i + 2] === "n") {
+      str += json.slice(start, i) + "\\ ";
+      i += 1;
+      start = i;
+      ch = "\\";
+    }
+    if (ch === "\\")
+      switch (json[i + 1]) {
+        case "u":
+          {
+            str += json.slice(start, i);
+            const code = json.substr(i + 2, 4);
+            switch (code) {
+              case "0000":
+                str += "\\0";
+                break;
+              case "0007":
+                str += "\\a";
+                break;
+              case "000b":
+                str += "\\v";
+                break;
+              case "001b":
+                str += "\\e";
+                break;
+              case "0085":
+                str += "\\N";
+                break;
+              case "00a0":
+                str += "\\_";
+                break;
+              case "2028":
+                str += "\\L";
+                break;
+              case "2029":
+                str += "\\P";
+                break;
+              default:
+                if (code.substr(0, 2) === "00")
+                  str += "\\x" + code.substr(2);
+                else
+                  str += json.substr(i, 6);
+            }
+            i += 5;
+            start = i + 1;
+          }
+          break;
+        case "n":
+          if (implicitKey || json[i + 2] === '"' || json.length < minMultiLineLength) {
+            i += 1;
+          } else {
+            str += json.slice(start, i) + "\n\n";
+            while (json[i + 2] === "\\" && json[i + 3] === "n" && json[i + 4] !== '"') {
+              str += "\n";
+              i += 2;
+            }
+            str += indent;
+            if (json[i + 2] === " ")
+              str += "\\";
+            i += 1;
+            start = i + 1;
+          }
+          break;
+        default:
+          i += 1;
+      }
+  }
+  str = start ? str + json.slice(start) : json;
+  return implicitKey ? str : foldFlowLines(str, indent, FOLD_QUOTED, getFoldOptions(ctx, false));
+}
+function singleQuotedString(value, ctx) {
+  if (ctx.options.singleQuote === false || ctx.implicitKey && value.includes("\n") || /[ \t]\n|\n[ \t]/.test(value))
+    return doubleQuotedString(value, ctx);
+  const indent = ctx.indent || (containsDocumentMarker(value) ? "  " : "");
+  const res = "'" + value.replace(/'/g, "''").replace(/\n+/g, `$&
+${indent}`) + "'";
+  return ctx.implicitKey ? res : foldFlowLines(res, indent, FOLD_FLOW, getFoldOptions(ctx, false));
+}
+function quotedString(value, ctx) {
+  const { singleQuote } = ctx.options;
+  let qs;
+  if (singleQuote === false)
+    qs = doubleQuotedString;
+  else {
+    const hasDouble = value.includes('"');
+    const hasSingle = value.includes("'");
+    if (hasDouble && !hasSingle)
+      qs = singleQuotedString;
+    else if (hasSingle && !hasDouble)
+      qs = doubleQuotedString;
+    else
+      qs = singleQuote ? singleQuotedString : doubleQuotedString;
+  }
+  return qs(value, ctx);
+}
+var blockEndNewlines;
+try {
+  blockEndNewlines = new RegExp("(^|(?<!\n))\n+(?!\n|$)", "g");
+} catch {
+  blockEndNewlines = /\n+(?!\n|$)/g;
+}
+function blockString({ comment, type, value }, ctx, onComment, onChompKeep) {
+  const { blockQuote, commentString, lineWidth } = ctx.options;
+  if (!blockQuote || /\n[\t ]+$/.test(value)) {
+    return quotedString(value, ctx);
+  }
+  const indent = ctx.indent || (ctx.forceBlockIndent || containsDocumentMarker(value) ? "  " : "");
+  const literal = blockQuote === "literal" ? true : blockQuote === "folded" || type === Scalar.BLOCK_FOLDED ? false : type === Scalar.BLOCK_LITERAL ? true : !lineLengthOverLimit(value, lineWidth, indent.length);
+  if (!value)
+    return literal ? "|\n" : ">\n";
+  let chomp;
+  let endStart;
+  for (endStart = value.length; endStart > 0; --endStart) {
+    const ch = value[endStart - 1];
+    if (ch !== "\n" && ch !== "	" && ch !== " ")
+      break;
+  }
+  let end = value.substring(endStart);
+  const endNlPos = end.indexOf("\n");
+  if (endNlPos === -1) {
+    chomp = "-";
+  } else if (value === end || endNlPos !== end.length - 1) {
+    chomp = "+";
+    if (onChompKeep)
+      onChompKeep();
+  } else {
+    chomp = "";
+  }
+  if (end) {
+    value = value.slice(0, -end.length);
+    if (end[end.length - 1] === "\n")
+      end = end.slice(0, -1);
+    end = end.replace(blockEndNewlines, `$&${indent}`);
+  }
+  let startWithSpace = false;
+  let startEnd;
+  let startNlPos = -1;
+  for (startEnd = 0; startEnd < value.length; ++startEnd) {
+    const ch = value[startEnd];
+    if (ch === " ")
+      startWithSpace = true;
+    else if (ch === "\n")
+      startNlPos = startEnd;
+    else
+      break;
+  }
+  let start = value.substring(0, startNlPos < startEnd ? startNlPos + 1 : startEnd);
+  if (start) {
+    value = value.substring(start.length);
+    start = start.replace(/\n+/g, `$&${indent}`);
+  }
+  const indentSize = indent ? "2" : "1";
+  let header = (startWithSpace ? indentSize : "") + chomp;
+  if (comment) {
+    header += " " + commentString(comment.replace(/ ?[\r\n]+/g, " "));
+    if (onComment)
+      onComment();
+  }
+  if (!literal) {
+    const foldedValue = value.replace(/\n+/g, "\n$&").replace(/(?:^|\n)([\t ].*)(?:([\n\t ]*)\n(?![\n\t ]))?/g, "$1$2").replace(/\n+/g, `$&${indent}`);
+    let literalFallback = false;
+    const foldOptions = getFoldOptions(ctx, true);
+    if (blockQuote !== "folded" && type !== Scalar.BLOCK_FOLDED) {
+      foldOptions.onOverflow = () => {
+        literalFallback = true;
+      };
+    }
+    const body = foldFlowLines(`${start}${foldedValue}${end}`, indent, FOLD_BLOCK, foldOptions);
+    if (!literalFallback)
+      return `>${header}
+${indent}${body}`;
+  }
+  value = value.replace(/\n+/g, `$&${indent}`);
+  return `|${header}
+${indent}${start}${value}${end}`;
+}
+function plainString(item, ctx, onComment, onChompKeep) {
+  const { type, value } = item;
+  const { actualString, implicitKey, indent, indentStep, inFlow } = ctx;
+  if (implicitKey && value.includes("\n") || inFlow && /[[\]{},]/.test(value)) {
+    return quotedString(value, ctx);
+  }
+  if (/^[\n\t ,[\]{}#&*!|>'"%@`]|^[?-]$|^[?-][ \t]|[\n:][ \t]|[ \t]\n|[\n\t ]#|[\n\t :]$/.test(value)) {
+    return implicitKey || inFlow || !value.includes("\n") ? quotedString(value, ctx) : blockString(item, ctx, onComment, onChompKeep);
+  }
+  if (!implicitKey && !inFlow && type !== Scalar.PLAIN && value.includes("\n")) {
+    return blockString(item, ctx, onComment, onChompKeep);
+  }
+  if (containsDocumentMarker(value)) {
+    if (indent === "") {
+      ctx.forceBlockIndent = true;
+      return blockString(item, ctx, onComment, onChompKeep);
+    } else if (implicitKey && indent === indentStep) {
+      return quotedString(value, ctx);
+    }
+  }
+  const str = value.replace(/\n+/g, `$&
+${indent}`);
+  if (actualString) {
+    const test = (tag) => tag.default && tag.tag !== "tag:yaml.org,2002:str" && tag.test?.test(str);
+    const { compat, tags } = ctx.doc.schema;
+    if (tags.some(test) || compat?.some(test))
+      return quotedString(value, ctx);
+  }
+  return implicitKey ? str : foldFlowLines(str, indent, FOLD_FLOW, getFoldOptions(ctx, false));
+}
+function stringifyString(item, ctx, onComment, onChompKeep) {
+  const { implicitKey, inFlow } = ctx;
+  const ss = typeof item.value === "string" ? item : Object.assign({}, item, { value: String(item.value) });
+  let { type } = item;
+  if (type !== Scalar.QUOTE_DOUBLE) {
+    if (/[\x00-\x08\x0b-\x1f\x7f-\x9f\u{D800}-\u{DFFF}]/u.test(ss.value))
+      type = Scalar.QUOTE_DOUBLE;
+  }
+  const _stringify = (_type) => {
+    switch (_type) {
+      case Scalar.BLOCK_FOLDED:
+      case Scalar.BLOCK_LITERAL:
+        return implicitKey || inFlow ? quotedString(ss.value, ctx) : blockString(ss, ctx, onComment, onChompKeep);
+      case Scalar.QUOTE_DOUBLE:
+        return doubleQuotedString(ss.value, ctx);
+      case Scalar.QUOTE_SINGLE:
+        return singleQuotedString(ss.value, ctx);
+      case Scalar.PLAIN:
+        return plainString(ss, ctx, onComment, onChompKeep);
+      default:
+        return null;
+    }
+  };
+  let res = _stringify(type);
+  if (res === null) {
+    const { defaultKeyType, defaultStringType } = ctx.options;
+    const t = implicitKey && defaultKeyType || defaultStringType;
+    res = _stringify(t);
+    if (res === null)
+      throw new Error(`Unsupported default string type ${t}`);
+  }
+  return res;
+}
+
+// node_modules/yaml/browser/dist/stringify/stringify.js
+function createStringifyContext(doc, options) {
+  const opt = Object.assign({
+    blockQuote: true,
+    commentString: stringifyComment,
+    defaultKeyType: null,
+    defaultStringType: "PLAIN",
+    directives: null,
+    doubleQuotedAsJSON: false,
+    doubleQuotedMinMultiLineLength: 40,
+    falseStr: "false",
+    flowCollectionPadding: true,
+    indentSeq: true,
+    lineWidth: 80,
+    minContentWidth: 20,
+    nullStr: "null",
+    simpleKeys: false,
+    singleQuote: null,
+    trailingComma: false,
+    trueStr: "true",
+    verifyAliasOrder: true
+  }, doc.schema.toStringOptions, options);
+  let inFlow;
+  switch (opt.collectionStyle) {
+    case "block":
+      inFlow = false;
+      break;
+    case "flow":
+      inFlow = true;
+      break;
+    default:
+      inFlow = null;
+  }
+  return {
+    anchors: /* @__PURE__ */ new Set(),
+    doc,
+    flowCollectionPadding: opt.flowCollectionPadding ? " " : "",
+    indent: "",
+    indentStep: typeof opt.indent === "number" ? " ".repeat(opt.indent) : "  ",
+    inFlow,
+    options: opt
+  };
+}
+function getTagObject(tags, item) {
+  if (item.tag) {
+    const match = tags.filter((t) => t.tag === item.tag);
+    if (match.length > 0)
+      return match.find((t) => t.format === item.format) ?? match[0];
+  }
+  let tagObj = void 0;
+  let obj;
+  if (isScalar(item)) {
+    obj = item.value;
+    let match = tags.filter((t) => t.identify?.(obj));
+    if (match.length > 1) {
+      const testMatch = match.filter((t) => t.test);
+      if (testMatch.length > 0)
+        match = testMatch;
+    }
+    tagObj = match.find((t) => t.format === item.format) ?? match.find((t) => !t.format);
+  } else {
+    obj = item;
+    tagObj = tags.find((t) => t.nodeClass && obj instanceof t.nodeClass);
+  }
+  if (!tagObj) {
+    const name = obj?.constructor?.name ?? (obj === null ? "null" : typeof obj);
+    throw new Error(`Tag not resolved for ${name} value`);
+  }
+  return tagObj;
+}
+function stringifyProps(node, tagObj, { anchors, doc }) {
+  if (!doc.directives)
+    return "";
+  const props = [];
+  const anchor = (isScalar(node) || isCollection(node)) && node.anchor;
+  if (anchor && anchorIsValid(anchor)) {
+    anchors.add(anchor);
+    props.push(`&${anchor}`);
+  }
+  const tag = node.tag ?? (tagObj.default ? null : tagObj.tag);
+  if (tag)
+    props.push(doc.directives.tagString(tag));
+  return props.join(" ");
+}
+function stringify(item, ctx, onComment, onChompKeep) {
+  if (isPair(item))
+    return item.toString(ctx, onComment, onChompKeep);
+  if (isAlias(item)) {
+    if (ctx.doc.directives)
+      return item.toString(ctx);
+    if (ctx.resolvedAliases?.has(item)) {
+      throw new TypeError(`Cannot stringify circular structure without alias nodes`);
+    } else {
+      if (ctx.resolvedAliases)
+        ctx.resolvedAliases.add(item);
+      else
+        ctx.resolvedAliases = /* @__PURE__ */ new Set([item]);
+      item = item.resolve(ctx.doc);
+    }
+  }
+  let tagObj = void 0;
+  const node = isNode(item) ? item : ctx.doc.createNode(item, { onTagObj: (o) => tagObj = o });
+  tagObj ?? (tagObj = getTagObject(ctx.doc.schema.tags, node));
+  const props = stringifyProps(node, tagObj, ctx);
+  if (props.length > 0)
+    ctx.indentAtStart = (ctx.indentAtStart ?? 0) + props.length + 1;
+  const str = typeof tagObj.stringify === "function" ? tagObj.stringify(node, ctx, onComment, onChompKeep) : isScalar(node) ? stringifyString(node, ctx, onComment, onChompKeep) : node.toString(ctx, onComment, onChompKeep);
+  if (!props)
+    return str;
+  return isScalar(node) || str[0] === "{" || str[0] === "[" ? `${props} ${str}` : `${props}
+${ctx.indent}${str}`;
+}
+
+// node_modules/yaml/browser/dist/stringify/stringifyPair.js
+function stringifyPair({ key, value }, ctx, onComment, onChompKeep) {
+  const { allNullValues, doc, indent, indentStep, options: { commentString, indentSeq, simpleKeys } } = ctx;
+  let keyComment = isNode(key) && key.comment || null;
+  if (simpleKeys) {
+    if (keyComment) {
+      throw new Error("With simple keys, key nodes cannot have comments");
+    }
+    if (isCollection(key) || !isNode(key) && typeof key === "object") {
+      const msg = "With simple keys, collection cannot be used as a key value";
+      throw new Error(msg);
+    }
+  }
+  let explicitKey = !simpleKeys && (!key || keyComment && value == null && !ctx.inFlow || isCollection(key) || (isScalar(key) ? key.type === Scalar.BLOCK_FOLDED || key.type === Scalar.BLOCK_LITERAL : typeof key === "object"));
+  ctx = Object.assign({}, ctx, {
+    allNullValues: false,
+    implicitKey: !explicitKey && (simpleKeys || !allNullValues),
+    indent: indent + indentStep
+  });
+  let keyCommentDone = false;
+  let chompKeep = false;
+  let str = stringify(key, ctx, () => keyCommentDone = true, () => chompKeep = true);
+  if (!explicitKey && !ctx.inFlow && str.length > 1024) {
+    if (simpleKeys)
+      throw new Error("With simple keys, single line scalar must not span more than 1024 characters");
+    explicitKey = true;
+  }
+  if (ctx.inFlow) {
+    if (allNullValues || value == null) {
+      if (keyCommentDone && onComment)
+        onComment();
+      return str === "" ? "?" : explicitKey ? `? ${str}` : str;
+    }
+  } else if (allNullValues && !simpleKeys || value == null && explicitKey) {
+    str = `? ${str}`;
+    if (keyComment && !keyCommentDone) {
+      str += lineComment(str, ctx.indent, commentString(keyComment));
+    } else if (chompKeep && onChompKeep)
+      onChompKeep();
+    return str;
+  }
+  if (keyCommentDone)
+    keyComment = null;
+  if (explicitKey) {
+    if (keyComment)
+      str += lineComment(str, ctx.indent, commentString(keyComment));
+    str = `? ${str}
+${indent}:`;
+  } else {
+    str = `${str}:`;
+    if (keyComment)
+      str += lineComment(str, ctx.indent, commentString(keyComment));
+  }
+  let vsb, vcb, valueComment;
+  if (isNode(value)) {
+    vsb = !!value.spaceBefore;
+    vcb = value.commentBefore;
+    valueComment = value.comment;
+  } else {
+    vsb = false;
+    vcb = null;
+    valueComment = null;
+    if (value && typeof value === "object")
+      value = doc.createNode(value);
+  }
+  ctx.implicitKey = false;
+  if (!explicitKey && !keyComment && isScalar(value))
+    ctx.indentAtStart = str.length + 1;
+  chompKeep = false;
+  if (!indentSeq && indentStep.length >= 2 && !ctx.inFlow && !explicitKey && isSeq(value) && !value.flow && !value.tag && !value.anchor) {
+    ctx.indent = ctx.indent.substring(2);
+  }
+  let valueCommentDone = false;
+  const valueStr = stringify(value, ctx, () => valueCommentDone = true, () => chompKeep = true);
+  let ws = " ";
+  if (keyComment || vsb || vcb) {
+    ws = vsb ? "\n" : "";
+    if (vcb) {
+      const cs = commentString(vcb);
+      ws += `
+${indentComment(cs, ctx.indent)}`;
+    }
+    if (valueStr === "" && !ctx.inFlow) {
+      if (ws === "\n" && valueComment)
+        ws = "\n\n";
+    } else {
+      ws += `
+${ctx.indent}`;
+    }
+  } else if (!explicitKey && isCollection(value)) {
+    const vs0 = valueStr[0];
+    const nl0 = valueStr.indexOf("\n");
+    const hasNewline = nl0 !== -1;
+    const flow = ctx.inFlow ?? value.flow ?? value.items.length === 0;
+    if (hasNewline || !flow) {
+      let hasPropsLine = false;
+      if (hasNewline && (vs0 === "&" || vs0 === "!")) {
+        let sp0 = valueStr.indexOf(" ");
+        if (vs0 === "&" && sp0 !== -1 && sp0 < nl0 && valueStr[sp0 + 1] === "!") {
+          sp0 = valueStr.indexOf(" ", sp0 + 1);
+        }
+        if (sp0 === -1 || nl0 < sp0)
+          hasPropsLine = true;
+      }
+      if (!hasPropsLine)
+        ws = `
+${ctx.indent}`;
+    }
+  } else if (valueStr === "" || valueStr[0] === "\n") {
+    ws = "";
+  }
+  str += ws + valueStr;
+  if (ctx.inFlow) {
+    if (valueCommentDone && onComment)
+      onComment();
+  } else if (valueComment && !valueCommentDone) {
+    str += lineComment(str, ctx.indent, commentString(valueComment));
+  } else if (chompKeep && onChompKeep) {
+    onChompKeep();
+  }
+  return str;
+}
+
+// node_modules/yaml/browser/dist/log.js
+function warn(logLevel, warning) {
+  if (logLevel === "debug" || logLevel === "warn") {
+    console.warn(warning);
+  }
+}
+
+// node_modules/yaml/browser/dist/schema/yaml-1.1/merge.js
+var MERGE_KEY = "<<";
+var merge = {
+  identify: (value) => value === MERGE_KEY || typeof value === "symbol" && value.description === MERGE_KEY,
+  default: "key",
+  tag: "tag:yaml.org,2002:merge",
+  test: /^<<$/,
+  resolve: () => Object.assign(new Scalar(Symbol(MERGE_KEY)), {
+    addToJSMap: addMergeToJSMap
+  }),
+  stringify: () => MERGE_KEY
+};
+var isMergeKey = (ctx, key) => (merge.identify(key) || isScalar(key) && (!key.type || key.type === Scalar.PLAIN) && merge.identify(key.value)) && ctx?.doc.schema.tags.some((tag) => tag.tag === merge.tag && tag.default);
+function addMergeToJSMap(ctx, map2, value) {
+  const source = resolveAliasValue(ctx, value);
+  if (isSeq(source))
+    for (const it of source.items)
+      mergeValue(ctx, map2, it);
+  else if (Array.isArray(source))
+    for (const it of source)
+      mergeValue(ctx, map2, it);
+  else
+    mergeValue(ctx, map2, source);
+}
+function mergeValue(ctx, map2, value) {
+  const source = resolveAliasValue(ctx, value);
+  if (!isMap(source))
+    throw new Error("Merge sources must be maps or map aliases");
+  const srcMap = source.toJSON(null, ctx, Map);
+  for (const [key, value2] of srcMap) {
+    if (map2 instanceof Map) {
+      if (!map2.has(key))
+        map2.set(key, value2);
+    } else if (map2 instanceof Set) {
+      map2.add(key);
+    } else if (!Object.prototype.hasOwnProperty.call(map2, key)) {
+      Object.defineProperty(map2, key, {
+        value: value2,
+        writable: true,
+        enumerable: true,
+        configurable: true
+      });
+    }
+  }
+  return map2;
+}
+function resolveAliasValue(ctx, value) {
+  return ctx && isAlias(value) ? value.resolve(ctx.doc, ctx) : value;
+}
+
+// node_modules/yaml/browser/dist/nodes/addPairToJSMap.js
+function addPairToJSMap(ctx, map2, { key, value }) {
+  if (isNode(key) && key.addToJSMap)
+    key.addToJSMap(ctx, map2, value);
+  else if (isMergeKey(ctx, key))
+    addMergeToJSMap(ctx, map2, value);
+  else {
+    const jsKey = toJS(key, "", ctx);
+    if (map2 instanceof Map) {
+      map2.set(jsKey, toJS(value, jsKey, ctx));
+    } else if (map2 instanceof Set) {
+      map2.add(jsKey);
+    } else {
+      const stringKey = stringifyKey(key, jsKey, ctx);
+      const jsValue = toJS(value, stringKey, ctx);
+      if (stringKey in map2)
+        Object.defineProperty(map2, stringKey, {
+          value: jsValue,
+          writable: true,
+          enumerable: true,
+          configurable: true
+        });
+      else
+        map2[stringKey] = jsValue;
+    }
+  }
+  return map2;
+}
+function stringifyKey(key, jsKey, ctx) {
+  if (jsKey === null)
+    return "";
+  if (typeof jsKey !== "object")
+    return String(jsKey);
+  if (isNode(key) && ctx?.doc) {
+    const strCtx = createStringifyContext(ctx.doc, {});
+    strCtx.anchors = /* @__PURE__ */ new Set();
+    for (const node of ctx.anchors.keys())
+      strCtx.anchors.add(node.anchor);
+    strCtx.inFlow = true;
+    strCtx.inStringifyKey = true;
+    const strKey = key.toString(strCtx);
+    if (!ctx.mapKeyWarned) {
+      let jsonStr = JSON.stringify(strKey);
+      if (jsonStr.length > 40)
+        jsonStr = jsonStr.substring(0, 36) + '..."';
+      warn(ctx.doc.options.logLevel, `Keys with collection values will be stringified due to JS Object restrictions: ${jsonStr}. Set mapAsMap: true to use object keys.`);
+      ctx.mapKeyWarned = true;
+    }
+    return strKey;
+  }
+  return JSON.stringify(jsKey);
+}
+
+// node_modules/yaml/browser/dist/nodes/Pair.js
+function createPair(key, value, ctx) {
+  const k = createNode(key, void 0, ctx);
+  const v = createNode(value, void 0, ctx);
+  return new Pair(k, v);
+}
+var Pair = class _Pair {
+  constructor(key, value = null) {
+    Object.defineProperty(this, NODE_TYPE, { value: PAIR });
+    this.key = key;
+    this.value = value;
+  }
+  clone(schema4) {
+    let { key, value } = this;
+    if (isNode(key))
+      key = key.clone(schema4);
+    if (isNode(value))
+      value = value.clone(schema4);
+    return new _Pair(key, value);
+  }
+  toJSON(_, ctx) {
+    const pair = ctx?.mapAsMap ? /* @__PURE__ */ new Map() : {};
+    return addPairToJSMap(ctx, pair, this);
+  }
+  toString(ctx, onComment, onChompKeep) {
+    return ctx?.doc ? stringifyPair(this, ctx, onComment, onChompKeep) : JSON.stringify(this);
+  }
+};
+
+// node_modules/yaml/browser/dist/stringify/stringifyCollection.js
+function stringifyCollection(collection, ctx, options) {
+  const flow = ctx.inFlow ?? collection.flow;
+  const stringify4 = flow ? stringifyFlowCollection : stringifyBlockCollection;
+  return stringify4(collection, ctx, options);
+}
+function stringifyBlockCollection({ comment, items }, ctx, { blockItemPrefix, flowChars, itemIndent, onChompKeep, onComment }) {
+  const { indent, options: { commentString } } = ctx;
+  const itemCtx = Object.assign({}, ctx, { indent: itemIndent, type: null });
+  let chompKeep = false;
+  const lines = [];
+  for (let i = 0; i < items.length; ++i) {
+    const item = items[i];
+    let comment2 = null;
+    if (isNode(item)) {
+      if (!chompKeep && item.spaceBefore)
+        lines.push("");
+      addCommentBefore(ctx, lines, item.commentBefore, chompKeep);
+      if (item.comment)
+        comment2 = item.comment;
+    } else if (isPair(item)) {
+      const ik = isNode(item.key) ? item.key : null;
+      if (ik) {
+        if (!chompKeep && ik.spaceBefore)
+          lines.push("");
+        addCommentBefore(ctx, lines, ik.commentBefore, chompKeep);
+      }
+    }
+    chompKeep = false;
+    let str2 = stringify(item, itemCtx, () => comment2 = null, () => chompKeep = true);
+    if (comment2)
+      str2 += lineComment(str2, itemIndent, commentString(comment2));
+    if (chompKeep && comment2)
+      chompKeep = false;
+    lines.push(blockItemPrefix + str2);
+  }
+  let str;
+  if (lines.length === 0) {
+    str = flowChars.start + flowChars.end;
+  } else {
+    str = lines[0];
+    for (let i = 1; i < lines.length; ++i) {
+      const line = lines[i];
+      str += line ? `
+${indent}${line}` : "\n";
+    }
+  }
+  if (comment) {
+    str += "\n" + indentComment(commentString(comment), indent);
+    if (onComment)
+      onComment();
+  } else if (chompKeep && onChompKeep)
+    onChompKeep();
+  return str;
+}
+function stringifyFlowCollection({ items }, ctx, { flowChars, itemIndent }) {
+  const { indent, indentStep, flowCollectionPadding: fcPadding, options: { commentString } } = ctx;
+  itemIndent += indentStep;
+  const itemCtx = Object.assign({}, ctx, {
+    indent: itemIndent,
+    inFlow: true,
+    type: null
+  });
+  let reqNewline = false;
+  let linesAtValue = 0;
+  const lines = [];
+  for (let i = 0; i < items.length; ++i) {
+    const item = items[i];
+    let comment = null;
+    if (isNode(item)) {
+      if (item.spaceBefore)
+        lines.push("");
+      addCommentBefore(ctx, lines, item.commentBefore, false);
+      if (item.comment)
+        comment = item.comment;
+    } else if (isPair(item)) {
+      const ik = isNode(item.key) ? item.key : null;
+      if (ik) {
+        if (ik.spaceBefore)
+          lines.push("");
+        addCommentBefore(ctx, lines, ik.commentBefore, false);
+        if (ik.comment)
+          reqNewline = true;
+      }
+      const iv = isNode(item.value) ? item.value : null;
+      if (iv) {
+        if (iv.comment)
+          comment = iv.comment;
+        if (iv.commentBefore)
+          reqNewline = true;
+      } else if (item.value == null && ik?.comment) {
+        comment = ik.comment;
+      }
+    }
+    if (comment)
+      reqNewline = true;
+    let str = stringify(item, itemCtx, () => comment = null);
+    reqNewline || (reqNewline = lines.length > linesAtValue || str.includes("\n"));
+    if (i < items.length - 1) {
+      str += ",";
+    } else if (ctx.options.trailingComma) {
+      if (ctx.options.lineWidth > 0) {
+        reqNewline || (reqNewline = lines.reduce((sum, line) => sum + line.length + 2, 2) + (str.length + 2) > ctx.options.lineWidth);
+      }
+      if (reqNewline) {
+        str += ",";
+      }
+    }
+    if (comment)
+      str += lineComment(str, itemIndent, commentString(comment));
+    lines.push(str);
+    linesAtValue = lines.length;
+  }
+  const { start, end } = flowChars;
+  if (lines.length === 0) {
+    return start + end;
+  } else {
+    if (!reqNewline) {
+      const len = lines.reduce((sum, line) => sum + line.length + 2, 2);
+      reqNewline = ctx.options.lineWidth > 0 && len > ctx.options.lineWidth;
+    }
+    if (reqNewline) {
+      let str = start;
+      for (const line of lines)
+        str += line ? `
+${indentStep}${indent}${line}` : "\n";
+      return `${str}
+${indent}${end}`;
+    } else {
+      return `${start}${fcPadding}${lines.join(" ")}${fcPadding}${end}`;
+    }
+  }
+}
+function addCommentBefore({ indent, options: { commentString } }, lines, comment, chompKeep) {
+  if (comment && chompKeep)
+    comment = comment.replace(/^\n+/, "");
+  if (comment) {
+    const ic = indentComment(commentString(comment), indent);
+    lines.push(ic.trimStart());
+  }
+}
+
+// node_modules/yaml/browser/dist/nodes/YAMLMap.js
+function findPair(items, key) {
+  const k = isScalar(key) ? key.value : key;
+  for (const it of items) {
+    if (isPair(it)) {
+      if (it.key === key || it.key === k)
+        return it;
+      if (isScalar(it.key) && it.key.value === k)
+        return it;
+    }
+  }
+  return void 0;
+}
+var YAMLMap = class extends Collection {
+  static get tagName() {
+    return "tag:yaml.org,2002:map";
+  }
+  constructor(schema4) {
+    super(MAP, schema4);
+    this.items = [];
+  }
+  /**
+   * A generic collection parsing method that can be extended
+   * to other node classes that inherit from YAMLMap
+   */
+  static from(schema4, obj, ctx) {
+    const { keepUndefined, replacer } = ctx;
+    const map2 = new this(schema4);
+    const add = (key, value) => {
+      if (typeof replacer === "function")
+        value = replacer.call(obj, key, value);
+      else if (Array.isArray(replacer) && !replacer.includes(key))
+        return;
+      if (value !== void 0 || keepUndefined)
+        map2.items.push(createPair(key, value, ctx));
+    };
+    if (obj instanceof Map) {
+      for (const [key, value] of obj)
+        add(key, value);
+    } else if (obj && typeof obj === "object") {
+      for (const key of Object.keys(obj))
+        add(key, obj[key]);
+    }
+    if (typeof schema4.sortMapEntries === "function") {
+      map2.items.sort(schema4.sortMapEntries);
+    }
+    return map2;
+  }
+  /**
+   * Adds a value to the collection.
+   *
+   * @param overwrite - If not set `true`, using a key that is already in the
+   *   collection will throw. Otherwise, overwrites the previous value.
+   */
+  add(pair, overwrite) {
+    let _pair;
+    if (isPair(pair))
+      _pair = pair;
+    else if (!pair || typeof pair !== "object" || !("key" in pair)) {
+      _pair = new Pair(pair, pair?.value);
+    } else
+      _pair = new Pair(pair.key, pair.value);
+    const prev = findPair(this.items, _pair.key);
+    const sortEntries = this.schema?.sortMapEntries;
+    if (prev) {
+      if (!overwrite)
+        throw new Error(`Key ${_pair.key} already set`);
+      if (isScalar(prev.value) && isScalarValue(_pair.value))
+        prev.value.value = _pair.value;
+      else
+        prev.value = _pair.value;
+    } else if (sortEntries) {
+      const i = this.items.findIndex((item) => sortEntries(_pair, item) < 0);
+      if (i === -1)
+        this.items.push(_pair);
+      else
+        this.items.splice(i, 0, _pair);
+    } else {
+      this.items.push(_pair);
+    }
+  }
+  delete(key) {
+    const it = findPair(this.items, key);
+    if (!it)
+      return false;
+    const del = this.items.splice(this.items.indexOf(it), 1);
+    return del.length > 0;
+  }
+  get(key, keepScalar) {
+    const it = findPair(this.items, key);
+    const node = it?.value;
+    return (!keepScalar && isScalar(node) ? node.value : node) ?? void 0;
+  }
+  has(key) {
+    return !!findPair(this.items, key);
+  }
+  set(key, value) {
+    this.add(new Pair(key, value), true);
+  }
+  /**
+   * @param ctx - Conversion context, originally set in Document#toJS()
+   * @param {Class} Type - If set, forces the returned collection type
+   * @returns Instance of Type, Map, or Object
+   */
+  toJSON(_, ctx, Type) {
+    const map2 = Type ? new Type() : ctx?.mapAsMap ? /* @__PURE__ */ new Map() : {};
+    if (ctx?.onCreate)
+      ctx.onCreate(map2);
+    for (const item of this.items)
+      addPairToJSMap(ctx, map2, item);
+    return map2;
+  }
+  toString(ctx, onComment, onChompKeep) {
+    if (!ctx)
+      return JSON.stringify(this);
+    for (const item of this.items) {
+      if (!isPair(item))
+        throw new Error(`Map items must all be pairs; found ${JSON.stringify(item)} instead`);
+    }
+    if (!ctx.allNullValues && this.hasAllNullValues(false))
+      ctx = Object.assign({}, ctx, { allNullValues: true });
+    return stringifyCollection(this, ctx, {
+      blockItemPrefix: "",
+      flowChars: { start: "{", end: "}" },
+      itemIndent: ctx.indent || "",
+      onChompKeep,
+      onComment
+    });
+  }
+};
+
+// node_modules/yaml/browser/dist/schema/common/map.js
+var map = {
+  collection: "map",
+  default: true,
+  nodeClass: YAMLMap,
+  tag: "tag:yaml.org,2002:map",
+  resolve(map2, onError) {
+    if (!isMap(map2))
+      onError("Expected a mapping for this tag");
+    return map2;
+  },
+  createNode: (schema4, obj, ctx) => YAMLMap.from(schema4, obj, ctx)
+};
+
+// node_modules/yaml/browser/dist/nodes/YAMLSeq.js
+var YAMLSeq = class extends Collection {
+  static get tagName() {
+    return "tag:yaml.org,2002:seq";
+  }
+  constructor(schema4) {
+    super(SEQ, schema4);
+    this.items = [];
+  }
+  add(value) {
+    this.items.push(value);
+  }
+  /**
+   * Removes a value from the collection.
+   *
+   * `key` must contain a representation of an integer for this to succeed.
+   * It may be wrapped in a `Scalar`.
+   *
+   * @returns `true` if the item was found and removed.
+   */
+  delete(key) {
+    const idx = asItemIndex(key);
+    if (typeof idx !== "number")
+      return false;
+    const del = this.items.splice(idx, 1);
+    return del.length > 0;
+  }
+  get(key, keepScalar) {
+    const idx = asItemIndex(key);
+    if (typeof idx !== "number")
+      return void 0;
+    const it = this.items[idx];
+    return !keepScalar && isScalar(it) ? it.value : it;
+  }
+  /**
+   * Checks if the collection includes a value with the key `key`.
+   *
+   * `key` must contain a representation of an integer for this to succeed.
+   * It may be wrapped in a `Scalar`.
+   */
+  has(key) {
+    const idx = asItemIndex(key);
+    return typeof idx === "number" && idx < this.items.length;
+  }
+  /**
+   * Sets a value in this collection. For `!!set`, `value` needs to be a
+   * boolean to add/remove the item from the set.
+   *
+   * If `key` does not contain a representation of an integer, this will throw.
+   * It may be wrapped in a `Scalar`.
+   */
+  set(key, value) {
+    const idx = asItemIndex(key);
+    if (typeof idx !== "number")
+      throw new Error(`Expected a valid index, not ${key}.`);
+    const prev = this.items[idx];
+    if (isScalar(prev) && isScalarValue(value))
+      prev.value = value;
+    else
+      this.items[idx] = value;
+  }
+  toJSON(_, ctx) {
+    const seq2 = [];
+    if (ctx?.onCreate)
+      ctx.onCreate(seq2);
+    let i = 0;
+    for (const item of this.items)
+      seq2.push(toJS(item, String(i++), ctx));
+    return seq2;
+  }
+  toString(ctx, onComment, onChompKeep) {
+    if (!ctx)
+      return JSON.stringify(this);
+    return stringifyCollection(this, ctx, {
+      blockItemPrefix: "- ",
+      flowChars: { start: "[", end: "]" },
+      itemIndent: (ctx.indent || "") + "  ",
+      onChompKeep,
+      onComment
+    });
+  }
+  static from(schema4, obj, ctx) {
+    const { replacer } = ctx;
+    const seq2 = new this(schema4);
+    if (obj && Symbol.iterator in Object(obj)) {
+      let i = 0;
+      for (let it of obj) {
+        if (typeof replacer === "function") {
+          const key = obj instanceof Set ? it : String(i++);
+          it = replacer.call(obj, key, it);
+        }
+        seq2.items.push(createNode(it, void 0, ctx));
+      }
+    }
+    return seq2;
+  }
+};
+function asItemIndex(key) {
+  let idx = isScalar(key) ? key.value : key;
+  if (idx && typeof idx === "string")
+    idx = Number(idx);
+  return typeof idx === "number" && Number.isInteger(idx) && idx >= 0 ? idx : null;
+}
+
+// node_modules/yaml/browser/dist/schema/common/seq.js
+var seq = {
+  collection: "seq",
+  default: true,
+  nodeClass: YAMLSeq,
+  tag: "tag:yaml.org,2002:seq",
+  resolve(seq2, onError) {
+    if (!isSeq(seq2))
+      onError("Expected a sequence for this tag");
+    return seq2;
+  },
+  createNode: (schema4, obj, ctx) => YAMLSeq.from(schema4, obj, ctx)
+};
+
+// node_modules/yaml/browser/dist/schema/json/schema.js
+function intIdentify(value) {
+  return typeof value === "bigint" || Number.isInteger(value);
+}
+var stringifyJSON = ({ value }) => JSON.stringify(value);
+var jsonScalars = [
+  {
+    identify: (value) => typeof value === "string",
+    default: true,
+    tag: "tag:yaml.org,2002:str",
+    resolve: (str) => str,
+    stringify: stringifyJSON
+  },
+  {
+    identify: (value) => value == null,
+    createNode: () => new Scalar(null),
+    default: true,
+    tag: "tag:yaml.org,2002:null",
+    test: /^null$/,
+    resolve: () => null,
+    stringify: stringifyJSON
+  },
+  {
+    identify: (value) => typeof value === "boolean",
+    default: true,
+    tag: "tag:yaml.org,2002:bool",
+    test: /^true$|^false$/,
+    resolve: (str) => str === "true",
+    stringify: stringifyJSON
+  },
+  {
+    identify: intIdentify,
+    default: true,
+    tag: "tag:yaml.org,2002:int",
+    test: /^-?(?:0|[1-9][0-9]*)$/,
+    resolve: (str, _onError, { intAsBigInt }) => intAsBigInt ? BigInt(str) : parseInt(str, 10),
+    stringify: ({ value }) => intIdentify(value) ? value.toString() : JSON.stringify(value)
+  },
+  {
+    identify: (value) => typeof value === "number",
+    default: true,
+    tag: "tag:yaml.org,2002:float",
+    test: /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]*)?(?:[eE][-+]?[0-9]+)?$/,
+    resolve: (str) => parseFloat(str),
+    stringify: stringifyJSON
+  }
+];
+var jsonError = {
+  default: true,
+  tag: "",
+  test: /^/,
+  resolve(str, onError) {
+    onError(`Unresolved plain scalar ${JSON.stringify(str)}`);
+    return str;
+  }
+};
+var schema = [map, seq].concat(jsonScalars, jsonError);
+
+// node_modules/yaml/browser/dist/schema/yaml-1.1/pairs.js
+function createPairs(schema4, iterable, ctx) {
+  const { replacer } = ctx;
+  const pairs2 = new YAMLSeq(schema4);
+  pairs2.tag = "tag:yaml.org,2002:pairs";
+  let i = 0;
+  if (iterable && Symbol.iterator in Object(iterable))
+    for (let it of iterable) {
+      if (typeof replacer === "function")
+        it = replacer.call(iterable, String(i++), it);
+      let key, value;
+      if (Array.isArray(it)) {
+        if (it.length === 2) {
+          key = it[0];
+          value = it[1];
+        } else
+          throw new TypeError(`Expected [key, value] tuple: ${it}`);
+      } else if (it && it instanceof Object) {
+        const keys = Object.keys(it);
+        if (keys.length === 1) {
+          key = keys[0];
+          value = it[key];
+        } else {
+          throw new TypeError(`Expected tuple with one key, not ${keys.length} keys`);
+        }
+      } else {
+        key = it;
+      }
+      pairs2.items.push(createPair(key, value, ctx));
+    }
+  return pairs2;
+}
+
+// node_modules/yaml/browser/dist/schema/yaml-1.1/omap.js
+var YAMLOMap = class _YAMLOMap extends YAMLSeq {
+  constructor() {
+    super();
+    this.add = YAMLMap.prototype.add.bind(this);
+    this.delete = YAMLMap.prototype.delete.bind(this);
+    this.get = YAMLMap.prototype.get.bind(this);
+    this.has = YAMLMap.prototype.has.bind(this);
+    this.set = YAMLMap.prototype.set.bind(this);
+    this.tag = _YAMLOMap.tag;
+  }
+  /**
+   * If `ctx` is given, the return type is actually `Map<unknown, unknown>`,
+   * but TypeScript won't allow widening the signature of a child method.
+   */
+  toJSON(_, ctx) {
+    if (!ctx)
+      return super.toJSON(_);
+    const map2 = /* @__PURE__ */ new Map();
+    if (ctx?.onCreate)
+      ctx.onCreate(map2);
+    for (const pair of this.items) {
+      let key, value;
+      if (isPair(pair)) {
+        key = toJS(pair.key, "", ctx);
+        value = toJS(pair.value, key, ctx);
+      } else {
+        key = toJS(pair, "", ctx);
+      }
+      if (map2.has(key))
+        throw new Error("Ordered maps must not include duplicate keys");
+      map2.set(key, value);
+    }
+    return map2;
+  }
+  static from(schema4, iterable, ctx) {
+    const pairs2 = createPairs(schema4, iterable, ctx);
+    const omap2 = new this();
+    omap2.items = pairs2.items;
+    return omap2;
+  }
+};
+YAMLOMap.tag = "tag:yaml.org,2002:omap";
+
+// node_modules/yaml/browser/dist/schema/yaml-1.1/set.js
+var YAMLSet = class _YAMLSet extends YAMLMap {
+  constructor(schema4) {
+    super(schema4);
+    this.tag = _YAMLSet.tag;
+  }
+  add(key) {
+    let pair;
+    if (isPair(key))
+      pair = key;
+    else if (key && typeof key === "object" && "key" in key && "value" in key && key.value === null)
+      pair = new Pair(key.key, null);
+    else
+      pair = new Pair(key, null);
+    const prev = findPair(this.items, pair.key);
+    if (!prev)
+      this.items.push(pair);
+  }
+  /**
+   * If `keepPair` is `true`, returns the Pair matching `key`.
+   * Otherwise, returns the value of that Pair's key.
+   */
+  get(key, keepPair) {
+    const pair = findPair(this.items, key);
+    return !keepPair && isPair(pair) ? isScalar(pair.key) ? pair.key.value : pair.key : pair;
+  }
+  set(key, value) {
+    if (typeof value !== "boolean")
+      throw new Error(`Expected boolean value for set(key, value) in a YAML set, not ${typeof value}`);
+    const prev = findPair(this.items, key);
+    if (prev && !value) {
+      this.items.splice(this.items.indexOf(prev), 1);
+    } else if (!prev && value) {
+      this.items.push(new Pair(key));
+    }
+  }
+  toJSON(_, ctx) {
+    return super.toJSON(_, ctx, Set);
+  }
+  toString(ctx, onComment, onChompKeep) {
+    if (!ctx)
+      return JSON.stringify(this);
+    if (this.hasAllNullValues(true))
+      return super.toString(Object.assign({}, ctx, { allNullValues: true }), onComment, onChompKeep);
+    else
+      throw new Error("Set items must all have null values");
+  }
+  static from(schema4, iterable, ctx) {
+    const { replacer } = ctx;
+    const set2 = new this(schema4);
+    if (iterable && Symbol.iterator in Object(iterable))
+      for (let value of iterable) {
+        if (typeof replacer === "function")
+          value = replacer.call(iterable, value, value);
+        set2.items.push(createPair(value, null, ctx));
+      }
+    return set2;
+  }
+};
+YAMLSet.tag = "tag:yaml.org,2002:set";
+
+// node_modules/yaml/browser/dist/schema/yaml-1.1/timestamp.js
+function parseSexagesimal(str, asBigInt) {
+  const sign = str[0];
+  const parts = sign === "-" || sign === "+" ? str.substring(1) : str;
+  const num = (n) => asBigInt ? BigInt(n) : Number(n);
+  const res = parts.replace(/_/g, "").split(":").reduce((res2, p) => res2 * num(60) + num(p), num(0));
+  return sign === "-" ? num(-1) * res : res;
+}
+var timestamp = {
+  identify: (value) => value instanceof Date,
+  default: true,
+  tag: "tag:yaml.org,2002:timestamp",
+  // If the time zone is omitted, the timestamp is assumed to be specified in UTC. The time part
+  // may be omitted altogether, resulting in a date format. In such a case, the time part is
+  // assumed to be 00:00:00Z (start of day, UTC).
+  test: RegExp("^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})(?:(?:t|T|[ \\t]+)([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}(\\.[0-9]+)?)(?:[ \\t]*(Z|[-+][012]?[0-9](?::[0-9]{2})?))?)?$"),
+  resolve(str) {
+    const match = str.match(timestamp.test);
+    if (!match)
+      throw new Error("!!timestamp expects a date, starting with yyyy-mm-dd");
+    const [, year, month, day, hour, minute, second] = match.map(Number);
+    const millisec = match[7] ? Number((match[7] + "00").substr(1, 3)) : 0;
+    let date = Date.UTC(year, month - 1, day, hour || 0, minute || 0, second || 0, millisec);
+    const tz = match[8];
+    if (tz && tz !== "Z") {
+      let d = parseSexagesimal(tz, false);
+      if (Math.abs(d) < 30)
+        d *= 60;
+      date -= 6e4 * d;
+    }
+    return new Date(date);
+  },
+  stringify: ({ value }) => value?.toISOString().replace(/(T00:00:00)?\.000Z$/, "") ?? ""
+};
+
+// node_modules/yaml/browser/dist/parse/cst-visit.js
+var BREAK2 = Symbol("break visit");
+var SKIP2 = Symbol("skip children");
+var REMOVE2 = Symbol("remove item");
+function visit2(cst, visitor) {
+  if ("type" in cst && cst.type === "document")
+    cst = { start: cst.start, value: cst.value };
+  _visit(Object.freeze([]), cst, visitor);
+}
+visit2.BREAK = BREAK2;
+visit2.SKIP = SKIP2;
+visit2.REMOVE = REMOVE2;
+visit2.itemAtPath = (cst, path) => {
+  let item = cst;
+  for (const [field, index] of path) {
+    const tok = item?.[field];
+    if (tok && "items" in tok) {
+      item = tok.items[index];
+    } else
+      return void 0;
+  }
+  return item;
+};
+visit2.parentCollection = (cst, path) => {
+  const parent = visit2.itemAtPath(cst, path.slice(0, -1));
+  const field = path[path.length - 1][0];
+  const coll = parent?.[field];
+  if (coll && "items" in coll)
+    return coll;
+  throw new Error("Parent collection not found");
+};
+function _visit(path, item, visitor) {
+  let ctrl = visitor(item, path);
+  if (typeof ctrl === "symbol")
+    return ctrl;
+  for (const field of ["key", "value"]) {
+    const token = item[field];
+    if (token && "items" in token) {
+      for (let i = 0; i < token.items.length; ++i) {
+        const ci = _visit(Object.freeze(path.concat([[field, i]])), token.items[i], visitor);
+        if (typeof ci === "number")
+          i = ci - 1;
+        else if (ci === BREAK2)
+          return BREAK2;
+        else if (ci === REMOVE2) {
+          token.items.splice(i, 1);
+          i -= 1;
+        }
+      }
+      if (typeof ctrl === "function" && field === "key")
+        ctrl = ctrl(item, path);
+    }
+  }
+  return typeof ctrl === "function" ? ctrl(item, path) : ctrl;
+}
+
+// node_modules/yaml/browser/dist/parse/lexer.js
+var hexDigits = new Set("0123456789ABCDEFabcdef");
+var tagChars = new Set("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-#;/?:@&=+$_.!~*'()");
+var flowIndicatorChars = new Set(",[]{}");
+var invalidAnchorChars = new Set(" ,[]{}\n\r	");
+
+// src/utils/yaml.ts
+function extractBodyContent(content) {
+  const bodyMatch = content.match(/^---\r?\n[\s\S]*?\r?\n---([\s\S]*)$/);
+  return bodyMatch ? bodyMatch[1] : content;
+}
+function normalizeTags(raw) {
+  if (!raw) return [];
+  const tagList = [];
+  if (Array.isArray(raw)) {
+    for (const item of raw) {
+      if (typeof item === "string") {
+        const clean = item.trim().replace(/^#+/, "");
+        if (clean) tagList.push(clean);
+      }
+    }
+  } else if (typeof raw === "string") {
+    const parts = raw.split(/[\s,]+/);
+    for (const part of parts) {
+      const clean = part.trim().replace(/^#+/, "");
+      if (clean) tagList.push(clean);
+    }
+  }
+  return Array.from(new Set(tagList));
+}
+
 // src/storage.ts
 var StorageManager = class {
   constructor(app) {
@@ -24721,9 +27011,9 @@ var StorageManager = class {
    * Generate collision-free filename: <timestamp>_<random5>.md
    */
   generateUniqueId() {
-    const timestamp = Date.now();
+    const timestamp2 = Date.now();
     const rand = Math.random().toString(36).substring(2, 7);
-    return `${timestamp}_${rand}`;
+    return `${timestamp2}_${rand}`;
   }
   /**
    * Helper to parse YAML frontmatter from file content
@@ -24772,7 +27062,8 @@ ${bodyContent}`;
           description: frontmatter.description || "",
           color: frontmatter.color || "purple",
           createdAt: frontmatter.created_at || new Date(file.stat.ctime).toISOString(),
-          itemCount
+          itemCount,
+          tags: normalizeTags(frontmatter.tags)
         });
       }
     }
@@ -24792,17 +27083,21 @@ ${bodyContent}`;
   /**
    * Create a new collection
    */
-  async createCollection(title, description = "") {
+  async createCollection(title, description = "", tags = []) {
     await this.ensureDirectoriesExist();
     const id = this.generateUniqueId();
     const filePath = `${COLLECTIONS_DIR}/${id}.md`;
     const createdAt = (/* @__PURE__ */ new Date()).toISOString();
+    const cleanTags = normalizeTags(tags);
     const frontmatter = {
       id,
       title: title.trim() || "New Collection",
       description: description.trim(),
       created_at: createdAt
     };
+    if (cleanTags.length > 0) {
+      frontmatter.tags = cleanTags;
+    }
     const content = this.formatMarkdownWithFrontmatter(frontmatter, `# ${title}
 `);
     await this.app.vault.create(filePath, content);
@@ -24816,8 +27111,34 @@ ${bodyContent}`;
       title: frontmatter.title,
       description: frontmatter.description,
       createdAt,
-      itemCount: 0
+      itemCount: 0,
+      tags: cleanTags
     };
+  }
+  /**
+   * Update collection metadata (title, description, tags, etc.)
+   */
+  async updateCollection(collection) {
+    const filePath = collection.filePath || `${COLLECTIONS_DIR}/${collection.id}.md`;
+    const file = this.app.vault.getAbstractFileByPath(filePath);
+    if (file instanceof import_obsidian2.TFile) {
+      const content = await this.app.vault.read(file);
+      const frontmatter = this.parseFrontmatter(content);
+      frontmatter.title = collection.title.trim();
+      frontmatter.description = (collection.description || "").trim();
+      const cleanTags = normalizeTags(collection.tags);
+      if (cleanTags.length > 0) {
+        frontmatter.tags = cleanTags;
+      } else {
+        delete frontmatter.tags;
+      }
+      if (collection.color) {
+        frontmatter.color = collection.color;
+      }
+      const body = extractBodyContent(content);
+      const newContent = this.formatMarkdownWithFrontmatter(frontmatter, body);
+      await this.app.vault.modify(file, newContent);
+    }
   }
   /**
    * Delete collection and its items
@@ -25018,7 +27339,8 @@ var SEED_COLLECTIONS = [
     description: "\u65E5\u3005\u306E\u30BF\u30B9\u30AF\u3068\u751F\u6D3B\u306ETODO",
     color: "purple",
     createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-    itemCount: 2
+    itemCount: 2,
+    tags: ["\u751F\u6D3B", "\u500B\u4EBA"]
   },
   {
     id: "col-default-2",
@@ -25027,7 +27349,8 @@ var SEED_COLLECTIONS = [
     description: "\u30E2\u30D0\u30A4\u30EBWeb\u30A2\u30D7\u30EA\u958B\u767A",
     color: "blue",
     createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-    itemCount: 1
+    itemCount: 1,
+    tags: ["\u958B\u767A", "\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8"]
   }
 ];
 var SEED_ITEMS = [
@@ -25116,7 +27439,7 @@ var LocalStorageAdapter = class {
       itemCount: items.filter((item) => item.collectionId === col.id).length
     }));
   }
-  async createCollection(title, description = "") {
+  async createCollection(title, description = "", tags = []) {
     const collections = this.getStoredCollections();
     const id = `col-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const newCol = {
@@ -25126,11 +27449,26 @@ var LocalStorageAdapter = class {
       description: description.trim(),
       color: "purple",
       createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-      itemCount: 0
+      itemCount: 0,
+      tags: tags || []
     };
     collections.push(newCol);
     this.saveStoredCollections(collections);
     return newCol;
+  }
+  async updateCollection(collection) {
+    const collections = this.getStoredCollections();
+    const idx = collections.findIndex((c) => c.id === collection.id);
+    if (idx !== -1) {
+      collections[idx] = {
+        ...collections[idx],
+        title: collection.title.trim(),
+        description: (collection.description || "").trim(),
+        tags: collection.tags || [],
+        color: collection.color || collections[idx].color
+      };
+      this.saveStoredCollections(collections);
+    }
   }
   async deleteCollection(collectionId) {
     let collections = this.getStoredCollections();
@@ -25226,7 +27564,7 @@ var DEFAULT_SETTINGS = {
 var import_react2 = __toESM(require_react());
 
 // node_modules/lucide-react/dist/esm/shared/src/utils.js
-var toKebabCase = (string) => string.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+var toKebabCase = (string2) => string2.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
 var mergeClasses = (...classes) => classes.filter((className, index, array) => {
   return Boolean(className) && array.indexOf(className) === index;
 }).join(" ");
@@ -25485,6 +27823,14 @@ var Layers = createLucideIcon("Layers", [
   ["path", { d: "m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65", key: "ep9fru" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/layout-grid.js
+var LayoutGrid = createLucideIcon("LayoutGrid", [
+  ["rect", { width: "7", height: "7", x: "3", y: "3", rx: "1", key: "1g98yp" }],
+  ["rect", { width: "7", height: "7", x: "14", y: "3", rx: "1", key: "6d4xhi" }],
+  ["rect", { width: "7", height: "7", x: "14", y: "14", rx: "1", key: "nxv5o0" }],
+  ["rect", { width: "7", height: "7", x: "3", y: "14", rx: "1", key: "1bb6yr" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/list.js
 var List = createLucideIcon("List", [
   ["line", { x1: "8", x2: "21", y1: "6", y2: "6", key: "7ey8pc" }],
@@ -25638,6 +27984,8 @@ var HeaderNav = ({
   viewMode,
   collections,
   selectedCollection,
+  activeTagFilter,
+  onClearTagFilter,
   startDate,
   daysCount = 7,
   showCompletedItems = false,
@@ -25776,7 +28124,20 @@ var HeaderNav = ({
               children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { size: 16 })
             }
           )
-        ] })
+        ] }),
+        activeTagFilter && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "div",
+          {
+            className: "header-active-tag-badge desktop-only",
+            title: "\u30BF\u30B0\u30D5\u30A3\u30EB\u30BF\u30FC\u4E2D\uFF08\u30AF\u30EA\u30C3\u30AF\u3067\u89E3\u9664\uFF09",
+            onClick: onClearTagFilter,
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Tag, { size: 12, className: "header-tag-icon" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "header-tag-name", children: activeTagFilter === "__untagged__" ? "\u672A\u5206\u985E" : `#${activeTagFilter}` }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "header-tag-clear-btn", title: "\u30D5\u30A3\u30EB\u30BF\u30FC\u89E3\u9664", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 12 }) })
+            ]
+          }
+        )
       ] }),
       viewMode === "type-calendar" && selectedType && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "breadcrumb-separator desktop-only", children: "/" }),
@@ -25929,26 +28290,225 @@ var HeaderNav = ({
 // src/components/CollectionsGrid.tsx
 var import_react3 = __toESM(require_react());
 var import_jsx_runtime2 = __toESM(require_jsx_runtime());
+var GROUP_STORAGE_KEY = "todo_cal_collections_grouped";
 var CollectionsGrid = ({
   collections,
+  selectedTagFilter: propSelectedTagFilter,
+  onSelectTagFilter,
   onSelectCollection,
   onCreateCollection,
+  onUpdateCollection,
   onDeleteCollection
 }) => {
   const [searchTerm, setSearchTerm] = (0, import_react3.useState)("");
+  const [localSelectedTagFilter, setLocalSelectedTagFilter] = (0, import_react3.useState)(null);
+  const activeTagFilter = propSelectedTagFilter !== void 0 ? propSelectedTagFilter : localSelectedTagFilter;
+  const handleTagFilterChange = (tag) => {
+    if (onSelectTagFilter) {
+      onSelectTagFilter(tag);
+    } else {
+      setLocalSelectedTagFilter(tag);
+    }
+  };
+  const [isGrouped, setIsGrouped] = (0, import_react3.useState)(() => {
+    if (typeof window !== "undefined" && window.localStorage) {
+      const saved = localStorage.getItem(GROUP_STORAGE_KEY);
+      if (saved !== null) {
+        return saved === "true";
+      }
+    }
+    return true;
+  });
+  const [collapsedGroups, setCollapsedGroups] = (0, import_react3.useState)({});
   const [isCreating, setIsCreating] = (0, import_react3.useState)(false);
   const [newTitle, setNewTitle] = (0, import_react3.useState)("");
   const [newDesc, setNewDesc] = (0, import_react3.useState)("");
-  const filteredCollections = collections.filter(
-    (c) => c.title.toLowerCase().includes(searchTerm.toLowerCase()) || c.description && c.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const [newTagsInput, setNewTagsInput] = (0, import_react3.useState)("");
+  const [editingCollection, setEditingCollection] = (0, import_react3.useState)(null);
+  const [editTitle, setEditTitle] = (0, import_react3.useState)("");
+  const [editDesc, setEditDesc] = (0, import_react3.useState)("");
+  const [editTagsInput, setEditTagsInput] = (0, import_react3.useState)("");
+  const handleToggleGrouped = () => {
+    const nextVal = !isGrouped;
+    setIsGrouped(nextVal);
+    if (typeof window !== "undefined" && window.localStorage) {
+      localStorage.setItem(GROUP_STORAGE_KEY, String(nextVal));
+    }
+  };
+  const handleToggleGroupCollapse = (groupKey) => {
+    setCollapsedGroups((prev) => ({
+      ...prev,
+      [groupKey]: !prev[groupKey]
+    }));
+  };
+  const { allTags, tagCounts, untaggedCount } = (0, import_react3.useMemo)(() => {
+    const counts = {};
+    let untagged = 0;
+    for (const col of collections) {
+      const tags = col.tags || [];
+      if (tags.length === 0) {
+        untagged++;
+      } else {
+        for (const t of tags) {
+          counts[t] = (counts[t] || 0) + 1;
+        }
+      }
+    }
+    const sortedTags = Object.keys(counts).sort((a, b) => {
+      if (counts[b] !== counts[a]) return counts[b] - counts[a];
+      return a.localeCompare(b, "ja");
+    });
+    return {
+      allTags: sortedTags,
+      tagCounts: counts,
+      untaggedCount: untagged
+    };
+  }, [collections]);
+  const filteredCollections = (0, import_react3.useMemo)(() => {
+    return collections.filter((c) => {
+      const matchesSearch = !searchTerm.trim() || c.title.toLowerCase().includes(searchTerm.toLowerCase()) || c.description && c.description.toLowerCase().includes(searchTerm.toLowerCase()) || c.tags && c.tags.some((t) => t.toLowerCase().includes(searchTerm.toLowerCase()));
+      if (!matchesSearch) return false;
+      if (activeTagFilter === null) {
+        return true;
+      }
+      if (activeTagFilter === "__untagged__") {
+        return !c.tags || c.tags.length === 0;
+      }
+      return c.tags && c.tags.includes(activeTagFilter);
+    });
+  }, [collections, searchTerm, activeTagFilter]);
+  const groupedCollections = (0, import_react3.useMemo)(() => {
+    if (!isGrouped) return [];
+    const groups = [];
+    const targetTags = activeTagFilter && activeTagFilter !== "__untagged__" ? [activeTagFilter] : activeTagFilter === "__untagged__" ? [] : allTags;
+    for (const tag of targetTags) {
+      const items = filteredCollections.filter((c) => c.tags && c.tags.includes(tag));
+      if (items.length > 0) {
+        groups.push({
+          key: `tag-${tag}`,
+          name: tag,
+          isUntagged: false,
+          items
+        });
+      }
+    }
+    if (!activeTagFilter || activeTagFilter === "__untagged__") {
+      const untaggedItems = filteredCollections.filter((c) => !c.tags || c.tags.length === 0);
+      if (untaggedItems.length > 0) {
+        groups.push({
+          key: "__untagged__",
+          name: "\u672A\u5206\u985E",
+          isUntagged: true,
+          items: untaggedItems
+        });
+      }
+    }
+    return groups;
+  }, [isGrouped, filteredCollections, allTags, activeTagFilter]);
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
-    await onCreateCollection(newTitle, newDesc);
+    const tags = normalizeTags(newTagsInput);
+    await onCreateCollection(newTitle, newDesc, tags);
     setNewTitle("");
     setNewDesc("");
+    setNewTagsInput("");
     setIsCreating(false);
+  };
+  const handleOpenEdit = (col, e) => {
+    e.stopPropagation();
+    setEditingCollection(col);
+    setEditTitle(col.title);
+    setEditDesc(col.description || "");
+    setEditTagsInput((col.tags || []).join(", "));
+  };
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!editingCollection || !editTitle.trim() || !onUpdateCollection) return;
+    const tags = normalizeTags(editTagsInput);
+    const updated = {
+      ...editingCollection,
+      title: editTitle.trim(),
+      description: editDesc.trim(),
+      tags
+    };
+    await onUpdateCollection(updated);
+    setEditingCollection(null);
+  };
+  const handleTagBadgeClick = (tag, e) => {
+    e.stopPropagation();
+    if (activeTagFilter === tag) {
+      handleTagFilterChange(null);
+    } else {
+      handleTagFilterChange(tag);
+    }
+  };
+  const renderCollectionCard = (col) => {
+    return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
+      "div",
+      {
+        className: "collection-card",
+        onClick: () => onSelectCollection(col),
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "card-top", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "card-folder-icon", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Folder, { size: 24 }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "file-count-badge", title: "\u30A2\u30A4\u30C6\u30E0\u6570", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(FileText, { size: 12 }),
+              /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("span", { children: [
+                col.itemCount || 0,
+                " files"
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "card-body", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("h3", { className: "card-title", children: col.title }),
+            col.description && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { className: "card-desc", children: col.description }),
+            col.tags && col.tags.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "card-tags-list", children: col.tags.map((tag) => /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
+              "span",
+              {
+                className: `card-tag-pill ${activeTagFilter === tag ? "active" : ""}`,
+                title: `#${tag} \u3067\u30D5\u30A3\u30EB\u30BF\u30FC`,
+                onClick: (e) => handleTagBadgeClick(tag, e),
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Tag, { size: 10, className: "card-tag-icon" }),
+                  tag
+                ]
+              },
+              tag
+            )) })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "card-footer", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "card-date", children: new Date(col.createdAt).toLocaleDateString("ja-JP") }),
+            /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "card-actions", children: [
+              onUpdateCollection && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+                "button",
+                {
+                  className: "edit-card-btn",
+                  title: "\u7DE8\u96C6\uFF08\u30BF\u30A4\u30C8\u30EB\u30FB\u8AAC\u660E\u30FB\u30BF\u30B0\uFF09",
+                  onClick: (e) => handleOpenEdit(col, e),
+                  children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Pencil, { size: 14 })
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+                "button",
+                {
+                  className: "delete-card-btn",
+                  title: "\u524A\u9664",
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    if (confirm(`\u300C${col.title}\u300D\u3092\u524A\u9664\u3057\u3066\u3082\u3088\u308D\u3057\u3044\u3067\u3059\u304B\uFF1F`)) {
+                      onDeleteCollection(col.id);
+                    }
+                  },
+                  children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Trash2, { size: 14 })
+                }
+              )
+            ] })
+          ] })
+        ]
+      },
+      col.id
+    );
   };
   return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "collections-dashboard", children: [
     /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "dashboard-subhead", children: [
@@ -25959,17 +28519,85 @@ var CollectionsGrid = ({
           {
             type: "text",
             className: "search-input",
-            placeholder: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u3092\u691C\u7D22...",
+            placeholder: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u540D\u30FB\u8AAC\u660E\u30FB\u30BF\u30B0\u3067\u691C\u7D22...",
             value: searchTerm,
             onChange: (e) => setSearchTerm(e.target.value)
           }
+        ),
+        searchTerm && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+          "button",
+          {
+            type: "button",
+            className: "search-clear-btn",
+            onClick: () => setSearchTerm(""),
+            title: "\u691C\u7D22\u30AF\u30EA\u30A2",
+            children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(X, { size: 14 })
+          }
         )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("button", { className: "nav-btn primary-btn", onClick: () => setIsCreating(true), children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Plus, { size: 16 }),
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { children: "\u65B0\u898F\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3" })
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "dashboard-head-actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
+          "button",
+          {
+            className: `nav-btn secondary-btn view-toggle-btn ${isGrouped ? "active" : ""}`,
+            onClick: handleToggleGrouped,
+            title: isGrouped ? "\u30B0\u30EB\u30FC\u30D7\u8868\u793A\u4E2D\uFF08\u30AF\u30EA\u30C3\u30AF\u3067\u5168\u4EF6\u30B0\u30EA\u30C3\u30C9\u8868\u793A\uFF09" : "\u30B0\u30EA\u30C3\u30C9\u8868\u793A\u4E2D\uFF08\u30AF\u30EA\u30C3\u30AF\u3067\u30BF\u30B0\u5225\u30B0\u30EB\u30FC\u30D7\u8868\u793A\uFF09",
+            children: [
+              isGrouped ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Layers, { size: 16 }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(LayoutGrid, { size: 16 }),
+              /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "view-toggle-text", children: isGrouped ? "\u30B0\u30EB\u30FC\u30D7\u5225" : "\u30D5\u30E9\u30C3\u30C8\u4E00\u89A7" })
+            ]
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("button", { className: "nav-btn primary-btn", onClick: () => setIsCreating(true), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Plus, { size: 16 }),
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { children: "\u65B0\u898F\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3" })
+        ] })
       ] })
     ] }),
+    (allTags.length > 0 || untaggedCount > 0) && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "collection-tag-filter-bar", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "tag-filter-scroll", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
+        "button",
+        {
+          className: `tag-filter-badge ${activeTagFilter === null ? "active" : ""}`,
+          onClick: () => handleTagFilterChange(null),
+          children: [
+            "\u3059\u3079\u3066 ",
+            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "badge-count", children: collections.length })
+          ]
+        }
+      ),
+      allTags.map((tag) => {
+        const count = tagCounts[tag] || 0;
+        const isSelected = activeTagFilter === tag;
+        return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
+          "button",
+          {
+            className: `tag-filter-badge ${isSelected ? "active" : ""}`,
+            onClick: (e) => handleTagBadgeClick(tag, e),
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Tag, { size: 12, className: "tag-badge-icon" }),
+              /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("span", { children: [
+                "#",
+                tag
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "badge-count", children: count })
+            ]
+          },
+          tag
+        );
+      }),
+      untaggedCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
+        "button",
+        {
+          className: `tag-filter-badge untagged-badge ${activeTagFilter === "__untagged__" ? "active" : ""}`,
+          onClick: (e) => handleTagBadgeClick("__untagged__", e),
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { children: "\u672A\u5206\u985E" }),
+            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "badge-count", children: untaggedCount })
+          ]
+        }
+      )
+    ] }) }),
     isCreating && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "todo-cal-modal-backdrop", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "todo-cal-modal-content", children: [
       /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("h3", { children: "\u65B0\u898F\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u306E\u4F5C\u6210" }),
       /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("form", { onSubmit: handleCreateSubmit, children: [
@@ -26001,6 +28629,40 @@ var CollectionsGrid = ({
             }
           )
         ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("label", { children: "\u30BF\u30B0 (\u30AB\u30F3\u30DE\u307E\u305F\u306F\u30B9\u30DA\u30FC\u30B9\u533A\u5207\u308A)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+            "input",
+            {
+              type: "text",
+              className: "todo-cal-form-input",
+              placeholder: "\u4F8B: \u4ED5\u4E8B, \u958B\u767A, \u30D7\u30ED\u30B8\u30A7\u30AF\u30C8",
+              value: newTagsInput,
+              onChange: (e) => setNewTagsInput(e.target.value)
+            }
+          ),
+          allTags.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "form-suggested-tags", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "suggested-label", children: "\u5019\u88DC:" }),
+            allTags.map((tag) => /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
+              "button",
+              {
+                type: "button",
+                className: "suggested-tag-btn",
+                onClick: () => {
+                  const currentTags = normalizeTags(newTagsInput);
+                  if (!currentTags.includes(tag)) {
+                    setNewTagsInput([...currentTags, tag].join(", "));
+                  }
+                },
+                children: [
+                  "+",
+                  tag
+                ]
+              },
+              tag
+            ))
+          ] })
+        ] }),
         /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "todo-cal-modal-actions", children: [
           /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
             "button",
@@ -26015,51 +28677,125 @@ var CollectionsGrid = ({
         ] })
       ] })
     ] }) }),
-    filteredCollections.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "empty-state", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Folder, { size: 48, className: "empty-icon" }),
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("h3", { children: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u304C\u3042\u308A\u307E\u305B\u3093" }),
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { children: "\u300C\u65B0\u898F\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u300D\u30DC\u30BF\u30F3\u304B\u3089\u4F5C\u6210\u3057\u3066\u30BF\u30B9\u30AF\u306E\u7BA1\u7406\u3092\u30B9\u30BF\u30FC\u30C8\u3057\u307E\u3057\u3087\u3046\u3002" })
-    ] }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "collections-grid", children: filteredCollections.map((col) => /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
-      "div",
-      {
-        className: "collection-card",
-        onClick: () => onSelectCollection(col),
-        children: [
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "card-top", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "card-folder-icon", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Folder, { size: 24 }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "file-count-badge", title: "\u30A2\u30A4\u30C6\u30E0\u6570", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(FileText, { size: 12 }),
-              /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("span", { children: [
-                col.itemCount || 0,
-                " files"
-              ] })
-            ] })
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "card-body", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("h3", { className: "card-title", children: col.title }),
-            col.description && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { className: "card-desc", children: col.description })
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "card-footer", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "card-date", children: new Date(col.createdAt).toLocaleDateString("ja-JP") }),
-            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+    editingCollection && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "todo-cal-modal-backdrop", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "todo-cal-modal-content", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("h3", { children: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u306E\u7DE8\u96C6" }),
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("form", { onSubmit: handleEditSubmit, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("label", { children: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u540D *" }),
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+            "input",
+            {
+              type: "text",
+              className: "todo-cal-form-input",
+              value: editTitle,
+              onChange: (e) => setEditTitle(e.target.value),
+              autoFocus: true,
+              required: true
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("label", { children: "\u8AAC\u660E (\u4EFB\u610F)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+            "textarea",
+            {
+              className: "todo-cal-form-textarea",
+              value: editDesc,
+              onChange: (e) => setEditDesc(e.target.value),
+              rows: 3
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "todo-cal-form-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("label", { children: "\u30BF\u30B0 (\u30AB\u30F3\u30DE\u307E\u305F\u306F\u30B9\u30DA\u30FC\u30B9\u533A\u5207\u308A)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+            "input",
+            {
+              type: "text",
+              className: "todo-cal-form-input",
+              placeholder: "\u4F8B: \u4ED5\u4E8B, \u958B\u767A, \u30D7\u30ED\u30B8\u30A7\u30AF\u30C8",
+              value: editTagsInput,
+              onChange: (e) => setEditTagsInput(e.target.value)
+            }
+          ),
+          allTags.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "form-suggested-tags", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "suggested-label", children: "\u5019\u88DC:" }),
+            allTags.map((tag) => /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
               "button",
               {
-                className: "delete-card-btn",
-                title: "\u524A\u9664",
-                onClick: (e) => {
-                  e.stopPropagation();
-                  if (confirm(`\u300C${col.title}\u300D\u3092\u524A\u9664\u3057\u3066\u3082\u3088\u308D\u3057\u3044\u3067\u3059\u304B\uFF1F`)) {
-                    onDeleteCollection(col.id);
+                type: "button",
+                className: "suggested-tag-btn",
+                onClick: () => {
+                  const currentTags = normalizeTags(editTagsInput);
+                  if (!currentTags.includes(tag)) {
+                    setEditTagsInput([...currentTags, tag].join(", "));
                   }
                 },
-                children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Trash2, { size: 14 })
-              }
-            )
+                children: [
+                  "+",
+                  tag
+                ]
+              },
+              tag
+            ))
           ] })
-        ]
-      },
-      col.id
-    )) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "todo-cal-modal-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+            "button",
+            {
+              type: "button",
+              className: "nav-btn secondary-btn",
+              onClick: () => setEditingCollection(null),
+              children: "\u30AD\u30E3\u30F3\u30BB\u30EB"
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("button", { type: "submit", className: "nav-btn primary-btn", children: "\u4FDD\u5B58" })
+        ] })
+      ] })
+    ] }) }),
+    filteredCollections.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "empty-state", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Folder, { size: 48, className: "empty-icon" }),
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("h3", { children: "\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093" }),
+      searchTerm || activeTagFilter ? /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("p", { children: [
+        "\u30D5\u30A3\u30EB\u30BF\u30FC\u6761\u4EF6\u306B\u4E00\u81F4\u3059\u308B\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u304C\u3042\u308A\u307E\u305B\u3093\u3002",
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+          "button",
+          {
+            className: "clear-filter-link",
+            onClick: () => {
+              setSearchTerm("");
+              handleTagFilterChange(null);
+            },
+            children: "\u30D5\u30A3\u30EB\u30BF\u30FC\u3092\u89E3\u9664"
+          }
+        )
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { children: "\u300C\u65B0\u898F\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u300D\u30DC\u30BF\u30F3\u304B\u3089\u4F5C\u6210\u3057\u3066\u30BF\u30B9\u30AF\u306E\u7BA1\u7406\u3092\u30B9\u30BF\u30FC\u30C8\u3057\u307E\u3057\u3087\u3046\u3002" })
+    ] }) : isGrouped ? (
+      /* Grouped Sections View */
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "collections-grouped-container", children: groupedCollections.map((group) => {
+        const isCollapsed = Boolean(collapsedGroups[group.key]);
+        return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("section", { className: "collection-group-section", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+            "div",
+            {
+              className: "collection-group-header",
+              onClick: () => handleToggleGroupCollapse(group.key),
+              children: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "group-header-left", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "group-toggle-icon", children: isCollapsed ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(ChevronRight, { size: 18 }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(ChevronDown, { size: 18 }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "group-tag-icon", children: group.isUntagged ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Folder, { size: 18 }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Tag, { size: 16 }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("h2", { className: "group-title", children: group.isUntagged ? "\u672A\u5206\u985E" : `#${group.name}` }),
+                /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "group-count-badge", children: group.items.length })
+              ] })
+            }
+          ),
+          !isCollapsed && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "collections-grid", children: group.items.map((col) => renderCollectionCard(col)) })
+        ] }, group.key);
+      }) })
+    ) : (
+      /* Flat Grid View */
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "collections-grid", children: filteredCollections.map((col) => renderCollectionCard(col)) })
+    )
   ] });
 };
 
@@ -26960,21 +29696,21 @@ var TaskDetailDrawer = ({
   const hasCustomGroups = existingGroups.length > 0;
   const groupedTodos = (0, import_react5.useMemo)(() => {
     if (!localItem) return [];
-    const map = /* @__PURE__ */ new Map();
-    existingGroups.forEach((g) => map.set(g, []));
-    map.set(UNGROUPED_LABEL, []);
+    const map2 = /* @__PURE__ */ new Map();
+    existingGroups.forEach((g) => map2.set(g, []));
+    map2.set(UNGROUPED_LABEL, []);
     localItem.todos.forEach((todo) => {
       const g = todo.group && todo.group.trim() ? todo.group.trim() : UNGROUPED_LABEL;
-      if (!map.has(g)) {
-        map.set(g, []);
+      if (!map2.has(g)) {
+        map2.set(g, []);
       }
-      map.get(g).push(todo);
+      map2.get(g).push(todo);
     });
     const result = [];
     existingGroups.forEach((g) => {
-      result.push({ groupName: g, todos: map.get(g) || [] });
+      result.push({ groupName: g, todos: map2.get(g) || [] });
     });
-    const ungrouped = map.get(UNGROUPED_LABEL) || [];
+    const ungrouped = map2.get(UNGROUPED_LABEL) || [];
     if (ungrouped.length > 0 || existingGroups.length === 0) {
       result.push({ groupName: UNGROUPED_LABEL, todos: ungrouped });
     }
@@ -28391,8 +31127,16 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
   const [isTemplateSettingsOpen, setIsTemplateSettingsOpen] = (0, import_react9.useState)(false);
   const [viewMode, setViewMode] = (0, import_react9.useState)(initialViewMode);
   const [collections, setCollections] = (0, import_react9.useState)([]);
+  const [selectedTagFilter, setSelectedTagFilter] = (0, import_react9.useState)(null);
   const [selectedCollection, setSelectedCollection] = (0, import_react9.useState)(null);
   const [selectedType, setSelectedType] = (0, import_react9.useState)(null);
+  const navigableCollections = (0, import_react9.useMemo)(() => {
+    if (!selectedTagFilter) return collections;
+    if (selectedTagFilter === "__untagged__") {
+      return collections.filter((c) => !c.tags || c.tags.length === 0);
+    }
+    return collections.filter((c) => c.tags && c.tags.includes(selectedTagFilter));
+  }, [collections, selectedTagFilter]);
   const [items, setItems] = (0, import_react9.useState)([]);
   const [agendaItems, setAgendaItems] = (0, import_react9.useState)([]);
   const [isAgendaLoading, setIsAgendaLoading] = (0, import_react9.useState)(false);
@@ -28476,18 +31220,22 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
   );
   const handleNavigateCollection = (0, import_react9.useCallback)(
     async (direction) => {
-      if (collections.length <= 1 || !selectedCollection) return;
-      const currentIndex = collections.findIndex((c) => c.id === selectedCollection.id);
-      if (currentIndex === -1) return;
+      const targetList = navigableCollections.length > 0 ? navigableCollections : collections;
+      if (targetList.length <= 1 || !selectedCollection) return;
+      const currentIndex = targetList.findIndex((c) => c.id === selectedCollection.id);
+      if (currentIndex === -1) {
+        await handleSelectCollection(targetList[0]);
+        return;
+      }
       let nextIndex = currentIndex + direction;
       if (nextIndex < 0) {
-        nextIndex = collections.length - 1;
-      } else if (nextIndex >= collections.length) {
+        nextIndex = targetList.length - 1;
+      } else if (nextIndex >= targetList.length) {
         nextIndex = 0;
       }
-      await handleSelectCollection(collections[nextIndex]);
+      await handleSelectCollection(targetList[nextIndex]);
     },
-    [collections, selectedCollection, handleSelectCollection]
+    [navigableCollections, collections, selectedCollection, handleSelectCollection]
   );
   const handleNavigateType = (0, import_react9.useCallback)(
     async (direction) => {
@@ -28513,8 +31261,9 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
       if (tagName === "input" || tagName === "textarea" || tagName === "select" || isContentEditable) {
         return;
       }
+      const activeList = navigableCollections.length > 0 ? navigableCollections : collections;
       if (e.key === "ArrowLeft" || e.key === "[") {
-        if (viewMode === "calendar" && collections.length > 1) {
+        if (viewMode === "calendar" && activeList.length > 1) {
           e.preventDefault();
           handleNavigateCollection(-1);
         } else if (viewMode === "type-calendar" && itemTypes.length > 1) {
@@ -28522,7 +31271,7 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
           handleNavigateType(-1);
         }
       } else if (e.key === "ArrowRight" || e.key === "]") {
-        if (viewMode === "calendar" && collections.length > 1) {
+        if (viewMode === "calendar" && activeList.length > 1) {
           e.preventDefault();
           handleNavigateCollection(1);
         } else if (viewMode === "type-calendar" && itemTypes.length > 1) {
@@ -28537,6 +31286,7 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
     };
   }, [
     viewMode,
+    navigableCollections.length,
     collections.length,
     itemTypes.length,
     isCreateItemModalOpen,
@@ -28572,9 +31322,16 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
       await loadAgendaItems();
     }
   };
-  const handleCreateCollection = async (title, description) => {
-    const newCol = await storage.createCollection(title, description);
+  const handleCreateCollection = async (title, description, tags) => {
+    const newCol = await storage.createCollection(title, description, tags);
     setCollections((prev) => [newCol, ...prev]);
+  };
+  const handleUpdateCollection = async (updatedCol) => {
+    setCollections((prev) => prev.map((c) => c.id === updatedCol.id ? updatedCol : c));
+    if (selectedCollection?.id === updatedCol.id) {
+      setSelectedCollection(updatedCol);
+    }
+    await storage.updateCollection(updatedCol);
   };
   const handleDeleteCollection = async (collectionId) => {
     setCollections((prev) => prev.filter((c) => c.id !== collectionId));
@@ -28737,8 +31494,10 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
       HeaderNav,
       {
         viewMode,
-        collections,
+        collections: viewMode === "calendar" ? navigableCollections.length > 0 ? navigableCollections : collections : collections,
         selectedCollection,
+        activeTagFilter: selectedTagFilter,
+        onClearTagFilter: () => setSelectedTagFilter(null),
         startDate,
         daysCount,
         showCompletedItems,
@@ -28767,8 +31526,11 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
           CollectionsGrid,
           {
             collections,
+            selectedTagFilter,
+            onSelectTagFilter: setSelectedTagFilter,
             onSelectCollection: handleSelectCollection,
             onCreateCollection: handleCreateCollection,
+            onUpdateCollection: handleUpdateCollection,
             onDeleteCollection: handleDeleteCollection
           }
         ),
@@ -28851,7 +31613,7 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
       MobileBottomBar,
       {
         viewMode,
-        collections,
+        collections: navigableCollections.length > 0 ? navigableCollections : collections,
         selectedCollection,
         itemTypes,
         selectedType,
@@ -29449,6 +32211,14 @@ lucide-react/dist/esm/icons/grip-vertical.js:
    *)
 
 lucide-react/dist/esm/icons/layers.js:
+  (**
+   * @license lucide-react v0.428.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/layout-grid.js:
   (**
    * @license lucide-react v0.428.0 - ISC
    *

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { App } from 'obsidian';
 import { StorageManager } from '../storage';
 import { IStorageAdapter } from '../adapters/IStorageAdapter';
@@ -34,8 +34,18 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
 
   const [viewMode, setViewMode] = useState<'collections' | 'calendar' | 'agenda' | 'type-calendar'>(initialViewMode);
   const [collections, setCollections] = useState<CollectionData[]>([]);
+  const [selectedTagFilter, setSelectedTagFilter] = useState<string | null>(null);
   const [selectedCollection, setSelectedCollection] = useState<CollectionData | null>(null);
   const [selectedType, setSelectedType] = useState<ItemType | null>(null);
+
+  // Collections filtered by active tag filter for navigation & header selector
+  const navigableCollections = useMemo(() => {
+    if (!selectedTagFilter) return collections;
+    if (selectedTagFilter === '__untagged__') {
+      return collections.filter((c) => !c.tags || c.tags.length === 0);
+    }
+    return collections.filter((c) => c.tags && c.tags.includes(selectedTagFilter));
+  }, [collections, selectedTagFilter]);
 
   const [items, setItems] = useState<ItemData[]>([]);
   const [agendaItems, setAgendaItems] = useState<AgendaTodoItem[]>([]);
@@ -138,23 +148,28 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
     [storage]
   );
 
-  // Navigate collection by step (+1 or -1)
+  // Navigate collection by step (+1 or -1), honoring active tag filter if set
   const handleNavigateCollection = useCallback(
     async (direction: -1 | 1) => {
-      if (collections.length <= 1 || !selectedCollection) return;
-      const currentIndex = collections.findIndex((c) => c.id === selectedCollection.id);
-      if (currentIndex === -1) return;
+      const targetList = navigableCollections.length > 0 ? navigableCollections : collections;
+      if (targetList.length <= 1 || !selectedCollection) return;
+      const currentIndex = targetList.findIndex((c) => c.id === selectedCollection.id);
+      if (currentIndex === -1) {
+        // If current collection is not in filtered list, jump to first item of filtered list
+        await handleSelectCollection(targetList[0]);
+        return;
+      }
 
       let nextIndex = currentIndex + direction;
       if (nextIndex < 0) {
-        nextIndex = collections.length - 1;
-      } else if (nextIndex >= collections.length) {
+        nextIndex = targetList.length - 1;
+      } else if (nextIndex >= targetList.length) {
         nextIndex = 0;
       }
 
-      await handleSelectCollection(collections[nextIndex]);
+      await handleSelectCollection(targetList[nextIndex]);
     },
-    [collections, selectedCollection, handleSelectCollection]
+    [navigableCollections, collections, selectedCollection, handleSelectCollection]
   );
 
   // Navigate type by step (+1 or -1)
@@ -188,8 +203,10 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
         return;
       }
 
+      const activeList = navigableCollections.length > 0 ? navigableCollections : collections;
+
       if (e.key === 'ArrowLeft' || e.key === '[') {
-        if (viewMode === 'calendar' && collections.length > 1) {
+        if (viewMode === 'calendar' && activeList.length > 1) {
           e.preventDefault();
           handleNavigateCollection(-1);
         } else if (viewMode === 'type-calendar' && itemTypes.length > 1) {
@@ -197,7 +214,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
           handleNavigateType(-1);
         }
       } else if (e.key === 'ArrowRight' || e.key === ']') {
-        if (viewMode === 'calendar' && collections.length > 1) {
+        if (viewMode === 'calendar' && activeList.length > 1) {
           e.preventDefault();
           handleNavigateCollection(1);
         } else if (viewMode === 'type-calendar' && itemTypes.length > 1) {
@@ -213,6 +230,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
     };
   }, [
     viewMode,
+    navigableCollections.length,
     collections.length,
     itemTypes.length,
     isCreateItemModalOpen,
@@ -256,9 +274,18 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
   };
 
   // Create Collection
-  const handleCreateCollection = async (title: string, description: string) => {
-    const newCol = await storage.createCollection(title, description);
+  const handleCreateCollection = async (title: string, description: string, tags?: string[]) => {
+    const newCol = await storage.createCollection(title, description, tags);
     setCollections((prev) => [newCol, ...prev]);
+  };
+
+  // Update Collection
+  const handleUpdateCollection = async (updatedCol: CollectionData) => {
+    setCollections((prev) => prev.map((c) => (c.id === updatedCol.id ? updatedCol : c)));
+    if (selectedCollection?.id === updatedCol.id) {
+      setSelectedCollection(updatedCol);
+    }
+    await storage.updateCollection(updatedCol);
   };
 
   // Delete Collection
@@ -468,8 +495,10 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
     <div className={`todo-calendar-app ${isMatrixView ? 'has-mobile-bottom-bar' : ''}`}>
       <HeaderNav
         viewMode={viewMode}
-        collections={collections}
+        collections={viewMode === 'calendar' ? (navigableCollections.length > 0 ? navigableCollections : collections) : collections}
         selectedCollection={selectedCollection}
+        activeTagFilter={selectedTagFilter}
+        onClearTagFilter={() => setSelectedTagFilter(null)}
         startDate={startDate}
         daysCount={daysCount}
         showCompletedItems={showCompletedItems}
@@ -497,8 +526,11 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
           {viewMode === 'collections' && (
             <CollectionsGrid
               collections={collections}
+              selectedTagFilter={selectedTagFilter}
+              onSelectTagFilter={setSelectedTagFilter}
               onSelectCollection={handleSelectCollection}
               onCreateCollection={handleCreateCollection}
+              onUpdateCollection={handleUpdateCollection}
               onDeleteCollection={handleDeleteCollection}
             />
           )}
@@ -583,7 +615,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
       {(viewMode === 'calendar' || viewMode === 'type-calendar') && (
         <MobileBottomBar
           viewMode={viewMode}
-          collections={collections}
+          collections={navigableCollections.length > 0 ? navigableCollections : collections}
           selectedCollection={selectedCollection}
           itemTypes={itemTypes}
           selectedType={selectedType}

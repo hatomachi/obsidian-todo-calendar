@@ -13,6 +13,7 @@ import {
   EyeOff,
   Settings,
   Tag,
+  X,
 } from 'lucide-react';
 import { CollectionData } from '../types';
 import { ItemType } from '../features/item-types/types';
@@ -21,6 +22,8 @@ interface HeaderNavProps {
   viewMode: 'collections' | 'calendar' | 'agenda' | 'type-calendar';
   collections: CollectionData[];
   selectedCollection: CollectionData | null;
+  activeTagFilter?: string | null;
+  onClearTagFilter?: () => void;
   startDate: Date;
   daysCount?: 3 | 7;
   showCompletedItems?: boolean;
@@ -47,6 +50,8 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   viewMode,
   collections,
   selectedCollection,
+  activeTagFilter,
+  onClearTagFilter,
   startDate,
   daysCount = 7,
   showCompletedItems = false,
@@ -191,6 +196,23 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                 <ChevronRight size={16} />
               </button>
             </div>
+
+            {/* Active Tag Filter Pill */}
+            {activeTagFilter && (
+              <div
+                className="header-active-tag-badge desktop-only"
+                title="タグフィルター中（クリックで解除）"
+                onClick={onClearTagFilter}
+              >
+                <Tag size={12} className="header-tag-icon" />
+                <span className="header-tag-name">
+                  {activeTagFilter === '__untagged__' ? '未分類' : `#${activeTagFilter}`}
+                </span>
+                <span className="header-tag-clear-btn" title="フィルター解除">
+                  <X size={12} />
+                </span>
+              </div>
+            )}
           </>
         )}
 

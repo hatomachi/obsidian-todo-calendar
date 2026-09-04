@@ -18,6 +18,7 @@ const SEED_COLLECTIONS: CollectionData[] = [
     color: 'purple',
     createdAt: new Date().toISOString(),
     itemCount: 2,
+    tags: ['生活', '個人'],
   },
   {
     id: 'col-default-2',
@@ -27,6 +28,7 @@ const SEED_COLLECTIONS: CollectionData[] = [
     color: 'blue',
     createdAt: new Date().toISOString(),
     itemCount: 1,
+    tags: ['開発', 'プロジェクト'],
   },
 ];
 
@@ -122,7 +124,7 @@ export class LocalStorageAdapter implements IStorageAdapter {
     }));
   }
 
-  async createCollection(title: string, description = ''): Promise<CollectionData> {
+  async createCollection(title: string, description = '', tags: string[] = []): Promise<CollectionData> {
     const collections = this.getStoredCollections();
     const id = `col-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const newCol: CollectionData = {
@@ -133,10 +135,26 @@ export class LocalStorageAdapter implements IStorageAdapter {
       color: 'purple',
       createdAt: new Date().toISOString(),
       itemCount: 0,
+      tags: tags || [],
     };
     collections.push(newCol);
     this.saveStoredCollections(collections);
     return newCol;
+  }
+
+  async updateCollection(collection: CollectionData): Promise<void> {
+    const collections = this.getStoredCollections();
+    const idx = collections.findIndex((c) => c.id === collection.id);
+    if (idx !== -1) {
+      collections[idx] = {
+        ...collections[idx],
+        title: collection.title.trim(),
+        description: (collection.description || '').trim(),
+        tags: collection.tags || [],
+        color: collection.color || collections[idx].color,
+      };
+      this.saveStoredCollections(collections);
+    }
   }
 
   async deleteCollection(collectionId: string): Promise<void> {
