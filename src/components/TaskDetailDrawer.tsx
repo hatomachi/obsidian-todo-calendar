@@ -408,7 +408,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
               title="グループを変更"
             >
               <Tag size={10} className="todo-group-icon" />
-              <span className="todo-group-name">{todo.group.trim()}</span>
+              <span className="todo-group-name">{todo.group?.trim()}</span>
             </div>
           )}
 

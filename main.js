@@ -29954,7 +29954,7 @@ var TaskDetailDrawer = ({
                 title: "\u30B0\u30EB\u30FC\u30D7\u3092\u5909\u66F4",
                 children: [
                   /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Tag, { size: 10, className: "todo-group-icon" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "todo-group-name", children: todo.group.trim() })
+                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "todo-group-name", children: todo.group?.trim() })
                 ]
               }
             ),
