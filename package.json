@@ -1,6 +1,6 @@
 {
   "name": "obsidian-todo-calendar",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Obsidian custom plugin for managing TODOs in a 7-day calendar matrix view with NotebookLM-style collections.",
   "main": "main.js",
   "scripts": {
@@ -8,7 +8,8 @@
     "build": "cp src/styles.css styles.css && node esbuild.config.mjs production && (cp main.js manifest.json styles.css /Users/s-ikari/work/playground/test-vault/.obsidian/plugins/obsidian-todo-calendar/ 2>/dev/null || true)",
     "dev:web": "vite",
     "build:web": "vite build",
-    "preview:web": "vite preview"
+    "preview:web": "vite preview",
+    "generate:icons": "python3 scripts/generate_icons.py"
   },
   "keywords": [
     "obsidian",
