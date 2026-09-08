@@ -1102,7 +1102,7 @@ var require_react_development = __commonJS({
           var dispatcher = resolveDispatcher();
           return dispatcher.useReducer(reducer, initialArg, init);
         }
-        function useRef2(initialValue) {
+        function useRef3(initialValue) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useRef(initialValue);
         }
@@ -1118,7 +1118,7 @@ var require_react_development = __commonJS({
           var dispatcher = resolveDispatcher();
           return dispatcher.useLayoutEffect(create, deps);
         }
-        function useCallback2(callback, deps) {
+        function useCallback3(callback, deps) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useCallback(callback, deps);
         }
@@ -1885,7 +1885,7 @@ var require_react_development = __commonJS({
         exports.memo = memo;
         exports.startTransition = startTransition;
         exports.unstable_act = act;
-        exports.useCallback = useCallback2;
+        exports.useCallback = useCallback3;
         exports.useContext = useContext;
         exports.useDebugValue = useDebugValue;
         exports.useDeferredValue = useDeferredValue;
@@ -1896,7 +1896,7 @@ var require_react_development = __commonJS({
         exports.useLayoutEffect = useLayoutEffect;
         exports.useMemo = useMemo4;
         exports.useReducer = useReducer;
-        exports.useRef = useRef2;
+        exports.useRef = useRef3;
         exports.useState = useState6;
         exports.useSyncExternalStore = useSyncExternalStore;
         exports.useTransition = useTransition;
@@ -29675,9 +29675,65 @@ var TaskDetailDrawer = ({
   const [dragOverIndex, setDragOverIndex] = (0, import_react5.useState)(null);
   const [isGroupedView, setIsGroupedView] = (0, import_react5.useState)(true);
   const [collapsedGroups, setCollapsedGroups] = (0, import_react5.useState)({});
+  const pendingItemRef = (0, import_react5.useRef)(null);
+  const debounceTimerRef = (0, import_react5.useRef)(null);
+  const flushPendingUpdate = (0, import_react5.useCallback)(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    if (pendingItemRef.current) {
+      const itemToSave = pendingItemRef.current;
+      pendingItemRef.current = null;
+      onUpdateItem(itemToSave);
+    }
+  }, [onUpdateItem]);
+  const debouncedUpdate = (0, import_react5.useCallback)(
+    (updated) => {
+      pendingItemRef.current = updated;
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        debounceTimerRef.current = null;
+        pendingItemRef.current = null;
+        onUpdateItem(updated);
+      }, 500);
+    },
+    [onUpdateItem]
+  );
+  const immediateUpdate = (0, import_react5.useCallback)(
+    (updated) => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+      pendingItemRef.current = null;
+      onUpdateItem(updated);
+    },
+    [onUpdateItem]
+  );
   (0, import_react5.useEffect)(() => {
-    setLocalItem(item);
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+      if (pendingItemRef.current) {
+        onUpdateItem(pendingItemRef.current);
+        pendingItemRef.current = null;
+      }
+    };
+  }, [onUpdateItem]);
+  (0, import_react5.useEffect)(() => {
+    if (!pendingItemRef.current) {
+      setLocalItem(item);
+    }
   }, [item]);
+  const handleClose = (0, import_react5.useCallback)(() => {
+    flushPendingUpdate();
+    onClose();
+  }, [flushPendingUpdate, onClose]);
   (0, import_react5.useEffect)(() => {
     if (selectedTodoId) {
       setEditingDescIds((prev) => ({ ...prev, [selectedTodoId]: true }));
@@ -29728,7 +29784,7 @@ var TaskDetailDrawer = ({
   const handleTitleChange = (newTitle) => {
     const updated = { ...localItem, title: newTitle };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    debouncedUpdate(updated);
   };
   const handleTypeChange = (typeId) => {
     const nextType = findItemType(itemTypes, typeId);
@@ -29739,7 +29795,7 @@ var TaskDetailDrawer = ({
       template: defaultTpl ? defaultTpl.name : void 0
     };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
   const handleTemplateChange = (tplName) => {
     const updated = {
@@ -29747,7 +29803,7 @@ var TaskDetailDrawer = ({
       template: tplName ? tplName : void 0
     };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
   const handleAddMissingTodo = (missing) => {
     const newTodo = {
@@ -29764,7 +29820,7 @@ var TaskDetailDrawer = ({
       todos: [...localItem.todos, newTodo]
     };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
   const handleAddAllMissingTodos = (missingList) => {
     const now = Date.now();
@@ -29781,17 +29837,17 @@ var TaskDetailDrawer = ({
       todos: [...localItem.todos, ...newTodos]
     };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
   const handleItemStatusChange = (newStatus) => {
     const updated = { ...localItem, status: newStatus };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
   const handleItemDescriptionChange = (newDesc) => {
     const updated = { ...localItem, description: newDesc };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    debouncedUpdate(updated);
   };
   const handleAddTodo = (groupName) => {
     const defaultGroup = groupName && groupName !== UNGROUPED_LABEL ? groupName : "";
@@ -29808,9 +29864,9 @@ var TaskDetailDrawer = ({
       todos: [...localItem.todos, newTodo]
     };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
-  const handleUpdateTodo = (todoId, fields) => {
+  const handleUpdateTodo = (todoId, fields, isImmediate = false) => {
     const updatedTodos = localItem.todos.map((t) => {
       if (t.id === todoId) {
         return { ...t, ...fields };
@@ -29819,13 +29875,17 @@ var TaskDetailDrawer = ({
     });
     const updated = { ...localItem, todos: updatedTodos };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    if (isImmediate) {
+      immediateUpdate(updated);
+    } else {
+      debouncedUpdate(updated);
+    }
   };
   const handleDeleteTodo = (todoId) => {
     const updatedTodos = localItem.todos.filter((t) => t.id !== todoId);
     const updated = { ...localItem, todos: updatedTodos };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
   const handleDuplicateTodo = (todoId) => {
     const index = localItem.todos.findIndex((t) => t.id === todoId);
@@ -29839,7 +29899,7 @@ var TaskDetailDrawer = ({
     updatedTodos.splice(index + 1, 0, duplicated);
     const updated = { ...localItem, todos: updatedTodos };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
   const toggleToggleEditDesc = (todoId) => {
     setEditingDescIds((prev) => ({
@@ -29873,7 +29933,7 @@ var TaskDetailDrawer = ({
     });
     const updated = { ...localItem, todos: sorted };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
   const handleDragStart = (e, index) => {
     setDraggedIndex(index);
@@ -29898,7 +29958,7 @@ var TaskDetailDrawer = ({
     updatedTodos.splice(targetIndex, 0, moved);
     const updated = { ...localItem, todos: updatedTodos };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
     setDraggedIndex(null);
     setDragOverIndex(null);
   };
@@ -29930,7 +29990,7 @@ var TaskDetailDrawer = ({
               {
                 type: "checkbox",
                 checked: todo.status === "done",
-                onChange: (e) => handleUpdateTodo(todo.id, { status: e.target.checked ? "done" : "todo" }),
+                onChange: (e) => handleUpdateTodo(todo.id, { status: e.target.checked ? "done" : "todo" }, true),
                 className: "todo-status-checkbox",
                 title: todo.status === "done" ? "\u672A\u5B8C\u4E86\u306B\u623B\u3059" : "\u5B8C\u4E86\u306B\u3059\u308B"
               }
@@ -29943,7 +30003,8 @@ var TaskDetailDrawer = ({
                 placeholder: "\u30BF\u30B9\u30AF\u540D\u3092\u5165\u529B...",
                 value: todo.title,
                 title: todo.title,
-                onChange: (e) => handleUpdateTodo(todo.id, { title: e.target.value })
+                onChange: (e) => handleUpdateTodo(todo.id, { title: e.target.value }),
+                onBlur: flushPendingUpdate
               }
             ),
             hasGroup && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
@@ -29965,7 +30026,7 @@ var TaskDetailDrawer = ({
                   type: "date",
                   className: "due-date-input-overlay",
                   value: todo.due || "",
-                  onChange: (e) => handleUpdateTodo(todo.id, { due: e.target.value })
+                  onChange: (e) => handleUpdateTodo(todo.id, { due: e.target.value }, true)
                 }
               ),
               /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: `due-date-badge ${!todo.due || todo.due.trim() === "" ? "empty-due-badge" : ""}`, children: [
@@ -30007,7 +30068,8 @@ var TaskDetailDrawer = ({
                   className: "editor-group-input",
                   placeholder: "\u30B0\u30EB\u30FC\u30D7\u540D\uFF08\u672A\u8A2D\u5B9A\u6642\u306F\u672A\u5206\u985E\uFF09...",
                   value: todo.group || "",
-                  onChange: (e) => handleUpdateTodo(todo.id, { group: e.target.value })
+                  onChange: (e) => handleUpdateTodo(todo.id, { group: e.target.value }),
+                  onBlur: flushPendingUpdate
                 }
               )
             ] }),
@@ -30020,6 +30082,7 @@ var TaskDetailDrawer = ({
                   placeholder: "\u8A73\u7D30\u30FB\u30E1\u30E2\u3092\u5165\u529B...",
                   value: todo.description || "",
                   onChange: (e) => handleUpdateTodo(todo.id, { description: e.target.value }),
+                  onBlur: flushPendingUpdate,
                   rows: 2,
                   autoFocus: true
                 }
@@ -30078,11 +30141,12 @@ var TaskDetailDrawer = ({
             className: `item-title-input ${localItem.status === "done" ? "done-title" : ""}`,
             value: localItem.title,
             onChange: (e) => handleTitleChange(e.target.value),
+            onBlur: flushPendingUpdate,
             placeholder: "\u30A2\u30A4\u30C6\u30E0\u540D\u3092\u5165\u529B..."
           }
         )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("button", { className: "icon-btn close-drawer-btn", onClick: onClose, title: "\u9589\u3058\u308B", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(X, { size: 18 }) })
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("button", { className: "icon-btn close-drawer-btn", onClick: handleClose, title: "\u9589\u3058\u308B", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(X, { size: 18 }) })
     ] }),
     enableItemTypes && itemTypes.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "drawer-type-selector-bar", children: [
       /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "type-selector-group", children: [
@@ -30135,6 +30199,7 @@ var TaskDetailDrawer = ({
             value: localItem.description || "",
             onChange: (e) => handleItemDescriptionChange(e.target.value),
             onBlur: (e) => {
+              flushPendingUpdate();
               if (!e.currentTarget.parentElement?.contains(e.relatedTarget)) {
                 setIsEditingItemDesc(false);
               }
@@ -30147,7 +30212,10 @@ var TaskDetailDrawer = ({
           "button",
           {
             className: "icon-btn save-memo-btn",
-            onClick: () => setIsEditingItemDesc(false),
+            onClick: () => {
+              flushPendingUpdate();
+              setIsEditingItemDesc(false);
+            },
             title: "\u5B8C\u4E86",
             children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Check, { size: 13 })
           }
@@ -31437,7 +31505,11 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
       }));
       return [...otherAgenda, ...updatedAgenda];
     });
-    await storage.updateItem(updatedItem);
+    try {
+      await storage.updateItem(updatedItem);
+    } catch (err) {
+      console.error("Failed to update item in storage:", err);
+    }
   };
   const handleDeleteItem = async (item) => {
     setItems((prev) => prev.filter((it) => it.id !== item.id));
@@ -31451,7 +31523,11 @@ var AppView = ({ app, storageAdapter, plugin, settings, initialViewMode = "colle
       setSelectedItem(null);
       setIsDrawerOpen(false);
     }
-    await storage.deleteItem(item);
+    try {
+      await storage.deleteItem(item);
+    } catch (err) {
+      console.error("Failed to delete item from storage:", err);
+    }
   };
   const handleSelectItem = (item, todoId) => {
     setSelectedItem(item);

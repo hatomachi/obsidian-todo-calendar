@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
   X,
   Plus,
@@ -71,9 +71,76 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
   const [isGroupedView, setIsGroupedView] = useState(true);
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
 
+  const pendingItemRef = useRef<ItemData | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Flush any pending debounced update immediately
+  const flushPendingUpdate = useCallback(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    if (pendingItemRef.current) {
+      const itemToSave = pendingItemRef.current;
+      pendingItemRef.current = null;
+      onUpdateItem(itemToSave);
+    }
+  }, [onUpdateItem]);
+
+  // Debounced update for typing text inputs (500ms)
+  const debouncedUpdate = useCallback(
+    (updated: ItemData) => {
+      pendingItemRef.current = updated;
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        debounceTimerRef.current = null;
+        pendingItemRef.current = null;
+        onUpdateItem(updated);
+      }, 500);
+    },
+    [onUpdateItem]
+  );
+
+  // Immediate update for discrete actions (toggles, duplicates, deletes, date pickers)
+  const immediateUpdate = useCallback(
+    (updated: ItemData) => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+      pendingItemRef.current = null;
+      onUpdateItem(updated);
+    },
+    [onUpdateItem]
+  );
+
+  // Flush on unmount
   useEffect(() => {
-    setLocalItem(item);
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+      if (pendingItemRef.current) {
+        onUpdateItem(pendingItemRef.current);
+        pendingItemRef.current = null;
+      }
+    };
+  }, [onUpdateItem]);
+
+  // Sync external item changes only when not actively typing
+  useEffect(() => {
+    if (!pendingItemRef.current) {
+      setLocalItem(item);
+    }
   }, [item]);
+
+  const handleClose = useCallback(() => {
+    flushPendingUpdate();
+    onClose();
+  }, [flushPendingUpdate, onClose]);
 
   useEffect(() => {
     if (selectedTodoId) {
@@ -145,7 +212,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
   const handleTitleChange = (newTitle: string) => {
     const updated = { ...localItem, title: newTitle };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    debouncedUpdate(updated);
   };
 
   const handleTypeChange = (typeId: string) => {
@@ -157,7 +224,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
       template: defaultTpl ? defaultTpl.name : undefined,
     };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
 
   const handleTemplateChange = (tplName: string) => {
@@ -166,7 +233,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
       template: tplName ? tplName : undefined,
     };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
 
   const handleAddMissingTodo = (missing: TemplateTodoDef) => {
@@ -183,7 +250,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
       todos: [...localItem.todos, newTodo],
     };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
 
   const handleAddAllMissingTodos = (missingList: TemplateTodoDef[]) => {
@@ -202,19 +269,19 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
       todos: [...localItem.todos, ...newTodos],
     };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
 
   const handleItemStatusChange = (newStatus: 'todo' | 'done') => {
     const updated = { ...localItem, status: newStatus };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
 
   const handleItemDescriptionChange = (newDesc: string) => {
     const updated = { ...localItem, description: newDesc };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    debouncedUpdate(updated);
   };
 
   const handleAddTodo = (groupName?: string) => {
@@ -232,10 +299,10 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
       todos: [...localItem.todos, newTodo],
     };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
 
-  const handleUpdateTodo = (todoId: string, fields: Partial<TodoItem>) => {
+  const handleUpdateTodo = (todoId: string, fields: Partial<TodoItem>, isImmediate = false) => {
     const updatedTodos = localItem.todos.map((t) => {
       if (t.id === todoId) {
         return { ...t, ...fields };
@@ -244,14 +311,18 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     });
     const updated = { ...localItem, todos: updatedTodos };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    if (isImmediate) {
+      immediateUpdate(updated);
+    } else {
+      debouncedUpdate(updated);
+    }
   };
 
   const handleDeleteTodo = (todoId: string) => {
     const updatedTodos = localItem.todos.filter((t) => t.id !== todoId);
     const updated = { ...localItem, todos: updatedTodos };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
 
   const handleDuplicateTodo = (todoId: string) => {
@@ -269,7 +340,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
 
     const updated = { ...localItem, todos: updatedTodos };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
 
   const toggleToggleEditDesc = (todoId: string) => {
@@ -312,7 +383,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     });
     const updated = { ...localItem, todos: sorted };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
   };
 
   // Drag and Drop handlers
@@ -343,7 +414,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
 
     const updated = { ...localItem, todos: updatedTodos };
     setLocalItem(updated);
-    onUpdateItem(updated);
+    immediateUpdate(updated);
 
     setDraggedIndex(null);
     setDragOverIndex(null);
@@ -385,7 +456,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
             type="checkbox"
             checked={todo.status === 'done'}
             onChange={(e) =>
-              handleUpdateTodo(todo.id, { status: e.target.checked ? 'done' : 'todo' })
+              handleUpdateTodo(todo.id, { status: e.target.checked ? 'done' : 'todo' }, true)
             }
             className="todo-status-checkbox"
             title={todo.status === 'done' ? '未完了に戻す' : '完了にする'}
@@ -398,6 +469,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
             value={todo.title}
             title={todo.title}
             onChange={(e) => handleUpdateTodo(todo.id, { title: e.target.value })}
+            onBlur={flushPendingUpdate}
           />
 
           {/* Group Tag badge (only shown if assigned) */}
@@ -418,7 +490,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
               type="date"
               className="due-date-input-overlay"
               value={todo.due || ''}
-              onChange={(e) => handleUpdateTodo(todo.id, { due: e.target.value })}
+              onChange={(e) => handleUpdateTodo(todo.id, { due: e.target.value }, true)}
             />
             <div className={`due-date-badge ${!todo.due || todo.due.trim() === '' ? 'empty-due-badge' : ''}`}>
               <Calendar size={12} className="due-date-icon" />
@@ -463,6 +535,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                 placeholder="グループ名（未設定時は未分類）..."
                 value={todo.group || ''}
                 onChange={(e) => handleUpdateTodo(todo.id, { group: e.target.value })}
+                onBlur={flushPendingUpdate}
               />
             </div>
             <div className="textarea-wrapper">
@@ -472,6 +545,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                 placeholder="詳細・メモを入力..."
                 value={todo.description || ''}
                 onChange={(e) => handleUpdateTodo(todo.id, { description: e.target.value })}
+                onBlur={flushPendingUpdate}
                 rows={2}
                 autoFocus
               />
@@ -523,10 +597,11 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
             className={`item-title-input ${localItem.status === 'done' ? 'done-title' : ''}`}
             value={localItem.title}
             onChange={(e) => handleTitleChange(e.target.value)}
+            onBlur={flushPendingUpdate}
             placeholder="アイテム名を入力..."
           />
         </div>
-        <button className="icon-btn close-drawer-btn" onClick={onClose} title="閉じる">
+        <button className="icon-btn close-drawer-btn" onClick={handleClose} title="閉じる">
           <X size={18} />
         </button>
       </div>
@@ -593,6 +668,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                 value={localItem.description || ''}
                 onChange={(e) => handleItemDescriptionChange(e.target.value)}
                 onBlur={(e) => {
+                  flushPendingUpdate();
                   if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node)) {
                     setIsEditingItemDesc(false);
                   }
@@ -602,7 +678,10 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
               />
               <button
                 className="icon-btn save-memo-btn"
-                onClick={() => setIsEditingItemDesc(false)}
+                onClick={() => {
+                  flushPendingUpdate();
+                  setIsEditingItemDesc(false);
+                }}
                 title="完了"
               >
                 <Check size={13} />

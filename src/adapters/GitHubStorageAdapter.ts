@@ -36,13 +36,32 @@ export class GitHubStorageAdapter implements IStorageAdapter {
   private memoryCache: Record<string, FileCacheEntry> = {};
   private knownFiles = new Map<string, { sha: string; size?: number }>();
   private deletedPaths = new Set<string>();
+  private writeQueue: Promise<any> = Promise.resolve();
 
   constructor(config: GitHubConfig) {
     this.config = config;
     this.octokit = new Octokit({
       auth: config.token,
+      request: {
+        fetch: (url: any, options: any) => {
+          return fetch(url, {
+            ...options,
+            cache: 'no-store',
+            headers: {
+              ...(options?.headers || {}),
+              'Cache-Control': 'no-cache',
+            },
+          });
+        },
+      },
     });
     this.memoryCache = this.loadCache();
+  }
+
+  private enqueueWrite<T>(task: () => Promise<T>): Promise<T> {
+    const next = this.writeQueue.then(task, task);
+    this.writeQueue = next.catch(() => {});
+    return next;
   }
 
   private getCacheKey(): string {
@@ -174,6 +193,10 @@ export class GitHubStorageAdapter implements IStorageAdapter {
         repo: this.config.repo,
         path,
         ref: this.config.branch,
+        headers: {
+          'If-None-Match': '',
+          'Cache-Control': 'no-cache',
+        },
       });
 
       if ('content' in data && data.content) {
@@ -192,96 +215,172 @@ export class GitHubStorageAdapter implements IStorageAdapter {
   }
 
   /**
-   * Write/Create/Update file via GitHub Contents API
+   * Internal write/create/update with 409 Conflict retry
    */
-  private async writeFile(path: string, content: string, commitMessage: string): Promise<string> {
-    let sha = this.fileShaCache.get(path);
+  private async writeFileInternal(path: string, content: string, commitMessage: string, maxRetries = 3): Promise<string> {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      let sha = this.fileShaCache.get(path);
 
-    if (!sha) {
+      if (!sha) {
+        try {
+          const { data } = await this.octokit.rest.repos.getContent({
+            owner: this.config.owner,
+            repo: this.config.repo,
+            path,
+            ref: this.config.branch,
+            headers: {
+              'If-None-Match': '',
+              'Cache-Control': 'no-cache',
+            },
+          });
+          if ('sha' in data) {
+            sha = data.sha;
+            this.fileShaCache.set(path, sha);
+          }
+        } catch (e: any) {
+          // 404 is normal for new files
+          if (e.status !== 404) {
+            console.warn(`[GitHubStorageAdapter] Failed to fetch SHA for ${path}:`, e);
+          }
+        }
+      }
+
       try {
-        const { data } = await this.octokit.rest.repos.getContent({
+        const { data } = await this.octokit.rest.repos.createOrUpdateFileContents({
           owner: this.config.owner,
           repo: this.config.repo,
           path,
-          ref: this.config.branch,
+          branch: this.config.branch,
+          message: commitMessage,
+          content: utf8ToBase64(content),
+          sha: sha || undefined,
         });
-        if ('sha' in data) {
-          sha = data.sha;
+
+        const newSha = data.content?.sha || sha || '';
+        if (newSha) {
+          this.fileShaCache.set(path, newSha);
+          this.updateCacheEntry(path, newSha, content);
+          this.knownFiles.set(path, { sha: newSha, size: content.length });
+          this.deletedPaths.delete(path);
+          return newSha;
         }
+        return '';
       } catch (e: any) {
-        // 404 is normal for new files
-        if (e.status !== 404) throw e;
+        const isConflict =
+          e.status === 409 ||
+          (e.message && (e.message.includes('does not match') || e.message.includes('Conflict')));
+        if (isConflict && attempt < maxRetries) {
+          console.warn(
+            `[GitHubStorageAdapter] 409 Conflict on writeFile "${path}". Invalidate SHA and retrying (attempt ${
+              attempt + 1
+            }/${maxRetries})...`
+          );
+          this.fileShaCache.delete(path);
+          this.deleteCacheEntry(path);
+          await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)));
+          continue;
+        }
+        throw e;
       }
     }
-
-    const { data } = await this.octokit.rest.repos.createOrUpdateFileContents({
-      owner: this.config.owner,
-      repo: this.config.repo,
-      path,
-      branch: this.config.branch,
-      message: commitMessage,
-      content: utf8ToBase64(content),
-      sha: sha || undefined,
-    });
-
-    const newSha = data.content?.sha || sha || '';
-    if (newSha) {
-      this.fileShaCache.set(path, newSha);
-      this.updateCacheEntry(path, newSha, content);
-      this.knownFiles.set(path, { sha: newSha, size: content.length });
-      this.deletedPaths.delete(path);
-      return newSha;
-    }
-    return '';
+    throw new Error(`Failed to write file "${path}" after ${maxRetries} retries`);
   }
 
   /**
-   * Delete file via GitHub Contents API
+   * Write/Create/Update file via GitHub Contents API (queued)
    */
-  private async deleteFile(path: string, commitMessage: string): Promise<void> {
-    let sha = this.fileShaCache.get(path);
-    if (!sha) {
-      try {
-        const { data } = await this.octokit.rest.repos.getContent({
-          owner: this.config.owner,
-          repo: this.config.repo,
-          path,
-          ref: this.config.branch,
-        });
-        if ('sha' in data) {
-          sha = data.sha;
+  private async writeFile(path: string, content: string, commitMessage: string): Promise<string> {
+    return this.enqueueWrite(() => this.writeFileInternal(path, content, commitMessage));
+  }
+
+  /**
+   * Internal delete file with 409 Conflict retry
+   */
+  private async deleteFileInternal(path: string, commitMessage: string, maxRetries = 3): Promise<void> {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      let sha = this.fileShaCache.get(path);
+      if (!sha) {
+        try {
+          const { data } = await this.octokit.rest.repos.getContent({
+            owner: this.config.owner,
+            repo: this.config.repo,
+            path,
+            ref: this.config.branch,
+            headers: {
+              'If-None-Match': '',
+              'Cache-Control': 'no-cache',
+            },
+          });
+          if ('sha' in data) {
+            sha = data.sha;
+            this.fileShaCache.set(path, sha);
+          }
+        } catch (e: any) {
+          if (e.status === 404) {
+            this.fileShaCache.delete(path);
+            this.deleteCacheEntry(path);
+            this.knownFiles.delete(path);
+            this.deletedPaths.add(path);
+            return;
+          }
+          throw e;
         }
-      } catch (e: any) {
-        if (e.status === 404) {
+      }
+
+      if (sha) {
+        try {
+          await this.octokit.rest.repos.deleteFile({
+            owner: this.config.owner,
+            repo: this.config.repo,
+            path,
+            branch: this.config.branch,
+            message: commitMessage,
+            sha,
+          });
           this.fileShaCache.delete(path);
           this.deleteCacheEntry(path);
           this.knownFiles.delete(path);
           this.deletedPaths.add(path);
           return;
+        } catch (e: any) {
+          if (e.status === 404) {
+            this.fileShaCache.delete(path);
+            this.deleteCacheEntry(path);
+            this.knownFiles.delete(path);
+            this.deletedPaths.add(path);
+            return;
+          }
+          const isConflict =
+            e.status === 409 ||
+            (e.message && (e.message.includes('does not match') || e.message.includes('Conflict')));
+          if (isConflict && attempt < maxRetries) {
+            console.warn(
+              `[GitHubStorageAdapter] 409 Conflict on deleteFile "${path}". Retrying (attempt ${
+                attempt + 1
+              }/${maxRetries})...`
+            );
+            this.fileShaCache.delete(path);
+            this.deleteCacheEntry(path);
+            await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)));
+            continue;
+          }
+          throw e;
         }
-        throw e;
+      } else {
+        this.fileShaCache.delete(path);
+        this.deleteCacheEntry(path);
+        this.knownFiles.delete(path);
+        this.deletedPaths.add(path);
+        return;
       }
     }
+  }
 
-    if (sha) {
-      await this.octokit.rest.repos.deleteFile({
-        owner: this.config.owner,
-        repo: this.config.repo,
-        path,
-        branch: this.config.branch,
-        message: commitMessage,
-        sha,
-      });
-      this.fileShaCache.delete(path);
-      this.deleteCacheEntry(path);
-      this.knownFiles.delete(path);
-      this.deletedPaths.add(path);
-    } else {
-      this.fileShaCache.delete(path);
-      this.deleteCacheEntry(path);
-      this.knownFiles.delete(path);
-      this.deletedPaths.add(path);
-    }
+  /**
+   * Delete file via GitHub Contents API (queued)
+   */
+  private async deleteFile(path: string, commitMessage: string): Promise<void> {
+    return this.enqueueWrite(() => this.deleteFileInternal(path, commitMessage));
   }
 
   async getCollections(): Promise<CollectionData[]> {
@@ -349,25 +448,27 @@ export class GitHubStorageAdapter implements IStorageAdapter {
   }
 
   async updateCollection(collection: CollectionData): Promise<void> {
-    const filePath = collection.filePath || `${COLLECTIONS_DIR}/${collection.id}.md`;
-    const content = await this.readFile(filePath);
-    const frontmatter = parseYamlContent(content);
+    return this.enqueueWrite(async () => {
+      const filePath = collection.filePath || `${COLLECTIONS_DIR}/${collection.id}.md`;
+      const content = await this.readFile(filePath);
+      const frontmatter = parseYamlContent(content);
 
-    frontmatter.title = collection.title.trim();
-    frontmatter.description = (collection.description || '').trim();
-    const cleanTags = normalizeTags(collection.tags);
-    if (cleanTags.length > 0) {
-      frontmatter.tags = cleanTags;
-    } else {
-      delete frontmatter.tags;
-    }
-    if (collection.color) {
-      frontmatter.color = collection.color;
-    }
+      frontmatter.title = collection.title.trim();
+      frontmatter.description = (collection.description || '').trim();
+      const cleanTags = normalizeTags(collection.tags);
+      if (cleanTags.length > 0) {
+        frontmatter.tags = cleanTags;
+      } else {
+        delete frontmatter.tags;
+      }
+      if (collection.color) {
+        frontmatter.color = collection.color;
+      }
 
-    const body = extractBodyContent(content);
-    const newContent = stringifyFrontmatter(frontmatter, body);
-    await this.writeFile(filePath, newContent, `chore(todo): update collection "${collection.title}"`);
+      const body = extractBodyContent(content);
+      const newContent = stringifyFrontmatter(frontmatter, body);
+      await this.writeFileInternal(filePath, newContent, `chore(todo): update collection "${collection.title}"`);
+    });
   }
 
   async deleteCollection(collectionId: string): Promise<void> {
@@ -468,31 +569,33 @@ export class GitHubStorageAdapter implements IStorageAdapter {
   }
 
   async updateItem(item: ItemData): Promise<void> {
-    const oldContent = await this.readFile(item.filePath);
-    const bodyContent = extractBodyContent(oldContent);
+    return this.enqueueWrite(async () => {
+      const oldContent = await this.readFile(item.filePath);
+      const bodyContent = extractBodyContent(oldContent);
 
-    const frontmatter: Record<string, any> = {
-      id: item.id,
-      collection_id: item.collectionId,
-      title: item.title,
-      status: item.status === 'done' ? 'done' : 'todo',
-      description: item.description || '',
-      created_at: item.createdAt,
-      todos: item.todos.map((t) => ({
-        id: t.id,
-        title: t.title,
-        due: t.due,
-        status: t.status,
-        description: t.description || '',
-        ...(t.group ? { group: t.group } : {}),
-      })),
-    };
+      const frontmatter: Record<string, any> = {
+        id: item.id,
+        collection_id: item.collectionId,
+        title: item.title,
+        status: item.status === 'done' ? 'done' : 'todo',
+        description: item.description || '',
+        created_at: item.createdAt,
+        todos: item.todos.map((t) => ({
+          id: t.id,
+          title: t.title,
+          due: t.due,
+          status: t.status,
+          description: t.description || '',
+          ...(t.group ? { group: t.group } : {}),
+        })),
+      };
 
-    if (item.type) frontmatter.type = item.type;
-    if (item.template) frontmatter.template = item.template;
+      if (item.type) frontmatter.type = item.type;
+      if (item.template) frontmatter.template = item.template;
 
-    const newContent = stringifyFrontmatter(frontmatter, bodyContent);
-    await this.writeFile(item.filePath, newContent, `chore(todo): update "${item.title}"`);
+      const newContent = stringifyFrontmatter(frontmatter, bodyContent);
+      await this.writeFileInternal(item.filePath, newContent, `chore(todo): update "${item.title}"`);
+    });
   }
 
   async deleteItem(item: ItemData): Promise<void> {

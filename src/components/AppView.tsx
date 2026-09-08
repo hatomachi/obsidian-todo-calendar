@@ -417,7 +417,11 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
     });
 
     // Save to Vault / GitHub / Local
-    await storage.updateItem(updatedItem);
+    try {
+      await storage.updateItem(updatedItem);
+    } catch (err) {
+      console.error('Failed to update item in storage:', err);
+    }
   };
 
   // Delete Item
@@ -438,7 +442,11 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
       setIsDrawerOpen(false);
     }
 
-    await storage.deleteItem(item);
+    try {
+      await storage.deleteItem(item);
+    } catch (err) {
+      console.error('Failed to delete item from storage:', err);
+    }
   };
 
   // Select Item or Todo
