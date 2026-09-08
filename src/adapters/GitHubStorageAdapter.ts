@@ -42,18 +42,6 @@ export class GitHubStorageAdapter implements IStorageAdapter {
     this.config = config;
     this.octokit = new Octokit({
       auth: config.token,
-      request: {
-        fetch: (url: any, options: any) => {
-          return fetch(url, {
-            ...options,
-            cache: 'no-store',
-            headers: {
-              ...(options?.headers || {}),
-              'Cache-Control': 'no-cache',
-            },
-          });
-        },
-      },
     });
     this.memoryCache = this.loadCache();
   }
@@ -193,10 +181,6 @@ export class GitHubStorageAdapter implements IStorageAdapter {
         repo: this.config.repo,
         path,
         ref: this.config.branch,
-        headers: {
-          'If-None-Match': '',
-          'Cache-Control': 'no-cache',
-        },
       });
 
       if ('content' in data && data.content) {
@@ -228,10 +212,6 @@ export class GitHubStorageAdapter implements IStorageAdapter {
             repo: this.config.repo,
             path,
             ref: this.config.branch,
-            headers: {
-              'If-None-Match': '',
-              'Cache-Control': 'no-cache',
-            },
           });
           if ('sha' in data) {
             sha = data.sha;
@@ -306,10 +286,6 @@ export class GitHubStorageAdapter implements IStorageAdapter {
             repo: this.config.repo,
             path,
             ref: this.config.branch,
-            headers: {
-              'If-None-Match': '',
-              'Cache-Control': 'no-cache',
-            },
           });
           if ('sha' in data) {
             sha = data.sha;
