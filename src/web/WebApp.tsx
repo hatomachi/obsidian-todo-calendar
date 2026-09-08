@@ -1,9 +1,12 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { AppView } from '../components/AppView';
 import { IStorageAdapter } from '../adapters/IStorageAdapter';
 import { LocalStorageAdapter } from '../adapters/LocalStorageAdapter';
 import { GitHubStorageAdapter, GitHubConfig } from '../adapters/GitHubStorageAdapter';
 import { GitLabStorageAdapter, GitLabConfig } from '../adapters/GitLabStorageAdapter';
+import { SyncManager } from '../sync/SyncManager';
+import { SyncState } from '../sync/types';
+import { SyncIndicator } from './SyncIndicator';
 import { SettingsModal, WebStorageMode } from './SettingsModal';
 import { Settings, RefreshCw, Smartphone, Cloud } from 'lucide-react';
 import '../styles.css';
@@ -62,16 +65,45 @@ export const WebApp: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [key, setKey] = useState(0); // For forcing re-render/reload of AppView
 
-  // Initialize storage adapter
-  const storageAdapter = useMemo<IStorageAdapter>(() => {
+  // Sync state managed by SyncManager
+  const [syncState, setSyncState] = useState<SyncState>({
+    status: 'synced',
+    pendingCount: 0,
+    lastSyncedAt: null,
+  });
+
+  // Initialize local-first sync manager
+  const syncManager = useMemo<SyncManager>(() => {
+    let rawRemote: IStorageAdapter;
+    let storageKey = 'local_mock';
+
     if (activeMode === 'gitlab' && gitlabConfig.baseUrl && gitlabConfig.projectId && gitlabConfig.token) {
-      return new GitLabStorageAdapter(gitlabConfig);
+      rawRemote = new GitLabStorageAdapter(gitlabConfig);
+      storageKey = `gitlab_${gitlabConfig.projectId}_${gitlabConfig.branch || 'main'}`;
+    } else if (activeMode === 'github' && githubConfig.token && githubConfig.owner && githubConfig.repo) {
+      rawRemote = new GitHubStorageAdapter(githubConfig);
+      storageKey = `github_${githubConfig.owner}_${githubConfig.repo}_${githubConfig.branch || 'main'}`;
+    } else {
+      rawRemote = new LocalStorageAdapter();
     }
-    if (activeMode === 'github' && githubConfig.token && githubConfig.owner && githubConfig.repo) {
-      return new GitHubStorageAdapter(githubConfig);
-    }
-    return new LocalStorageAdapter();
+
+    return new SyncManager(rawRemote, storageKey);
   }, [activeMode, githubConfig, gitlabConfig, key]);
+
+  // Subscribe to sync state changes & lifecycle
+  useEffect(() => {
+    const unsubscribe = syncManager.subscribe((state) => {
+      setSyncState(state);
+    });
+    return () => {
+      unsubscribe();
+      syncManager.dispose();
+    };
+  }, [syncManager]);
+
+  const handleManualSync = useCallback(() => {
+    syncManager.syncNow();
+  }, [syncManager]);
 
   const handleSaveConfig = useCallback(
     (newGithubConfig: GitHubConfig, newGitlabConfig: GitLabConfig, newMode: WebStorageMode) => {
@@ -86,9 +118,11 @@ export const WebApp: React.FC = () => {
     []
   );
 
-  const handleRefresh = () => {
-    setKey((prev) => prev + 1);
-  };
+  const handleRefresh = useCallback(() => {
+    syncManager.pullRemote().then(() => {
+      setKey((prev) => prev + 1);
+    });
+  }, [syncManager]);
 
   const isConfigured =
     activeMode === 'gitlab'
@@ -151,10 +185,15 @@ export const WebApp: React.FC = () => {
         </div>
 
         <div className="todo-cal-web-header-actions">
+          <SyncIndicator
+            state={syncState}
+            onSync={handleManualSync}
+            disabled={syncState.status === 'syncing'}
+          />
           <button
             className="todo-cal-web-icon-btn"
             onClick={handleRefresh}
-            title="リフレッシュ"
+            title="最新データを取得（リフレッシュ）"
           >
             <RefreshCw size={18} />
           </button>
@@ -172,7 +211,7 @@ export const WebApp: React.FC = () => {
       <main className="todo-cal-web-content">
         <AppView
           key={key}
-          storageAdapter={storageAdapter}
+          storageAdapter={syncManager}
           initialViewMode="agenda"
         />
       </main>

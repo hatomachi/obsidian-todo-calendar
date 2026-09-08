@@ -1,4 +1,5 @@
 import { IStorageAdapter } from './IStorageAdapter';
+import { BatchSyncItem } from '../sync/types';
 import { CollectionData, ItemData, AgendaTodoItem, TodoItem } from '../types';
 import { ItemType } from '../features/item-types/types';
 import { getDefaultItemTypes } from '../features/item-types/templateUtils';
@@ -813,5 +814,97 @@ export class GitLabStorageAdapter implements IStorageAdapter {
     const path = `${ROOT_DATA_DIR}/templates.json`;
     const content = JSON.stringify({ types }, null, 2);
     await this.writeFile(path, content, 'chore(todo): update templates.json');
+  }
+
+  /**
+   * Batch synchronize multiple file changes in a single Git commit via GitLab Commits API
+   */
+  async batchSync(items: BatchSyncItem[], commitMessage?: string): Promise<void> {
+    if (!items || items.length === 0) return;
+
+    const defaultMsg =
+      items.length === 1
+        ? `chore(todo): sync 1 file (${items[0].action} ${items[0].filePath})`
+        : `chore(todo): batch sync ${items.length} changes`;
+    const message = commitMessage || defaultMsg;
+
+    try {
+      const commitUrl = `${this.baseUrl}/projects/${this.encodedProjectId}/repository/commits`;
+      const actions: Array<{
+        action: 'create' | 'update' | 'delete';
+        file_path: string;
+        content?: string;
+        encoding?: 'text';
+      }> = [];
+
+      for (const item of items) {
+        if (item.action === 'delete') {
+          actions.push({
+            action: 'delete',
+            file_path: item.filePath.replace(/^\/+/, ''),
+          });
+        } else {
+          const exists = this.knownFiles.has(item.filePath) || this.fileShaCache.has(item.filePath);
+          actions.push({
+            action: exists ? 'update' : 'create',
+            file_path: item.filePath.replace(/^\/+/, ''),
+            content: item.content ?? '',
+            encoding: 'text',
+          });
+        }
+      }
+
+      const res = await this.fetchWithAuth(commitUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          branch: this.config.branch || 'main',
+          commit_message: message,
+          actions,
+        }),
+      });
+
+      if (res.ok) {
+        for (const item of items) {
+          if (item.action === 'delete') {
+            this.fileShaCache.delete(item.filePath);
+            this.deleteCacheEntry(item.filePath);
+            this.knownFiles.delete(item.filePath);
+            this.deletedPaths.add(item.filePath);
+          } else {
+            const fakeSha = this.generateUniqueId();
+            this.deletedPaths.delete(item.filePath);
+            this.fileShaCache.set(item.filePath, fakeSha);
+            this.updateCacheEntry(item.filePath, fakeSha, item.content || '');
+            this.knownFiles.set(item.filePath, { sha: fakeSha, size: (item.content || '').length });
+          }
+        }
+        return;
+      }
+
+      console.warn(
+        `[GitLabStorageAdapter] Commits API batch commit failed (${res.status} ${res.statusText}), falling back to sequential writes`
+      );
+    } catch (e) {
+      console.warn(
+        `[GitLabStorageAdapter] Commits API batch commit error, falling back to sequential writes:`,
+        e
+      );
+    }
+
+    // Fallback: execute one by one
+    for (const item of items) {
+      if (item.action === 'delete') {
+        await this.deleteFile(item.filePath, `chore(todo): delete ${item.filePath}`);
+      } else {
+        await this.writeFile(
+          item.filePath,
+          item.content || '',
+          `chore(todo): update ${item.filePath}`
+        );
+      }
+    }
   }
 }

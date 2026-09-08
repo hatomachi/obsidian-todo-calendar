@@ -1,5 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { IStorageAdapter } from './IStorageAdapter';
+import { BatchSyncItem } from '../sync/types';
 import { CollectionData, ItemData, AgendaTodoItem, TodoItem } from '../types';
 import { ItemType } from '../features/item-types/types';
 import { getDefaultItemTypes } from '../features/item-types/templateUtils';
@@ -742,5 +743,147 @@ export class GitHubStorageAdapter implements IStorageAdapter {
     const path = `${ROOT_DATA_DIR}/templates.json`;
     const content = JSON.stringify({ types }, null, 2);
     await this.writeFile(path, content, 'chore(todo): update templates.json');
+  }
+
+  /**
+   * Batch synchronize multiple file changes in a single Git commit via Git Data API
+   */
+  async batchSync(items: BatchSyncItem[], commitMessage?: string): Promise<void> {
+    if (!items || items.length === 0) return;
+
+    return this.enqueueWrite(async () => {
+      const defaultMsg =
+        items.length === 1
+          ? `chore(todo): sync 1 file (${items[0].action} ${items[0].filePath})`
+          : `chore(todo): batch sync ${items.length} changes`;
+      const message = commitMessage || defaultMsg;
+
+      const maxRetries = 3;
+      let lastError: any = null;
+
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          // 1. Get current branch HEAD
+          const branch = this.config.branch || 'main';
+          const { data: refData } = await this.octokit.rest.git.getRef({
+            owner: this.config.owner,
+            repo: this.config.repo,
+            ref: `heads/${branch}`,
+          });
+          const headCommitSha = refData.object.sha;
+
+          // 2. Get tree of the HEAD commit
+          const { data: headCommit } = await this.octokit.rest.git.getCommit({
+            owner: this.config.owner,
+            repo: this.config.repo,
+            commit_sha: headCommitSha,
+          });
+          const baseTreeSha = headCommit.tree.sha;
+
+          // 3. Build tree items
+          const treeEntries: Array<{
+            path: string;
+            mode: '100644';
+            type: 'blob';
+            sha?: string | null;
+            content?: string;
+          }> = [];
+
+          for (const item of items) {
+            if (item.action === 'delete') {
+              treeEntries.push({
+                path: item.filePath,
+                mode: '100644',
+                type: 'blob',
+                sha: null,
+              });
+            } else {
+              treeEntries.push({
+                path: item.filePath,
+                mode: '100644',
+                type: 'blob',
+                content: item.content ?? '',
+              });
+            }
+          }
+
+          // 4. Create new tree
+          const { data: newTree } = await this.octokit.rest.git.createTree({
+            owner: this.config.owner,
+            repo: this.config.repo,
+            base_tree: baseTreeSha,
+            tree: treeEntries,
+          });
+
+          // 5. Create new commit
+          const { data: newCommit } = await this.octokit.rest.git.createCommit({
+            owner: this.config.owner,
+            repo: this.config.repo,
+            message,
+            tree: newTree.sha,
+            parents: [headCommitSha],
+          });
+
+          // 6. Update branch ref
+          await this.octokit.rest.git.updateRef({
+            owner: this.config.owner,
+            repo: this.config.repo,
+            ref: `heads/${branch}`,
+            sha: newCommit.sha,
+          });
+
+          // 7. Update internal caches
+          for (const item of items) {
+            if (item.action === 'delete') {
+              this.fileShaCache.delete(item.filePath);
+              this.deleteCacheEntry(item.filePath);
+              this.knownFiles.delete(item.filePath);
+              this.deletedPaths.add(item.filePath);
+            } else {
+              this.deletedPaths.delete(item.filePath);
+              this.fileShaCache.delete(item.filePath); // Will be re-fetched on next read/tree
+              this.updateCacheEntry(item.filePath, '', item.content || '');
+              this.knownFiles.set(item.filePath, { sha: '', size: (item.content || '').length });
+            }
+          }
+
+          return;
+        } catch (e: any) {
+          lastError = e;
+          const isConflict =
+            e.status === 409 ||
+            e.status === 422 ||
+            (e.message && (e.message.includes('Conflict') || e.message.includes('fast forward')));
+
+          if (isConflict && attempt < maxRetries) {
+            console.warn(
+              `[GitHubStorageAdapter] Git Data API Conflict on batchSync. Retrying (${attempt + 1}/${maxRetries})...`
+            );
+            await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+            continue;
+          }
+
+          // If not conflict or max retries reached, fallback to sequential individual write/delete
+          console.warn(
+            `[GitHubStorageAdapter] Git Data API batch commit failed, falling back to sequential writes:`,
+            e
+          );
+          break;
+        }
+      }
+
+      // Fallback: execute one by one
+      for (const item of items) {
+        if (item.action === 'delete') {
+          await this.deleteFileInternal(item.filePath, `chore(todo): delete ${item.filePath}`);
+        } else {
+          await this.writeFileInternal(
+            item.filePath,
+            item.content || '',
+            `chore(todo): update ${item.filePath}`
+          );
+        }
+      }
+    });
   }
 }

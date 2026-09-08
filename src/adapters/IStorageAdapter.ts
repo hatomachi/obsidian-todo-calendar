@@ -1,5 +1,6 @@
 import { CollectionData, ItemData, AgendaTodoItem, TodoItem } from '../types';
 import { ItemType } from '../features/item-types/types';
+import { BatchSyncItem } from '../sync/types';
 
 export interface IStorageAdapter {
   /**
@@ -68,4 +69,9 @@ export interface IStorageAdapter {
    * Save item type templates
    */
   saveTemplates(types: ItemType[]): Promise<void>;
+
+  /**
+   * Batch synchronize multiple file changes in a single operation/commit
+   */
+  batchSync?(items: BatchSyncItem[], commitMessage?: string): Promise<void>;
 }
