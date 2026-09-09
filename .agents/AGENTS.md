@@ -1,5 +1,9 @@
 # Project Rules (Obsidian TODO Calendar)
 
+> [!IMPORTANT]
+> **🎯 プロダクト作戦ノート & Next Actions (personal-vault)**:  
+> 本プロダクトの全体ビジョン、現在地、ユーザーからの日常フィードバック、直近の Next Actions は [obsidian-todo-calendar.md](file:///Users/s-ikari/work/personal-vault/10_%E8%81%B7%E4%BA%BA%E3%83%BB%E7%99%BA%E6%98%8E%E5%AE%B6/obsidian-todo-calendar.md) に一元管理されています。実装着手・機能完了時は必ず確認・更新してください。
+
 ## プラグインビルド＆検証の自動連携ルール
 
 ユーザーがプラグイン動作を検証できるよう、コード変更後およびビルド（`npm run build`等）を行った際は、必ずビルド成果物を以下のテスト用Vaultのプラグインフォルダにコピーしてください。
