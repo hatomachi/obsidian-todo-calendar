@@ -180,7 +180,8 @@ export class LocalStorageAdapter implements IStorageAdapter {
     description = '',
     type?: string,
     template?: string,
-    initialTodos: TodoItem[] = []
+    initialTodos: TodoItem[] = [],
+    assignee?: string
   ): Promise<ItemData> {
     const items = this.getStoredItems();
     const id = `item-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
@@ -194,6 +195,7 @@ export class LocalStorageAdapter implements IStorageAdapter {
       createdAt: new Date().toISOString(),
       type,
       template,
+      assignee,
       todos: initialTodos,
     };
     items.unshift(newItem);

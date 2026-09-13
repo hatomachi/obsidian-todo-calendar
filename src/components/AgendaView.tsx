@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertCircle, Calendar, CheckCircle2, Circle, Clock, ChevronDown, ChevronRight, ExternalLink, Filter, Loader2 } from 'lucide-react';
+import { AlertCircle, Calendar, CheckCircle2, Circle, Clock, ChevronDown, ChevronRight, ExternalLink, Filter, Loader2, User } from 'lucide-react';
 import { AgendaTodoItem, CollectionData, ItemData } from '../types';
 
 interface AgendaViewProps {
@@ -7,6 +7,7 @@ interface AgendaViewProps {
   collections: CollectionData[];
   selectedCollectionId: string | null;
   isLoading?: boolean;
+  username?: string;
   onSelectCollectionFilter: (colId: string | null) => void;
   onQuickToggleTodoStatus: (item: ItemData, todoId: string) => void;
   onSelectItem: (item: ItemData, todoId?: string) => void;
@@ -40,6 +41,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
   collections,
   selectedCollectionId,
   isLoading = false,
+  username,
   onSelectCollectionFilter,
   onQuickToggleTodoStatus,
   onSelectItem,
@@ -47,13 +49,20 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
 }) => {
   const [showUpcoming, setShowUpcoming] = useState(true);
   const [showNoDue, setShowNoDue] = useState(false);
+  const [assigneeFilter, setAssigneeFilter] = useState<'all' | 'me'>(() => (username ? 'me' : 'all'));
 
   const todayStr = formatDateStr(new Date());
 
-  // Filter items if a specific collection filter is applied
-  const filteredItems = selectedCollectionId
-    ? agendaItems.filter((item) => item.collection.id === selectedCollectionId)
-    : agendaItems;
+  // Filter items if a specific collection filter or assignee filter is applied
+  const filteredItems = agendaItems.filter((entry) => {
+    if (selectedCollectionId && entry.collection.id !== selectedCollectionId) {
+      return false;
+    }
+    if (assigneeFilter === 'me' && username) {
+      return entry.item.assignee === username;
+    }
+    return true;
+  });
 
   // Categorize
   const overdue: AgendaTodoItem[] = [];
@@ -97,6 +106,26 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
         </div>
 
         <div className="todo-cal-agenda-filter-group">
+          {username && (
+            <div className="assignee-filter-group" style={{ marginRight: '0.4rem' }}>
+              <button
+                type="button"
+                className={`filter-chip-btn ${assigneeFilter === 'me' ? 'active' : ''}`}
+                onClick={() => setAssigneeFilter('me')}
+              >
+                <User size={12} />
+                <span>自分 ({username})</span>
+              </button>
+              <button
+                type="button"
+                className={`filter-chip-btn ${assigneeFilter === 'all' ? 'active' : ''}`}
+                onClick={() => setAssigneeFilter('all')}
+              >
+                全員
+              </button>
+            </div>
+          )}
+
           <Filter size={16} />
           <select
             value={selectedCollectionId || ''}
@@ -271,6 +300,15 @@ const AgendaCard: React.FC<AgendaCardProps> = ({
       >
         <div className="todo-cal-agenda-card-title">{todo.title}</div>
         <div className="todo-cal-agenda-card-sub">
+          {item.assignee && (
+            <span
+              className="item-assignee-badge"
+              title={`担当者: ${item.assignee}`}
+            >
+              <User size={10} />
+              <span>{item.assignee}</span>
+            </span>
+          )}
           <span className="item-title">{item.title}</span>
           {todo.due && <span className="due-tag">{todo.due} ({relativeDate})</span>}
         </div>

@@ -10,6 +10,7 @@ import {
   Plus,
   Trash2,
   AlertTriangle,
+  User,
 } from 'lucide-react';
 import { CollectionData, ItemData, TodoItem, TodoStatus } from '../types';
 import { isJapaneseHoliday } from '../utils/holidays';
@@ -32,6 +33,9 @@ interface CalendarMatrixViewProps {
   collections?: CollectionData[];
   isCrossCollection?: boolean;
   typeName?: string;
+  username?: string;
+  assigneeFilter?: string;
+  onChangeAssigneeFilter?: (filter: string) => void;
   onToggleShowCompleted?: () => void;
   onToggleItemStatus: (item: ItemData) => void;
   isDrawerOpen?: boolean;
@@ -72,6 +76,9 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
   collections = [],
   isCrossCollection = false,
   typeName,
+  username,
+  assigneeFilter = 'all',
+  onChangeAssigneeFilter,
   onToggleShowCompleted,
   onToggleItemStatus,
   isDrawerOpen,
@@ -271,13 +278,81 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
     }
   };
 
+  const uniqueAssignees = React.useMemo(() => {
+    const set = new Set<string>();
+    items.forEach((item) => {
+      if (item.assignee && item.assignee.trim()) {
+        set.add(item.assignee.trim());
+      }
+    });
+    return Array.from(set).sort();
+  }, [items]);
+
   const completedCount = items.filter((it) => it.status === 'done').length;
-  const visibleItems = showCompletedItems ? items : items.filter((it) => it.status !== 'done');
+
+  const visibleItems = React.useMemo(() => {
+    let result = showCompletedItems ? items : items.filter((it) => it.status !== 'done');
+    if (assigneeFilter && assigneeFilter !== 'all') {
+      if (assigneeFilter === 'me') {
+        result = result.filter((item) => (username ? item.assignee === username : true));
+      } else if (assigneeFilter === '__unassigned__') {
+        result = result.filter((item) => !item.assignee);
+      } else {
+        result = result.filter((item) => item.assignee === assigneeFilter);
+      }
+    }
+    return result;
+  }, [items, showCompletedItems, assigneeFilter, username]);
 
   const totalColumns = daysCount === 3 ? 5 : 10;
 
   return (
     <div className="calendar-matrix-container" onClick={handleContainerClick}>
+      {/* Assignee Filter Toolbar */}
+      <div className="matrix-filter-toolbar">
+        <div className="assignee-filter-group">
+          <span className="assignee-filter-label">
+            <User size={12} />
+            <span>担当:</span>
+          </span>
+          <button
+            type="button"
+            className={`filter-chip-btn ${assigneeFilter === 'all' ? 'active' : ''}`}
+            onClick={() => onChangeAssigneeFilter?.('all')}
+          >
+            全員
+          </button>
+          {username && (
+            <button
+              type="button"
+              className={`filter-chip-btn ${assigneeFilter === 'me' ? 'active' : ''}`}
+              onClick={() => onChangeAssigneeFilter?.('me')}
+            >
+              自分 ({username})
+            </button>
+          )}
+          {(uniqueAssignees.length > 0 || assigneeFilter === '__unassigned__') && (
+            <select
+              className={`filter-chip-select ${assigneeFilter !== 'all' && assigneeFilter !== 'me' ? 'active' : ''}`}
+              value={assigneeFilter === 'all' || assigneeFilter === 'me' ? '' : assigneeFilter}
+              onChange={(e) => {
+                if (e.target.value) {
+                  onChangeAssigneeFilter?.(e.target.value);
+                }
+              }}
+            >
+              <option value="">メンバー絞り込み...</option>
+              {uniqueAssignees.map((u) => (
+                <option key={u} value={u}>
+                  {u}
+                </option>
+              ))}
+              <option value="__unassigned__">未割り当て</option>
+            </select>
+          )}
+        </div>
+      </div>
+
       <div className="table-scroll-wrapper" onClick={handleContainerClick}>
         <table className={`matrix-table ${daysCount === 3 ? 'compact-3days' : ''}`}>
           <thead onClick={handleHeaderClick}>
@@ -422,6 +497,15 @@ export const CalendarMatrixView: React.FC<CalendarMatrixViewProps> = ({
                           )}
                           {enableItemTypes && itemType && (
                             <TypeBadge itemType={itemType} size="sm" />
+                          )}
+                          {item.assignee && (
+                            <span
+                              className="item-assignee-badge"
+                              title={`担当者: ${item.assignee}`}
+                            >
+                              <User size={11} />
+                              <span>{item.assignee}</span>
+                            </span>
                           )}
                           <span
                             className={`item-title-text ${isItemDone ? 'line-through' : ''}`}

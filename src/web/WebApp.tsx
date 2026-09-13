@@ -15,6 +15,7 @@ import './web.css';
 const GITHUB_CONFIG_STORAGE_KEY = 'todo_cal_github_config';
 const GITLAB_CONFIG_STORAGE_KEY = 'todo_cal_gitlab_config';
 const MODE_STORAGE_KEY = 'todo_cal_active_mode';
+const USERNAME_STORAGE_KEY = 'todo_cal_username';
 
 const DEFAULT_GITHUB_CONFIG: GitHubConfig = {
   owner: '',
@@ -31,6 +32,10 @@ const DEFAULT_GITLAB_CONFIG: GitLabConfig = {
 };
 
 export const WebApp: React.FC = () => {
+  const [username, setUsername] = useState<string>(() => {
+    return localStorage.getItem(USERNAME_STORAGE_KEY) || '';
+  });
+
   const [githubConfig, setGithubConfig] = useState<GitHubConfig>(() => {
     const raw = localStorage.getItem(GITHUB_CONFIG_STORAGE_KEY);
     if (raw) {
@@ -106,13 +111,15 @@ export const WebApp: React.FC = () => {
   }, [syncManager]);
 
   const handleSaveConfig = useCallback(
-    (newGithubConfig: GitHubConfig, newGitlabConfig: GitLabConfig, newMode: WebStorageMode) => {
+    (newGithubConfig: GitHubConfig, newGitlabConfig: GitLabConfig, newMode: WebStorageMode, newUsername: string) => {
       setGithubConfig(newGithubConfig);
       setGitlabConfig(newGitlabConfig);
       setActiveMode(newMode);
+      setUsername(newUsername);
       localStorage.setItem(GITHUB_CONFIG_STORAGE_KEY, JSON.stringify(newGithubConfig));
       localStorage.setItem(GITLAB_CONFIG_STORAGE_KEY, JSON.stringify(newGitlabConfig));
       localStorage.setItem(MODE_STORAGE_KEY, newMode);
+      localStorage.setItem(USERNAME_STORAGE_KEY, newUsername);
       setKey((prev) => prev + 1);
     },
     []
@@ -212,6 +219,7 @@ export const WebApp: React.FC = () => {
         <AppView
           key={key}
           storageAdapter={syncManager}
+          settings={{ enableItemTypes: true, username }}
           initialViewMode="agenda"
         />
       </main>
@@ -222,6 +230,7 @@ export const WebApp: React.FC = () => {
         onClose={() => setIsSettingsOpen(false)}
         githubConfig={githubConfig}
         gitlabConfig={gitlabConfig}
+        username={username}
         onSaveConfig={handleSaveConfig}
         activeMode={activeMode}
       />

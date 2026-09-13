@@ -17,6 +17,7 @@ import {
   ChevronRight,
   List,
   Layers,
+  User,
 } from 'lucide-react';
 import { ItemData, TodoItem } from '../types';
 import { ItemType, TemplateTodoDef } from '../features/item-types/types';
@@ -211,6 +212,13 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
 
   const handleTitleChange = (newTitle: string) => {
     const updated = { ...localItem, title: newTitle };
+    setLocalItem(updated);
+    debouncedUpdate(updated);
+  };
+
+  const handleAssigneeChange = (newAssignee: string) => {
+    const trimmed = newAssignee.trim();
+    const updated = { ...localItem, assignee: trimmed || undefined };
     setLocalItem(updated);
     debouncedUpdate(updated);
   };
@@ -606,45 +614,61 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
         </button>
       </div>
 
-      {/* Item Type & Template Selector Section */}
-      {enableItemTypes && itemTypes.length > 0 && (
-        <div className="drawer-type-selector-bar">
-          <div className="type-selector-group">
-            <Tag size={13} className="selector-icon" />
-            <span className="selector-label">タイプ:</span>
-            <select
-              className="type-dropdown-select"
-              value={localItem.type || ''}
-              onChange={(e) => handleTypeChange(e.target.value)}
-            >
-              <option value="">(タイプ指定なし)</option>
-              {itemTypes.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.name}
-                </option>
-              ))}
-            </select>
-          </div>
+      {/* Item Assignee & Type Selector Section */}
+      <div className="drawer-type-selector-bar">
+        <div className="type-selector-group">
+          <User size={13} className="selector-icon" />
+          <span className="selector-label">担当:</span>
+          <input
+            type="text"
+            className="type-dropdown-select"
+            style={{ width: '100px', padding: '2px 6px' }}
+            value={localItem.assignee || ''}
+            onChange={(e) => handleAssigneeChange(e.target.value)}
+            onBlur={flushPendingUpdate}
+            placeholder="未割り当て"
+          />
+        </div>
 
-          {currentItemType && currentItemType.templates.length > 0 && (
+        {enableItemTypes && itemTypes.length > 0 && (
+          <>
             <div className="type-selector-group">
-              <Layers size={13} className="selector-icon" />
-              <span className="selector-label">テンプレ:</span>
+              <Tag size={13} className="selector-icon" />
+              <span className="selector-label">タイプ:</span>
               <select
                 className="type-dropdown-select"
-                value={localItem.template || currentItemType.templates[0]?.name || ''}
-                onChange={(e) => handleTemplateChange(e.target.value)}
+                value={localItem.type || ''}
+                onChange={(e) => handleTypeChange(e.target.value)}
               >
-                {currentItemType.templates.map((tpl) => (
-                  <option key={tpl.id} value={tpl.name}>
-                    {tpl.name}
+                <option value="">(指定なし)</option>
+                {itemTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
                   </option>
                 ))}
               </select>
             </div>
-          )}
-        </div>
-      )}
+
+            {currentItemType && currentItemType.templates.length > 0 && (
+              <div className="type-selector-group">
+                <Layers size={13} className="selector-icon" />
+                <span className="selector-label">テンプレ:</span>
+                <select
+                  className="type-dropdown-select"
+                  value={localItem.template || currentItemType.templates[0]?.name || ''}
+                  onChange={(e) => handleTemplateChange(e.target.value)}
+                >
+                  {currentItemType.templates.map((tpl) => (
+                    <option key={tpl.id} value={tpl.name}>
+                      {tpl.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Template Validation Alert Banner */}
       {enableItemTypes && currentItemTemplate && (

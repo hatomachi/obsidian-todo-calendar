@@ -242,6 +242,7 @@ export class StorageManager implements IStorageAdapter {
           template: frontmatter.template,
           status: frontmatter.status === 'done' ? 'done' : 'todo',
           description: frontmatter.description || '',
+          assignee: frontmatter.assignee,
           createdAt: frontmatter.created_at || new Date(file.stat.ctime).toISOString(),
           todos,
         });
@@ -260,7 +261,8 @@ export class StorageManager implements IStorageAdapter {
     description = '',
     type?: string,
     template?: string,
-    initialTodos: TodoItem[] = []
+    initialTodos: TodoItem[] = [],
+    assignee?: string
   ): Promise<ItemData> {
     await this.ensureDirectoriesExist();
 
@@ -283,6 +285,7 @@ export class StorageManager implements IStorageAdapter {
       todos: initialTodos,
     };
 
+    if (assignee) frontmatter.assignee = assignee;
     if (type) frontmatter.type = type;
     if (template) frontmatter.template = template;
 
@@ -298,6 +301,7 @@ export class StorageManager implements IStorageAdapter {
       template,
       status: 'todo',
       description: frontmatter.description,
+      assignee,
       createdAt,
       todos: initialTodos,
     };
@@ -335,6 +339,7 @@ export class StorageManager implements IStorageAdapter {
       })),
     };
 
+    if (item.assignee) frontmatter.assignee = item.assignee;
     if (item.type) frontmatter.type = item.type;
     if (item.template) frontmatter.template = item.template;
 

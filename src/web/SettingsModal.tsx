@@ -10,10 +10,12 @@ interface SettingsModalProps {
   onClose: () => void;
   githubConfig: GitHubConfig;
   gitlabConfig: GitLabConfig;
+  username?: string;
   onSaveConfig: (
     githubConfig: GitHubConfig,
     gitlabConfig: GitLabConfig,
-    mode: WebStorageMode
+    mode: WebStorageMode,
+    username: string
   ) => void;
   activeMode: WebStorageMode;
 }
@@ -23,10 +25,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   githubConfig,
   gitlabConfig,
+  username = '',
   onSaveConfig,
   activeMode,
 }) => {
   const [mode, setMode] = useState<WebStorageMode>(activeMode);
+  const [userName, setUserName] = useState(username);
 
   // GitHub state
   const [ghOwner, setGhOwner] = useState(githubConfig.owner || '');
@@ -117,7 +121,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         branch: glBranch.trim() || 'main',
         token: glToken.trim(),
       },
-      mode
+      mode,
+      userName.trim()
     );
     onClose();
   };
@@ -139,6 +144,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           >
             ✕
           </button>
+        </div>
+
+        {/* Username input */}
+        <div style={{ marginBottom: '1.2rem' }}>
+          <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.3rem' }}>
+            👤 ユーザー名 / 担当者名
+          </label>
+          <input
+            type="text"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            placeholder="例: s-ikari"
+            style={{
+              width: '100%',
+              padding: '0.5rem',
+              borderRadius: '6px',
+              border: '1px solid var(--background-modifier-border, #444)',
+              background: 'var(--background-secondary, #222)',
+              color: 'inherit',
+              fontSize: '0.85rem',
+            }}
+          />
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted, #888)' }}>
+            チーム共有時にアイテムの担当者として割り当てる識別子です（新規アイテム作成時に自動セット）。
+          </span>
         </div>
 
         {/* Mode selection buttons */}

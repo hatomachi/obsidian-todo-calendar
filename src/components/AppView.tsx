@@ -59,11 +59,17 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
   const [startDate, setStartDate] = useState<Date>(() => new Date());
   const [daysCount, setDaysCount] = useState<3 | 7>(() => (typeof window !== 'undefined' && window.innerWidth <= 768 ? 3 : 7));
   const [showCompletedItems, setShowCompletedItems] = useState(false);
+  const [assigneeFilter, setAssigneeFilter] = useState<string>(() =>
+    settings?.username || plugin?.settings?.username ? 'me' : 'all'
+  );
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false);
   const [newItemTitle, setNewItemTitle] = useState('');
   const [newItemDescription, setNewItemDescription] = useState('');
   const [newItemType, setNewItemType] = useState<string>('');
   const [newItemTemplate, setNewItemTemplate] = useState<string>('');
+  const [newItemAssignee, setNewItemAssignee] = useState<string>(() =>
+    settings?.username || plugin?.settings?.username || ''
+  );
   const [newItemCollectionId, setNewItemCollectionId] = useState<string>('');
 
   // Listen to plugin settings changes
@@ -302,6 +308,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
 
   // Open Create Item Modal
   const handleOpenCreateItemModal = () => {
+    setNewItemAssignee(pluginSettings.username || '');
     if (viewMode === 'type-calendar' && selectedType) {
       setNewItemType(selectedType.id);
       setNewItemTemplate(selectedType.templates[0]?.name || '');
@@ -344,10 +351,13 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
       }
     }
 
+    const assigneeToSet = newItemAssignee.trim() || undefined;
+
     setNewItemTitle('');
     setNewItemDescription('');
     setNewItemType('');
     setNewItemTemplate('');
+    setNewItemAssignee(pluginSettings.username || '');
     setNewItemCollectionId('');
     setIsCreateItemModalOpen(false);
 
@@ -357,7 +367,8 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
       newItemDescription,
       selectedTypeVal,
       selectedTemplateVal,
-      initialTodos
+      initialTodos,
+      assigneeToSet
     );
 
     // Optimistic / Immediate State Update for items
@@ -554,6 +565,9 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
               itemTypes={itemTypes}
               collections={collections}
               isCrossCollection={false}
+              username={pluginSettings.username}
+              assigneeFilter={assigneeFilter}
+              onChangeAssigneeFilter={setAssigneeFilter}
               onToggleShowCompleted={() => setShowCompletedItems((prev) => !prev)}
               onToggleItemStatus={handleToggleItemStatus}
               isDrawerOpen={isDrawerOpen}
@@ -578,6 +592,9 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
               collections={collections}
               isCrossCollection={true}
               typeName={selectedType?.name}
+              username={pluginSettings.username}
+              assigneeFilter={assigneeFilter}
+              onChangeAssigneeFilter={setAssigneeFilter}
               onToggleShowCompleted={() => setShowCompletedItems((prev) => !prev)}
               onToggleItemStatus={handleToggleItemStatus}
               isDrawerOpen={isDrawerOpen}
@@ -596,6 +613,7 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
               collections={collections}
               selectedCollectionId={selectedCollectionFilterId}
               isLoading={isAgendaLoading}
+              username={pluginSettings.username}
               onSelectCollectionFilter={setSelectedCollectionFilterId}
               onQuickToggleTodoStatus={handleQuickToggleTodoStatus}
               onSelectItem={handleSelectItem}
@@ -725,6 +743,17 @@ export const AppView: React.FC<AppViewProps> = ({ app, storageAdapter, plugin, s
                   )}
                 </div>
               )}
+
+              <div className="todo-cal-form-group">
+                <label>👤 担当者 (任意)</label>
+                <input
+                  type="text"
+                  className="todo-cal-form-input"
+                  placeholder="例: s-ikari"
+                  value={newItemAssignee}
+                  onChange={(e) => setNewItemAssignee(e.target.value)}
+                />
+              </div>
 
               <div className="todo-cal-form-group">
                 <label>メモ / 詳細説明 (任意)</label>

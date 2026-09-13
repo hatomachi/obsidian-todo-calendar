@@ -112,6 +112,7 @@ collection_id: "1724300000000_a1b2c"
 title: "2026年9月定期リリース"
 type: "release"                 # （オプション）タイプID（例: release, estimate等）
 template: "通常リリース"        # （オプション）テンプレート名
+assignee: "s-ikari"             # （オプション）アイテム担当者ID/ユーザー名
 status: "todo"                  # "todo" または "done"（アイテム/アクション自体の完了状態）
 description: "アイテムの説明や追加メモ"
 created_at: "2026-08-22T06:00:00.000Z"

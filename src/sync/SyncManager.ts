@@ -268,6 +268,7 @@ export class SyncManager implements IStorageAdapter {
         ...(t.group ? { group: t.group } : {}),
       })),
     };
+    if (item.assignee) frontmatter.assignee = item.assignee;
     if (item.type) frontmatter.type = item.type;
     if (item.template) frontmatter.template = item.template;
 
@@ -599,7 +600,8 @@ export class SyncManager implements IStorageAdapter {
     description = '',
     type?: string,
     template?: string,
-    initialTodos: TodoItem[] = []
+    initialTodos: TodoItem[] = [],
+    assignee?: string
   ): Promise<ItemData> {
     const id = `item-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const filePath = `${ITEMS_DIR}/${collectionId}/${id}.md`;
@@ -615,6 +617,7 @@ export class SyncManager implements IStorageAdapter {
       createdAt,
       type,
       template,
+      assignee,
       todos: initialTodos,
     };
 

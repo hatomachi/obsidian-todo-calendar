@@ -37,7 +37,8 @@ export interface IStorageAdapter {
     description?: string,
     type?: string,
     template?: string,
-    initialTodos?: TodoItem[]
+    initialTodos?: TodoItem[],
+    assignee?: string
   ): Promise<ItemData>;
 
   /**

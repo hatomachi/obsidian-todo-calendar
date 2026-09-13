@@ -70,6 +70,21 @@ export class TodoCalendarSettingTab extends PluginSettingTab {
     containerEl.createEl('h2', { text: 'TODO カレンダー 設定' });
 
     new Setting(containerEl)
+      .setName('ユーザー名 / 担当者名')
+      .setDesc(
+        'チーム共有時にアイテムの担当者として割り当てるあなたの識別子を設定します。新規アイテム作成時に自動セットされ、カレンダーやアジェンダで「自分のみ」フィルタが利用できるようになります。'
+      )
+      .addText((text) =>
+        text
+          .setPlaceholder('例: s-ikari')
+          .setValue(this.plugin.settings.username || '')
+          .onChange(async (value) => {
+            this.plugin.settings.username = value.trim();
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
       .setName('タイプ & テンプレート機能の有効化')
       .setDesc(
         'アクションにタイプ（リリース、見積等）を付与し、テンプレートTODOの自動セットや抜け漏れ・期日未設定の警告機能を利用可能にします。プライベート用途等で不要な場合はOFFにしてください。'

@@ -18,6 +18,7 @@ export interface ItemData {
   template?: string;
   status?: TodoStatus;
   description?: string;
+  assignee?: string;
   createdAt: string;
   todos: TodoItem[];
 }
@@ -41,9 +42,11 @@ export interface AgendaTodoItem {
 
 export interface PluginSettings {
   enableItemTypes: boolean;
+  username?: string;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
   enableItemTypes: true,
+  username: '',
 };
 
